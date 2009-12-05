@@ -15,10 +15,56 @@ def count_of_tiles_yaku(hand):
 	return sum(map(lambda r: r[1], score))
 
 
-def compute_payment(fans, minipoints):
-	pass
+scoring_table = {
+	20: [ None, 1400, 2600, 5200 ],
+	25: [ None, 1600, 3200, 6400 ],
+	30: [ 1000, 2000, 3900, 7700 ],
+	40:	[ 1300, 2600, 5200, 8000 ],
+	50: [ 1600, 3200, 6400, 8000 ],
+	60: [ 2000, 3900, 7700, 8000 ],
+	70: [ 2300, 4500, 8000, 8000 ],
+	80: [ 2600, 5200, 8000, 8000 ],
+	90: [ 2900, 5800, 8000, 8000 ],
+	100:[ 3200, 6400, 8000, 8000 ]
+}
+
+limited_hands = {
+	5: ("Mangan", 8000),
+    6: ("Haneman", 12000),
+    7: ("Haneman", 12000),
+    8: ("Baiman", 16000),
+    9: ("Baiman", 16000),
+   10: ("Baiman", 16000),
+   11: ("Sanbaiman", 24000),
+   12: ("Sanbaiman",24000),
+   13: ("Yakuman", 32000),
+}
 
 
+def round_to_base(num, base):
+	if num % base == 0:
+		return num
+	else:
+		return num - (num % base) + base
+
+
+def compute_payment(fans, minipoints, wintype, player_wind):
+	if fans < 5:
+		name, score = "", scoring_table[minipoints][fans - 1]
+	else:
+		name, score = limited_hands[fans]
+	
+	if wintype == "Ron":
+		if player_wind.name == "WE":
+			return (name, round_to_base(score / 2 * 3, 100))
+		else:
+			return (name, score)
+	else:
+		if player_wind.name == "WE":
+			return (name, (round_to_base(score / 2, 100), 0))
+		else:
+			return (name, (round_to_base(score / 4, 100), round_to_base(score / 2, 100)))
+	
 def compute_score(hand, doras, riichi, round_wind, player_wind):
 	yaku = find_tiles_yaku(hand)
 	return yaku

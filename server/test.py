@@ -3,7 +3,7 @@ import unittest
 from unittest import TestCase
 
 from tile import Tile
-from eval import count_of_tiles_yaku
+from eval import count_of_tiles_yaku, compute_payment
 
 
 def tiles(strs):
@@ -27,6 +27,35 @@ class EvalHandTestCase(TestCase):
 			score = count_of_tiles_yaku(tiles(hand))
 			self.assert_(score == r, "Hand %i returned score %i" % (hand_id, score))
 		self.assert_(all(map(lambda i: count_of_tiles_yaku(tiles(i[0])) == i[1], hands)))
+
+	def test_basic_payment(self):
+		print compute_payment(2, 40, "Tsumo", Tile("WN"))
+		self.assert_(compute_payment(2, 40, "Ron", Tile("WN")) == ("", 2600))
+		self.assert_(compute_payment(2, 40, "Ron", Tile("WE")) == ("", 3900))
+		self.assertEquals(compute_payment(2, 40, "Tsumo", Tile("WN")), ("", (700,1300)))
+		self.assertEquals(compute_payment(2, 40, "Tsumo", Tile("WE")), ("", (1300, 0)))
+
+		self.assert_(compute_payment(1, 40, "Ron", Tile("WN")) == ("", 1300))
+		self.assert_(compute_payment(1, 40, "Ron", Tile("WE")) == ("", 2000))
+		self.assertEquals(compute_payment(1, 40, "Tsumo", Tile("WN")), ("", (400, 700)))
+		self.assertEquals(compute_payment(1, 40, "Tsumo", Tile("WE")), ("", (700, 0)))
+
+		self.assertEquals(compute_payment(4, 20, "Tsumo", Tile("WN")), ("", (1300, 2600)))
+		self.assertEquals(compute_payment(4, 20, "Tsumo", Tile("WE")), ("", (2600, 0)))
+
+		self.assertEquals(compute_payment(3, 20, "Tsumo", Tile("WN")), ("", (700, 1300)))
+		self.assertEquals(compute_payment(3, 20, "Tsumo", Tile("WE")), ("", (1300, 0)))
+
+		self.assertEquals(compute_payment(5, 40, "Ron", Tile("WN")), ("Mangan", 8000))
+		self.assertEquals(compute_payment(5, 40, "Ron", Tile("WE")), ("Mangan", 12000))
+		self.assertEquals(compute_payment(5, 40, "Tsumo", Tile("WN")), ("Mangan", (2000, 4000)))
+		self.assertEquals(compute_payment(5, 40, "Tsumo", Tile("WE")), ("Mangan", (4000, 0)))
+
+		self.assertEquals(compute_payment(13, 40, "Ron", Tile("WN")), ("Yakuman", 32000))
+		self.assertEquals(compute_payment(13, 40, "Ron", Tile("WE")), ("Yakuman", 48000))
+		self.assertEquals(compute_payment(13, 40, "Tsumo", Tile("WN")), ("Yakuman", (8000, 16000)))
+		self.assertEquals(compute_payment(13, 40, "Tsumo", Tile("WE")), ("Yakuman", (16000, 0)))
+
 
 if __name__ == '__main__':
     unittest.main()
