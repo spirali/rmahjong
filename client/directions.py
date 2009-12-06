@@ -35,3 +35,10 @@ direction_down = Direction("down", 2, True, (0, 1), 180)
 direction_left = Direction("left", 3, False, (-1, 0), 90)
 direction_right = Direction("right", 1, False, (1, 0), 270)
 
+direction_up.next = direction_right
+direction_right.next = direction_down
+direction_down.next = direction_left
+direction_left.next = direction_up
+
+for d in [ direction_up, direction_down, direction_left, direction_right ]:
+	d.prev = d.next.next.next

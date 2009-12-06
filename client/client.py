@@ -4,7 +4,7 @@ from graphics import init_fonts
 from table import Table
 from gui import GuiManager, PlayerBox
 from directions import direction_up, direction_down, direction_left, direction_right
-from states import ConnectingState
+from states import ConnectingState, TestState
 
 winds = [ "WE", "WS", "WW", "WN" ]
 
@@ -62,7 +62,7 @@ class Mahjong:
 		self.player_boxes = [
 			PlayerBox((50, 700), names[0], 25000, direction_up, (0,-80)),
 			PlayerBox((954, 300), names[1], 25000, direction_left, (-210, 0)), 
-			PlayerBox((750, 0), names[2], 25000, direction_up, (0,80)),
+			PlayerBox((700, 0), names[2], 25000, direction_up, (0,80)),
 			PlayerBox((0, 300), names[3], 25000, direction_right, (80,0)) ]
 		for widget in self.player_boxes:
 			self.gui.add_widget(widget)
@@ -118,5 +118,6 @@ def main_init():
 main_init()
 mahjong = Mahjong()
 mahjong.set_state(ConnectingState(mahjong))
+#mahjong.set_state(TestState(mahjong))
 mahjong.run()
 pygame.quit()

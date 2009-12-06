@@ -255,3 +255,29 @@ class ScoreState(State):
 		button = Button( (400,560), (300, 25), "I am ready for next round", None)
 		self.setup_widgets([table, button])
 
+
+class TestState(State):
+
+	def __init__(self, mahjong):
+		State.__init__(self, mahjong)
+		self.mahjong.table.set_new_hand(["DW", "DW", "C2","C3","C4", "WW", "WW", "WW", "B8", "B6", "B7"])
+		self.mahjong.table.set_new_hand(["DW", "DW", "C2","C3","C4", "WW", "WW", "WW"])
+		#self.mahjong.table.set_new_hand(["DW", "DW", ])
+
+		for x in xrange(4):
+			self.mahjong.table.add_open_set(x, [ "C2", "DR", "DR", "DR" ], [2,3])
+			self.mahjong.table.add_open_set(x, [ "C2", "C1", "C2", "C3" ], [1])
+			self.mahjong.table.add_open_set(x, [ "C2", "DR", "DR", "DR" ], [0])
+			self.mahjong.table.add_open_set(x, [ "C2", "C1", "C2", "C3" ], [3])
+
+
+		from table import all_tile_names
+		for tile in all_tile_names[:18]:
+			self.mahjong.table.new_tile_to_dropzone(0, tile)
+			self.mahjong.table.new_tile_to_dropzone(1, tile)
+			self.mahjong.table.new_tile_to_dropzone(2, tile)
+			self.mahjong.table.new_tile_to_dropzone(3, tile)
+		
+		self.mahjong.init_player_boxes(["A","B", "C", "D"])
+	def tick(self):
+		pass

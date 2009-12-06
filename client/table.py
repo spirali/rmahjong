@@ -39,7 +39,21 @@ class TableTile:
 		if px >= x and py >= y and px < x + table.get_face_size_x() and py < y + table.get_face_size_y():
 			if self.callback:
 				self.callback(self)
-			
+
+	def get_face_size_x(self):
+		if self.direction == direction_up or self.direction_down:
+			return self.table.get_face_size_x()
+		else:
+			return self.table.get_face_size_y()
+
+	def get_face_size_y(self):
+		if self.direction == direction_up or self.direction_down:
+			return self.table.get_face_size_y()
+		else:
+			return self.table.get_face_size_x()
+
+	def get_face_size(self):
+		return (self.get_face_size_x(), self.get_face_size_y())
 
 class DropZone:
 	
@@ -74,6 +88,13 @@ class Table:
 		dz_across = DropZone(self, (580, 140), direction_down, 6)
 		dz_right = DropZone(self, (640, 410), direction_left, 6)
 		dz_left = DropZone(self, (320, 210), direction_right,6)
+
+		self.open_set_positions = [ 
+			((1005,690), direction_up, 0), 
+			((950,80), direction_left, 0),
+			((15,15), direction_down, 0),
+			((45,680), direction_right, 0),
+		]
 
 		self.drop_zones = [ dz_my, dz_right, dz_across, dz_left ]
 
@@ -147,3 +168,24 @@ class Table:
 	def set_hand_callback(self, callback):
 		for tile in self.hand:
 			tile.callback = callback
+
+	def add_open_set(self, player, tile_names, marked):
+		orig_position, direction, level = self.open_set_positions[player]
+		position = orig_position
+		fx, fy = self.get_face_size_x(), self.get_face_size_y()
+		for i, tile_name in reversed(list(enumerate(tile_names))):
+			dr, mv = (direction.next, fy) if i in marked else (direction, fx)
+			# Cheap hack with directions
+			if direction == direction_up or direction == direction_right:
+				position = direction.move_left(position, mv)
+			tile = self.new_tile(tile_name, position, dr)
+			if direction == direction_down or direction == direction_left:
+				position = direction.move_left(position, mv)
+		level += 1
+		if level == 2:
+			level = 0
+			position = direction.move_left(orig_position, fx * 2 + fy * 2 + 10)
+			position = direction.move_down(position, fy + 10)
+		else:
+			position = direction.move_up(orig_position, fy + 10)
+		self.open_set_positions[player] = (position, direction, level)
