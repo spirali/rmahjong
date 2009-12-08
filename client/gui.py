@@ -1,14 +1,20 @@
 import graphics
 import pygame
+from copy import copy
 
 
 class GuiManager:
 
 	def __init__(self):
 		self.widgets = []
+		self.timeouts = []
 
 	def add_widget(self, widget):
 		self.widgets.append(widget)
+	
+	def add_widget_with_timeout(self, widget, timeout):
+		self.add_widget(widget)
+		self.timeouts.append((timeout + pygame.time.get_ticks(), widget))
 
 	def remove_widget(self, widget):
 		self.widgets.remove(widget)
@@ -24,6 +30,13 @@ class GuiManager:
 	def button_down(self, button, position):
 		for widget in self.widgets:
 			widget.button_down(button, position)
+
+	def tick(self):
+		ticks = pygame.time.get_ticks()
+		for timeout, widget in copy(self.timeouts):
+			if timeout <= ticks:
+				self.widgets.remove(widget)
+				self.timeouts.remove((timeout, widget))
 
 
 class Widget:
@@ -63,17 +76,17 @@ class Widget:
 
 class Button(Widget):
 	
-	def __init__(self, position, size, text, callback):
+	def __init__(self, position, size, label, callback):
 		Widget.__init__(self, position, size)
 		self.pressed = False
-		self.text = text
+		self.label = label
 		self.callback = callback
 		self.prepare_surface()
 
 	def bg_surface(self):
 		surface = self.create_bg_surface()
 		surface.fill((0,0,0,90))
-		textsurface = graphics.font.render(self.text, True, (255,255,255))
+		textsurface = graphics.font.render(self.label, True, (255,255,255))
 		px = (surface.get_width() - textsurface.get_width()) / 2
 		py = (surface.get_height() - textsurface.get_height()) / 2
 		surface.blit(textsurface, (px, py))

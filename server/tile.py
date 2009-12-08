@@ -84,6 +84,9 @@ class Pon(TileSet):
 	def __init__(self, tile, closed = True):
 		TileSet.__init__(self, closed)
 		self.tile = tile
+
+	def tiles(self):
+		return [ self.tile, self.tile, self.tile ]
 	
 	def is_pon_or_kon(self):
 		return True 
@@ -113,7 +116,10 @@ class Chi(TileSet):
 		self.tile1 = tile1
 		self.tile2 = tile2
 		self.tile3 = tile3
-	
+
+	def tiles(self):
+		return [ self.tile1, self.tile2, self.tile3 ]
+
 	def __repr__(self):
 		return "Chi: %s %s %s" % (self.tile1, self.tile2, self.tile3)		
 

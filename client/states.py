@@ -116,7 +116,7 @@ class RoundState(State):
 	def __init__(self, mahjong):
 		State.__init__(self, mahjong)
 		self.protocol = mahjong.protocol
-		self.buttons = []
+		self.widgets = []
 
 
 	def process_message(self, message):
@@ -124,6 +124,9 @@ class RoundState(State):
 		
 		if name == "DROPPED":
 			self.mahjong.add_dropped_tile(message["wind"], message["tile"])
+			actions = message["actions"].split()
+			if actions:
+				self.add_buttons(actions, self.on_steal_action_click)
 			return
 
 		if name == "MOVE":
@@ -141,14 +144,22 @@ class RoundState(State):
 			self.mahjong.set_state(state)
 			return
 
+		if name == "STOLEN_TILE":
+			self.process_stolen_tile(message)
+			return
+
 		State.process_message(self, message)		
 
 	def enter_state(self):
 		pass
 
+	def remove_widgets(self):
+		for widget in self.widgets:
+			self.mahjong.gui.remove_widget(widget)
+		self.widgets = []
+
 	def leave_state(self):
-		for button in self.buttons:
-			self.mahjong.gui.remove_widget(button)
+		self.remove_widgets()
 
 	def add_buttons(self, button_labels, callback):
 		px, py = 780,640
@@ -157,7 +168,29 @@ class RoundState(State):
 			button = Button((px, py), (75,25), label, callback)
 			py -= 27
 			self.mahjong.gui.add_widget(button)
-			self.buttons.append(button)
+			self.widgets.append(button)
+
+	def process_stolen_tile(self, message):
+		action = message["action"]
+		tiles = message["tiles"].split()
+		stolen_tile = message["stolen_tile"]
+		player = message["player"]
+		from_player = message["from_player"]
+		player_id = self.mahjong.player_id_by_wind(player)
+		# TODO: Timed shout
+		shoutbox = self.mahjong.create_shoutbox(player, action + "!")
+		self.mahjong.gui.add_widget_with_timeout(shoutbox, 2500)
+		self.mahjong.table.add_open_set(player_id, tiles, [])
+		self.mahjong.table.steal_from_dropzone(self.mahjong.player_id_by_wind(from_player))
+		
+		if player_id == 0:
+			tiles.remove(stolen_tile) # Tiles are now removed from hand, so we dont want remove stolen tile
+			for tile in tiles:
+				self.mahjong.table.remove_hand_tile(tile)
+			self.mahjong.arrange_hand()
+			self.mahjong.set_state(MyMoveState(self.mahjong, None, []))
+		else:
+			self.mahjong.set_state(OtherMoveState(self.mahjong, player))
 
 
 class MyMoveState(RoundState):
@@ -166,16 +199,19 @@ class MyMoveState(RoundState):
 		RoundState.__init__(self, mahjong)
 		self.picked_tile_name = tile
 		self.actions = actions
+		self.picked_tile = None
 
 	def enter_state(self):
 		RoundState.enter_state(self)
 
 		table = self.mahjong.table
 		table.set_hand_callback(self.drop_hand_tile)		
-		tile = table.new_tile(self.picked_tile_name, table.picked_tile_position())
-		tile.callback = self.drop_picked_tile
+		
+		if self.picked_tile_name:
+			tile = table.new_tile(self.picked_tile_name, table.picked_tile_position())
+			tile.callback = self.drop_picked_tile
+			self.picked_tile = tile
 
-		self.picked_tile = tile
 		self.mahjong.select_my_box()
 		self.add_buttons(self.actions, self.on_action_click)
 
@@ -183,14 +219,19 @@ class MyMoveState(RoundState):
 		self.mahjong.table.set_hand_callback(None)		
 		self.protocol.send_message(message = "DROP", tile = tile.name)
 		tile.remove()
+		self.remove_widgets()
 
 	def drop_hand_tile(self, tile):
 		table = self.mahjong.table
 		table.set_hand_callback(None)		
-		self.picked_tile.callback = None
 		self.protocol.send_message(message = "DROP", tile = tile.name)
 		tile.remove()
-		table.add_to_hand(self.picked_tile)
+		if self.picked_tile:
+			self.picked_tile.callback = None
+			table.add_to_hand(self.picked_tile)
+
+		self.mahjong.arrange_hand()
+		self.remove_widgets()
 
 	def leave_state(self):
 		RoundState.leave_state(self)
@@ -198,6 +239,7 @@ class MyMoveState(RoundState):
 		self.mahjong.table.set_hand_callback(None)		
 
 	def on_action_click(self, button):
+		self.remove_widgets()
 		self.action_tsumo()
 
 	def action_tsumo(self):
@@ -218,6 +260,13 @@ class OtherMoveState(RoundState):
 		RoundState.leave_state(self)
 		self.mahjong.select_none()
 
+	def on_steal_action_click(self, button):
+		self.remove_widgets()
+		action = button.label
+		if action == "Pass":
+			self.protocol.send_message(message = "READY")
+		else:
+			self.protocol.send_message(message = "STEAL", action = action)
 
 class ScoreState(State):
 	

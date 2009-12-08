@@ -43,6 +43,11 @@ class Server:
 	def declare_win(self, player, wintype):
 		self.set_state(ScoreState(self, player, wintype))
 
+	def player_is_ready(self, player):
+		self.state.player_is_ready(player)
+
+	def player_try_steal_tile(self, player, action):
+		self.state.player_try_steal_tile(player, action)
 
 server = Server(4500)
 server.run()

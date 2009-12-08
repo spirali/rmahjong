@@ -56,6 +56,7 @@ class Mahjong:
 			self.process_events()
 			self.draw_all()
 			self.state.tick()
+			self.gui.tick()
 			clock.tick(10)
 
 	def init_player_boxes(self, names):
@@ -107,6 +108,10 @@ class Mahjong:
 
 	def process_network_message(self, message):
 		print "Unknown message: " + repr(message)
+
+	def arrange_hand(self):
+		self.table.arrange_hand()
+
 
 def main_init():
 	pygame.display.init()

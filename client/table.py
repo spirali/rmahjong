@@ -63,6 +63,8 @@ class DropZone:
 		self.table = table
 		self.tile_in_row = 0
 		self.row_size = row_size
+		self.last_tile = None
+		self.last_pos = None
 
 	def next_position(self):
 		p = self.position
@@ -75,6 +77,15 @@ class DropZone:
 			self.position = self.direction.move_right(self.position, self.table.get_face_size_x())
 		return p
 			
+	def new_tile(self, name):
+		self.last_pos = self.position
+		tile = self.table.new_tile(name, self.next_position(), self.direction)
+		self.last_tile = tile
+		return tile
+
+	def pop_tile(self):
+		self.position = self.last_pos
+		self.last_tile.remove()
 	
 class Table:
 
@@ -103,7 +114,6 @@ class Table:
 
 	def set_new_hand(self, tile_names):
 		self.hand = [ self.new_tile(name) for name in tile_names ]
-		self.sort_hand()
 		self.arrange_hand()
 
 	def new_tile(self, name, position = None, direction = direction_up):
@@ -112,15 +122,16 @@ class Table:
 		return t
 
 	def new_tile_to_dropzone(self, player_index, tile_name):
-		dz = self.drop_zones[player_index]
-		return self.new_tile(tile_name, dz.next_position(), dz.direction)
+		return self.drop_zones[player_index].new_tile(tile_name)
+
+	def steal_from_dropzone(self, player_index):
+		self.drop_zones[player_index].pop_tile()
 
 	def add_to_hand(self, tile):
 		self.hand.append(tile)
-		self.sort_hand()
-		self.arrange_hand()
 
 	def arrange_hand(self):
+		self.sort_hand()
 		px, py = 320, 690
 		for tile in self.hand:
 			tile.position = (px, py)
@@ -133,6 +144,12 @@ class Table:
 		if tile in self.hand:
 			self.hand.remove(tile)
 		self.tiles.remove(tile)
+
+	def remove_hand_tile(self, tile_name):
+		for tile in self.hand:
+			if tile.name == tile_name:
+				tile.remove()
+				return
 
 	def picked_tile_position(self):
 		px, py = 320 + 10, 690
@@ -189,3 +206,5 @@ class Table:
 		else:
 			position = direction.move_up(orig_position, fy + 10)
 		self.open_set_positions[player] = (position, direction, level)
+
+

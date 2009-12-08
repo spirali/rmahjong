@@ -24,7 +24,8 @@ class Player:
 		self.hand = hand
 
 	def other_players(self):
-		return [ self.left_player, self.right_player, self.across_player ]
+		""" Returns other players in order from right """
+		return [ self.right_player, self.across_player, self.left_player ]
 
 	def move(self, tile):
 		self.hand.append(tile)
@@ -42,8 +43,18 @@ class Player:
 			options.append("Tsumo")
 		return options
 
+	def steal_actions(self, player, tile):
+		options = []
+		if self.hand.count(tile) >= 2:
+			options.append("Pon")
+		return options
+
 	def round_end(self, player, win_type, payment, scores, total_fans):
 		pass
+
+	def stolen_tile(self, player, from_player, action, set, tile):
+		if player == self:
+			self.can_drop_tile = True
 
 class NetworkPlayer(Player):
 
@@ -87,12 +98,23 @@ class NetworkPlayer(Player):
 	def process_message(self, message):
 		name = message["message"]
 
-		if name == "DROP" and self.can_drop_tile:
+		if name == "DROP":
+			if not self.can_drop_tile:
+				return
 			self.can_drop_tile = False
 			tile = Tile(message["tile"])
 			self.hand.remove(tile)
 			self.drop_zone.append(tile)
 			self.server.state.drop_tile(self, tile)
+			return
+
+		if name == "READY":
+			self.server.player_is_ready(self)
+			return
+
+		if name == "STEAL":
+			action = message["action"]
+			self.server.player_try_steal_tile(self, action)
 			return
 
 		if name == "TSUMO":
@@ -106,7 +128,22 @@ class NetworkPlayer(Player):
 		print "Unknown message " + str(message) + " from player: " + self.name
 
 	def player_dropped_tile(self, player, tile):
-		self.connection.send_message(message = "DROPPED", wind = player.wind.name, tile = tile.name)
+		if self != player:
+			actions = self.steal_actions(player, tile)
+		else:
+			actions = []		
+
+		if actions:
+			actions.append("Pass")
+		else:
+			self.server.player_is_ready(self)
+
+		msg_actions = " ".join(actions)
+		msg = { "message" : "DROPPED", 
+				"wind" : player.wind.name, 
+				"tile" : tile.name, 
+				"actions" : msg_actions }
+		self.connection.send_dict(msg)
 
 	def round_end(self, player, win_type, payment, scores):
 		msg = {}
@@ -116,4 +153,15 @@ class NetworkPlayer(Player):
 		msg["player"] = player.wind.name
 		msg["total_fans"] = sum(map(lambda r: r[1], scores))
 		msg["score_items"] = ";".join(map(lambda sc: "%s %s" % (sc[0], sc[1]), scores))
+		self.connection.send_dict(msg)
+
+	def stolen_tile(self, player, from_player, action, set, tile):
+		Player.stolen_tile(self, player, from_player, action, set, tile)
+		msg = { "message" : "STOLEN_TILE",
+				"action" : action,
+				"player" : player.wind.name,
+				"from_player" : from_player.wind.name,
+				"tiles" : " ".join([tile.name for tile in set.tiles()]),
+				"stolen_tile" : tile.name
+		}
 		self.connection.send_dict(msg)
