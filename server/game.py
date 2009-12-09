@@ -55,8 +55,8 @@ class FakeGame(Game):
 			return map(Tile, strs)
 
 		hands = [
-			[ "WW", "C1", "C1", "C1", "C1", "C2", "C3", "DR", "B9", "DR", "B8", "B7", "DR" ],
-			[ "DR", "DR", "C1", "C1", "C9", "C2", "C3", "B8", "B9", "WN", "WN", "B7", "DR" ],
+			[ "WW", "C1", "C1", "C4", "C1", "C2", "C3", "DR", "B9", "DR", "B8", "B7", "DR" ],
+			[ "DR", "DR", "C5", "C6", "C3", "C2", "C3", "B8", "B9", "WN", "WN", "B7", "DR" ],
 			[ "C1", "B1", "B9", "C2", "WW", "WW", "WN", "WS", "DR", "DG", "DW", "C5", "P7" ],
 			[ "DG", "DG", "DR", "DW", "DG", "DW", "DW", "DR", "B1", "B2", "B2", "B2", "B1" ],
 			[ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C2" ],

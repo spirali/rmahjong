@@ -167,3 +167,22 @@ score_functions = [
 	("Yaku-Pai", score_yaku_pai),
 	("Tan-Yao", score_tan_yao),
 ]
+
+
+def find_potential_chi(hand, tile):
+	r = []
+	if not tile.is_suit():
+		return r
+	n = tile.get_number()
+	pt = tile.prev_tile()
+	ppt = pt.prev_tile()
+	nt = tile.next_tile()
+	nnt = nt.next_tile()
+	if n < 9 and n > 1 and pt in hand and nt in hand:
+		r.append((Chi(pt, tile, nt), nt))
+	if n < 8 and nt in hand and nnt in hand:
+		r.append((Chi(tile, nt, nnt), nnt))
+	if n > 2 and pt in hand and ppt in hand:
+		r.append((Chi(ppt, pt, tile), ppt))
+	return r
+

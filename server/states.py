@@ -5,6 +5,7 @@ from connection import Connection
 from dictprotocol import DictProtocol
 from game import Game
 from tile import Chi, Pon
+from eval import find_potential_chi
 
 class LobbyState:
 
@@ -111,7 +112,7 @@ class StealTileState(GenericGameState):
 		GenericGameState.__init__(self, server)
 		self.player = player
 		self.droped_tile = droped_tile
-		self.ready_players = [ (player, "Pass") ]
+		self.ready_players = [ (player, "Pass", None) ]
 
 	def enter_state(self):
 		for p in self.server.players:
@@ -122,12 +123,12 @@ class StealTileState(GenericGameState):
 
 	def player_is_ready(self, player):
 		if not self.is_player_ready(player):
-			self.ready_players.append((player, "Pass"))
+			self.ready_players.append((player, "Pass", None))
 		self.check_ready_players()
 
-	def player_try_steal_tile(self, player, action):
+	def player_try_steal_tile(self, player, action, chi_choose):
 		if not self.is_player_ready(player):
-			self.ready_players.append((player, action))
+			self.ready_players.append((player, action, chi_choose))
 		self.check_ready_players()
 
 	def check_ready_players(self):
@@ -136,25 +137,34 @@ class StealTileState(GenericGameState):
 			self.ready_players.sort(key = lambda i: players.index(i[0]))
 			self.ready_players.sort(key = lambda i: steal_priority.index(i[1]))
 
-			s_player, s_action = self.ready_players[0]
+			s_player, s_action, s_chichoose = self.ready_players[0]
 			if s_action == "Pass":
 				self.server.set_state(PlayerMoveState(self.server, self.player.right_player))
 			else:
-				state = DropAfterStealState(self.server, s_player, self.player, self.droped_tile, s_action)
+				state = DropAfterStealState(self.server, s_player, self.player, self.droped_tile, s_action, s_chichoose)
 				self.server.set_state(state)
 
 
 class DropAfterStealState(GenericGameState):
 
-	def __init__(self, server, player, from_player, stolen_tile, action):
+	def __init__(self, server, player, from_player, stolen_tile, action, chi_choose):
 		GenericGameState.__init__(self, server)
 		self.player = player
 		self.stolen_tile = stolen_tile
 		self.action = action
 		self.from_player = from_player
+		self.chi_choose = chi_choose
 
 	def enter_state(self):
-		set = Pon(self.stolen_tile)
+		if self.action == "Chi":
+			for s, marker in find_potential_chi(self.player.hand, self.stolen_tile):
+				if marker == self.chi_choose:
+					set = s
+					break
+
+		if self.action == "Pon":
+			set = Pon(self.stolen_tile)
+		
 		for player in self.server.players:
 			player.stolen_tile(self.player, self.from_player, self.action, set, self.stolen_tile)
 
@@ -162,7 +172,7 @@ class DropAfterStealState(GenericGameState):
 		assert player == self.player
 		self.server.set_state(StealTileState(self.server, player, tile))
 
-`
+
 class ScoreState(GenericGameState):
 	
 	def __init__(self, server, player, win_type):

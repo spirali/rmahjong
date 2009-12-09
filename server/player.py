@@ -1,6 +1,6 @@
 from connection import ConnectionClosed
 from tile import Tile
-from eval import count_of_tiles_yaku
+from eval import count_of_tiles_yaku, find_potential_chi
 
 class Player:
 
@@ -47,6 +47,9 @@ class Player:
 		options = []
 		if self.hand.count(tile) >= 2:
 			options.append("Pon")
+		if player == self.left_player:
+			if find_potential_chi(self.hand, tile):
+				options.append("Chi")
 		return options
 
 	def round_end(self, player, win_type, payment, scores, total_fans):
@@ -114,7 +117,11 @@ class NetworkPlayer(Player):
 
 		if name == "STEAL":
 			action = message["action"]
-			self.server.player_try_steal_tile(self, action)
+			if "chi_choose" in message:
+				chi_choose = Tile(message["chi_choose"])
+			else:
+				chi_choose = None
+			self.server.player_try_steal_tile(self, action, chi_choose)
 			return
 
 		if name == "TSUMO":
@@ -133,7 +140,12 @@ class NetworkPlayer(Player):
 		else:
 			actions = []		
 
+		chi_choose = ""
+
 		if actions:
+			if "Chi" in actions:
+				choose_tiles = [ t.name for set, t in find_potential_chi(self.hand, tile) ]
+				chi_choose = " ".join(choose_tiles)
 			actions.append("Pass")
 		else:
 			self.server.player_is_ready(self)
@@ -142,6 +154,7 @@ class NetworkPlayer(Player):
 		msg = { "message" : "DROPPED", 
 				"wind" : player.wind.name, 
 				"tile" : tile.name, 
+				"chi_choose" : chi_choose,
 				"actions" : msg_actions }
 		self.connection.send_dict(msg)
 

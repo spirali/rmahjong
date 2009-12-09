@@ -48,10 +48,16 @@ class Tile(object):
 		return self.is_suit() and self.get_number() != 1 and self.get_number() != 9
 
 	def next_tile(self):
-		return Tile(self.get_type() + str((self.get_number() % 9) + 1))
+		n = self.get_number() + 1
+		if n == 10:
+			n = 1
+		return Tile(self.get_type() + str(n))
 
 	def prev_tile(self):
-		return Tile(self.get_type() + str((self.get_number() % 9) + 1))
+		n = self.get_number() - 1
+		if n == 0:
+			n = 9
+		return Tile(self.get_type() + str(n))
 
 
 red_dragon = Tile("DR")

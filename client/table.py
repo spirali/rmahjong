@@ -16,6 +16,7 @@ class TableTile:
 		self.position = position
 		self.direction = direction
 		self.callback = callback
+		self.highlight = False
 
 	def remove(self):
 		self.table.remove_tile(self)
@@ -206,5 +207,10 @@ class Table:
 		else:
 			position = direction.move_up(orig_position, fy + 10)
 		self.open_set_positions[player] = (position, direction, level)
+
+	def find_tile_in_hand(self, tile_name):
+		for tile in self.hand:
+			if tile.name == tile_name:
+				return tile
 
 

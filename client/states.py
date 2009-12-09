@@ -125,6 +125,7 @@ class RoundState(State):
 		if name == "DROPPED":
 			self.mahjong.add_dropped_tile(message["wind"], message["tile"])
 			actions = message["actions"].split()
+			self.chi_choose = message["chi_choose"].split()
 			if actions:
 				self.add_buttons(actions, self.on_steal_action_click)
 			return
@@ -251,6 +252,7 @@ class OtherMoveState(RoundState):
 	def __init__(self, mahjong, wind):
 		RoundState.__init__(self, mahjong)
 		self.wind = wind
+		self.highlight_tiles = []
 
 	def enter_state(self):
 		RoundState.enter_state(self)
@@ -265,8 +267,23 @@ class OtherMoveState(RoundState):
 		action = button.label
 		if action == "Pass":
 			self.protocol.send_message(message = "READY")
-		else:
+		if action == "Pon":
 			self.protocol.send_message(message = "STEAL", action = action)
+		if action == "Chi":
+			if len(self.chi_choose) == 1:
+				self.protocol.send_message(message="STEAL", action = "Chi", chi_choose = self.chi_choose[0])
+			else:
+				for tile_name in self.chi_choose:
+					tile = self.mahjong.table.find_tile_in_hand(tile_name)
+					self.highlight_tiles.append(tile)
+					tile.highlight = True
+					tile.callback = self.on_chi_choose_click
+
+	def on_chi_choose_click(self, tile):
+		self.protocol.send_message(message="STEAL", action = "Chi", chi_choose = tile.name)
+		for tile in self.highlight_tiles:
+			tile.highlight = False
+			tile.callback = None
 
 class ScoreState(State):
 	

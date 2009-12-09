@@ -14,11 +14,12 @@ class TilePainter:
 		self.face_size = (68.0 * scale, 82.0 * scale)
 		self.matrix_size = (69.0 * scale, 88.5 * scale)
 
-		self.tile_size = [ (97.0 * scale, 115.0 * scale), (116.0 * scale, 97.0 * scale)]
-		self.tile_start = [ (0,0), (195.0 * scale,0) ]
+		self.tile_size = [ (97.0 * scale, 115.0 * scale), (116.0 * scale, 97.0 * scale), (97.0 * scale, 115.0 * scale)]
+		self.tile_start = [ (0,0), (195.0 * scale,0), (97.5 * scale,0), (195.0 * scale,0) ]
 
 		self.matrix_start = (1 * scale, 120.5 * scale)
 		self.face_offset = [ (28.0 * scale, 3.0 * scale),  (30.0 * scale, 0.0 * scale) ]
+		self.face_offset.append(self.face_offset[0])
 
 		tile_sources = {}
 		tile_sources["C1"] = (0,0)
@@ -76,7 +77,10 @@ class TilePainter:
 
 	def draw_tile(self, screen, tile):
 		if tile.is_vertical():
-			bg_id = 0
+			if tile.highlight:
+				bg_id = 2
+			else:
+				bg_id = 0
 		else:
 			bg_id = 1
 		self._draw_tile(screen, tile.position, self.tile_images[tile.name][tile.image_id()], bg_id)
