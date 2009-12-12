@@ -41,7 +41,7 @@ class Game:
 
 	def end_of_game(self, winner, wintype):
 		hand = winner.hand
-		scores  = compute_score(hand, self.doras, False, self.round_wind, winner.wind)		
+		scores  = compute_score(hand, winner.open_sets, self.doras, False, self.round_wind, winner.wind)		
 		payment = "XYZ"
 		for player in self.players:
 			player.round_end(winner, wintype, payment, scores)
@@ -56,7 +56,7 @@ class FakeGame(Game):
 
 		hands = [
 			[ "WW", "C1", "C1", "C4", "C1", "C2", "C3", "DR", "B9", "DR", "B8", "B7", "DR" ],
-			[ "DR", "DR", "C5", "C6", "C3", "C2", "C3", "B8", "B9", "WN", "WN", "B7", "DR" ],
+			[ "DR", "DR", "C5", "C6", "C4", "C2", "C3", "B8", "B9", "WN", "WN", "B7", "DR" ],
 			[ "C1", "B1", "B9", "C2", "WW", "WW", "WN", "WS", "DR", "DG", "DW", "C5", "P7" ],
 			[ "DG", "DG", "DR", "DW", "DG", "DW", "DW", "DR", "B1", "B2", "B2", "B2", "B1" ],
 			[ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C2" ],

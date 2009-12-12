@@ -267,9 +267,7 @@ class OtherMoveState(RoundState):
 		action = button.label
 		if action == "Pass":
 			self.protocol.send_message(message = "READY")
-		if action == "Pon":
-			self.protocol.send_message(message = "STEAL", action = action)
-		if action == "Chi":
+		elif action == "Chi":
 			if len(self.chi_choose) == 1:
 				self.protocol.send_message(message="STEAL", action = "Chi", chi_choose = self.chi_choose[0])
 			else:
@@ -278,6 +276,8 @@ class OtherMoveState(RoundState):
 					self.highlight_tiles.append(tile)
 					tile.highlight = True
 					tile.callback = self.on_chi_choose_click
+		else:
+			self.protocol.send_message(message = "STEAL", action = action)
 
 	def on_chi_choose_click(self, tile):
 		self.protocol.send_message(message="STEAL", action = "Chi", chi_choose = tile.name)

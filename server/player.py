@@ -29,8 +29,11 @@ class Player:
 		""" Returns other players in order from right """
 		return [ self.right_player, self.across_player, self.left_player ]
 
-	def move(self, tile):
+	def new_hand_tile(self, tile):
 		self.hand.append(tile)
+
+	def move(self, tile):
+		self.new_hand_tile(tile)
 		self.can_drop_tile = True
 
 	def other_move(self, player):
@@ -45,13 +48,22 @@ class Player:
 			options.append("Tsumo")
 		return options
 
+	def is_furiten(self):
+		# TODO
+		return False
+
 	def steal_actions(self, player, tile):
 		options = []
 		if self.hand.count(tile) >= 2:
 			options.append("Pon")
+
 		if player == self.left_player:
 			if find_potential_chi(self.hand, tile):
 				options.append("Chi")
+
+		if count_of_tiles_yaku(self.hand + [ tile ], self.open_sets) > 0 and not self.is_furiten():
+			options.append("Ron")
+
 		return options
 
 	def round_end(self, player, win_type, payment, scores, total_fans):

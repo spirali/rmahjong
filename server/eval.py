@@ -65,8 +65,8 @@ def compute_payment(fans, minipoints, wintype, player_wind):
 		else:
 			return (name, (round_to_base(score / 4, 100), round_to_base(score / 2, 100)))
 	
-def compute_score(hand, doras, riichi, round_wind, player_wind):
-	yaku = find_tiles_yaku(hand)
+def compute_score(hand, open_sets, doras, riichi, round_wind, player_wind):
+	yaku = find_tiles_yaku(hand, open_sets)
 	return yaku
 	
 
