@@ -39,7 +39,6 @@ class EvalHandTestCase(TestCase):
 			self.assert_(score == r, "Hand %i returned score %i" % (hand_id, score))
 
 	def test_basic_payment(self):
-		print compute_payment(2, 40, "Tsumo", Tile("WN"))
 		self.assert_(compute_payment(2, 40, "Ron", Tile("WN")) == ("", 2600))
 		self.assert_(compute_payment(2, 40, "Ron", Tile("WE")) == ("", 3900))
 		self.assertEquals(compute_payment(2, 40, "Tsumo", Tile("WN")), ("", (700,1300)))
