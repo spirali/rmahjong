@@ -1,6 +1,7 @@
 from connection import ConnectionClosed
 from tile import Tile
 from eval import count_of_tiles_yaku, find_potential_chi
+from copy import copy
 
 class Player:
 
@@ -10,6 +11,7 @@ class Player:
 		self.score = 25000
 		self.can_drop_tile = False
 		self.drop_zone = []
+		self.open_sets = []
 
 	def set_neighbours(self, left, right, across):
 		self.left_player = left
@@ -39,7 +41,7 @@ class Player:
 
 	def hand_actions(self):
 		options = []
-		if count_of_tiles_yaku(self.hand) > 0:
+		if count_of_tiles_yaku(self.hand, self.open_sets) > 0:
 			options.append("Tsumo")
 		return options
 
@@ -57,6 +59,9 @@ class Player:
 
 	def stolen_tile(self, player, from_player, action, set, tile):
 		if player == self:
+			my_set = copy(set)
+			my_set.closed = False
+			self.open_sets.append(my_set)
 			self.can_drop_tile = True
 
 class NetworkPlayer(Player):

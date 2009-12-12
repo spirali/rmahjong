@@ -2,16 +2,16 @@ from tile import Pon, Chi
 from tile import red_dragon, white_dragon, green_dragon
 from copy import copy
 
-def find_tiles_yaku(hand):
+def find_tiles_yaku(hand, open_sets):
 	for pair, rest in detect_pairs(hand):
-		sets = find_sets(rest)
+		sets = find_sets(rest, open_sets)
 		if sets:
 			return eval_sets(pair, sets)
 	return []
 
 
-def count_of_tiles_yaku(hand):
-	score = find_tiles_yaku(hand)
+def count_of_tiles_yaku(hand, open_sets):
+	score = find_tiles_yaku(hand, open_sets)
 	return sum(map(lambda r: r[1], score))
 
 
@@ -84,10 +84,9 @@ def detect_pairs(hand):
 	return result
 
 
-def find_sets(hand):
+def find_sets(hand, open_sets):
 	""" Hand has to be sorted """
-	founded = []
-	result = []
+	founded = copy(open_sets)
 
 	def check_triples(hand, level):			
 			if level == 5:				
@@ -121,7 +120,7 @@ def find_sets(hand):
 						return r;
 					founded.remove(set)
 			return None
-	return check_triples(hand, 1)
+	return check_triples(hand, 1 + len(open_sets))
 
 
 def eval_sets(pair, sets):

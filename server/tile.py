@@ -76,13 +76,14 @@ chars = [ Tile("C1"), Tile("C2"), Tile("C3"), Tile("C4"), Tile("C5"), Tile("C6")
 bamboos = [ Tile("B1"), Tile("B2"), Tile("B3"), Tile("B4"), Tile("B5"), Tile("B6"), Tile("B7"), Tile("B8"), Tile("B9") ]
 all_tiles = honors + pins + chars + bamboos
 
+
 class TileSet(object):
 	
 	def __init__(self, closed):
 		self.closed = closed
 		
 	def is_pon_or_kon(self):
-		return False		
+		return False
 
 
 class Pon(TileSet):
@@ -95,7 +96,7 @@ class Pon(TileSet):
 		return [ self.tile, self.tile, self.tile ]
 	
 	def is_pon_or_kon(self):
-		return True 
+		return True
 	
 	def all_tiles(self, fn):
 		return fn(self.tile)
