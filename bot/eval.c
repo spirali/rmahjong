@@ -80,7 +80,6 @@ void check_sets(SearchContext *context, tile_id *sets_tiles)
 		return;
 	}
 
-
 	if (mcount == 0) {
 		return;
 	}
@@ -108,7 +107,9 @@ void check_sets(SearchContext *context, tile_id *sets_tiles)
 	
 }
 
-void compute_best(TileSet *sets, int set, int free, tile_id *sets_tiles, SearchContext *context)
+/* set - index in all sets
+   free - how many sets we have to select to get 4 sets */
+void compute_best(TileSet *all_sets, int set, int free, tile_id *sets_tiles, SearchContext *context)
 {
 	if (free == 0) {
 		check_sets(context, sets_tiles);
@@ -118,8 +119,8 @@ void compute_best(TileSet *sets, int set, int free, tile_id *sets_tiles, SearchC
 		return;
 	}
 
-	compute_best(sets, set + 1, free, sets_tiles, context);
-	TileSet *s = &sets[set];
+	compute_best(all_sets, set + 1, free, sets_tiles, context);
+	TileSet *s = &all_sets[set];
 	context->sets[free - 1] = s;
 	if (set < TILES_COUNT) {
 		if (context->pair == s->tile) {
@@ -127,7 +128,7 @@ void compute_best(TileSet *sets, int set, int free, tile_id *sets_tiles, SearchC
 		}
 
 		sets_tiles[s->tile] += 3;
-		compute_best(sets, set + 1, free - 1, sets_tiles, context);
+		compute_best(all_sets, set + 1, free - 1, sets_tiles, context);
 		sets_tiles[s->tile] -= 3;
 	} else {
 		int t;
@@ -136,7 +137,7 @@ void compute_best(TileSet *sets, int set, int free, tile_id *sets_tiles, SearchC
 			sets_tiles[tl]++;
 			sets_tiles[tl + 1]++;
 			sets_tiles[tl + 2]++;
-			compute_best(sets, set + 1, free - t, sets_tiles, context);
+			compute_best(all_sets, set + 1, free - t, sets_tiles, context);
 		}
 
 		sets_tiles[tl]-=free;
@@ -145,7 +146,7 @@ void compute_best(TileSet *sets, int set, int free, tile_id *sets_tiles, SearchC
 	}
 }
 
-void find_best(SearchContext *context, TileSet *sets) 
+void find_best(SearchContext *context, TileSet *all_sets) 
 {
 	int t;
 	tile_id sets_tiles[TILES_COUNT];
@@ -153,11 +154,15 @@ void find_best(SearchContext *context, TileSet *sets)
 	context->best_value = 0;
 	zero_tiles(context->best_target);
 
+	for (t = 0; t < context->gc.open_sets_count; t++)  {
+		context->sets[3 - t] = &context->gc.open_sets[3 - t];
+	}
+
 	for (t = 0; t < TILES_COUNT; t ++) {
 		context->pair = t;
-		sets_tiles[t] = 2;
-		compute_best(sets, 0, 4, sets_tiles, context);
-		sets_tiles[t] = 0;
+		sets_tiles[t] += 2;
+		compute_best(all_sets, 0, 4 - context->gc.open_sets_count, sets_tiles, context);
+		sets_tiles[t] -= 2;
 	}
 }
 
@@ -191,7 +196,7 @@ int choose_drop_tile(GameContext *gc)
 	TileSet *all = all_tilesets();
 	find_best(&context, all);
 	free(all);
-	
+
 	tile_id unn[TILES_COUNT];
 	int unn_count = unnecessary_tiles(gc->hand, context.best_target, unn);
 	int id = rand() % unn_count;

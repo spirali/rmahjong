@@ -38,7 +38,7 @@ void process_commands(FILE *file, FILE *fileout, GameContext *gc)
 		
 		if (!strcmp(line, "WALL")) {
 			if (!read_tiles(file, gc->wall)) {
-				fprintf(fileout, "Error: Invalid format (WALL)\n");
+				fprintf(fileout, "Error: Invalid format (%s)\n", line);
 			} else {
 				gc->wall_size = tiles_count(gc->wall);
 			}
@@ -47,7 +47,7 @@ void process_commands(FILE *file, FILE *fileout, GameContext *gc)
 
 		if (!strcmp(line, "HAND")) {
 			if (!read_tiles(file, gc->hand)) {
-				fprintf(fileout, "Error: Invalid format (HAND)\n");
+				fprintf(fileout, "Error: Invalid format (%s)\n", line);
 			}	
 			continue;
 		}
@@ -60,10 +60,18 @@ void process_commands(FILE *file, FILE *fileout, GameContext *gc)
 
 		if (!strcmp(line, "TURNS")) {
 			if (fscanf(file, "%i\n", &gc->turns) != 1) {
-				fprintf(fileout, "Error: Invalid format (TURNS)\n");
+				fprintf(fileout, "Error: Invalid format (%s)\n", line);
 			}
 			continue;
 		}
+
+		if (!strcmp(line, "SETS")) {
+			if (!read_sets(file, gc->open_sets, 4, &gc->open_sets_count)) {
+				fprintf(fileout, "Error: Invalid format (%s)\n", line);
+			}	
+			continue;
+		}
+
 		fprintf(fileout, "Error: Unknown command\n");
 	}
 }

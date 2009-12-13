@@ -67,5 +67,7 @@ int tile_from_name(char *name);
 TileSet * all_tilesets();
 int tiles_count(tile_id *tile);
 
+void remove_set_from_tiles(tile_id *tiles, TileSet *set);
+void add_set_to_tiles(tile_id *tiles, TileSet *set);
 
 #endif 

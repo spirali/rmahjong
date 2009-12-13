@@ -75,12 +75,29 @@ class BoxEngineTestCase(TestCase):
 			h = tiles([ "C1", "C2", "C3", "DR", "DR", "DR", "DG", "DG", "C9", "B1", "B2", "B3", "WN", "WN" ])
 			e.set_turns(100)
 			e.set_hand(h)
+			e.set_sets([])
 			e.set_wall(4 * all_tiles)
 			e.question_discard()
 			tile = e.get_tile()
 			self.assertEquals(tile, Tile("C9"))
 		finally:
 			e.shutdown()
+
+	def test_discard_with_open_sets(self):
+		e = BotEngine()
+		try:
+			e.set_blocking()
+			h = tiles([ "DG", "DG", "C9", "B1", "B2", "B3", "WN", "WN" ])
+			e.set_turns(100)
+			e.set_hand(h)
+			e.set_sets([chi("C1"), pon("DR")])
+			e.set_wall(4 * all_tiles)
+			e.question_discard()
+			tile = e.get_tile()
+			self.assertEquals(tile, Tile("C9"))
+		finally:
+			e.shutdown()
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -52,11 +52,16 @@ class BotEngine(Thread):
 		self._write("WALL\n")	
 		self._set_tiles(tiles)
 
+	def set_sets(self, sets):
+		self._write("SETS\n")
+		for set in sets:
+			self._write("%s %s " % (set.get_name(), set.get_tile_for_engine().name))
+		self._write("\n")
+
 	def question_discard(self):
 		self._write("DISCARD\n")
 
 	def _write(self, string):
-		#print string
 		self.process_in.write(string)
 
 	def _set_tiles(self, tiles):

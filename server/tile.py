@@ -91,6 +91,12 @@ class Pon(TileSet):
 	def __init__(self, tile, closed = True):
 		TileSet.__init__(self, closed)
 		self.tile = tile
+	
+	def get_name(self):
+		return "Pon"
+
+	def get_tile_for_engine(self):
+		return self.tile
 
 	def tiles(self):
 		return [ self.tile, self.tile, self.tile ]
@@ -123,6 +129,12 @@ class Chi(TileSet):
 		self.tile1 = tile1
 		self.tile2 = tile2
 		self.tile3 = tile3
+
+	def get_name(self):
+		return "Chi"
+
+	def get_tile_for_engine(self):
+		return self.tile1
 
 	def tiles(self):
 		return [ self.tile1, self.tile2, self.tile3 ]

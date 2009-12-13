@@ -8,6 +8,8 @@ typedef struct GameContext GameContext;
 struct GameContext {
 	int turns;
 	int wall_size;
+	int open_sets_count;
+	TileSet open_sets[4];
 	tile_id wall[TILES_COUNT];
 	tile_id hand[TILES_COUNT];
 };

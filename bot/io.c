@@ -5,6 +5,8 @@
 #include "io.h"
 #include "tiles.h"
 
+#define LINE_LENGTH_LIMIT 4096
+
 void dump_tiles(tile_id *tile)
 {
 	int t;
@@ -19,8 +21,8 @@ void dump_tiles(tile_id *tile)
 
 int read_tiles(FILE *file, tile_id *out)
 {
-	char line[500];
-	char *s = fgets(line, 500, file);
+	char line[LINE_LENGTH_LIMIT];
+	char *s = fgets(line, LINE_LENGTH_LIMIT, file);
 	if (s == NULL)
 		return 0;
 
@@ -36,6 +38,45 @@ int read_tiles(FILE *file, tile_id *out)
 		token = strtok(NULL, delim);
 	}
 	return 1;
+}
+
+int read_sets(FILE *file, TileSet *set, int max, int *count)
+{
+	char line[LINE_LENGTH_LIMIT];
+	char *s = fgets(line, LINE_LENGTH_LIMIT, file);
+	if (s == NULL)
+		return 0;
+
+	char *delim = "\n\t\r ";
+	char *token = strtok(line, delim);
+	int c = 0;
+	while(token && c < max) {
+		int type;
+		if (!strcmp("Chi", token)) {
+			type = CHI;
+		} else if (!strcmp("Pon", token)) {
+			type = PON;
+		} else {
+			return 0;
+		}
+
+		token = strtok(NULL, delim);
+
+		if (token == NULL) {
+			return 0;
+		}
+		int tile = tile_from_name(token);
+		if (tile == TILE_NONE) {
+			return 0;
+		}
+		set[c].type = type;
+		set[c].tile = tile;
+		c++;
+		token = strtok(NULL, delim);
+	}
+	*count = c;
+	return 1;
+
 }
 
 int read_wall(FILE *file, tile_id *out)

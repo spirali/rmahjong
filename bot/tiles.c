@@ -97,7 +97,7 @@ void init_tiles(int *tiles, int count, tile_id *out)
 	} 
 }
 
-/**
+
 void add_set_to_tiles(tile_id *tiles, TileSet *set)
 {
 	switch(set->type) {
@@ -124,6 +124,6 @@ void remove_set_from_tiles(tile_id *tiles, TileSet *set)
 			tiles[set->tile]-=3;
 			return;
 	}
-}**/
+}
 
 
