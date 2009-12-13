@@ -2,8 +2,9 @@
 import unittest
 from unittest import TestCase
 
-from tile import Tile, Chi, Pon
+from tile import Tile, Chi, Pon, all_tiles
 from eval import count_of_tiles_yaku, compute_payment
+from botengine import BotEngine
 
 
 def tiles(strs):
@@ -65,6 +66,21 @@ class EvalHandTestCase(TestCase):
 		self.assertEquals(compute_payment(13, 40, "Tsumo", Tile("WN")), ("Yakuman", (8000, 16000)))
 		self.assertEquals(compute_payment(13, 40, "Tsumo", Tile("WE")), ("Yakuman", (16000, 0)))
 
+class BoxEngineTestCase(TestCase):
+
+	def test_discard(self):
+		e = BotEngine()
+		try:
+			e.set_blocking()
+			h = tiles([ "C1", "C2", "C3", "DR", "DR", "DR", "DG", "DG", "C9", "B1", "B2", "B3", "WN", "WN" ])
+			e.set_turns(100)
+			e.set_hand(h)
+			e.set_wall(4 * all_tiles)
+			e.question_discard()
+			tile = e.get_tile()
+			self.assertEquals(tile, Tile("C9"))
+		finally:
+			e.shutdown()
 
 if __name__ == '__main__':
     unittest.main()
