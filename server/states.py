@@ -55,10 +55,10 @@ class LobbyState:
 
 	def init_game(self):
 		players = self.server.players
-		from game import FakeGame
-		game = FakeGame(players)
+		game = Game(players)
 		self.server.set_game(game)
-		self.server.set_state(PlayerMoveState(self.server, game.get_east_player()))
+		self.server.start_new_round()
+		self.server.set_state(PlayerMoveState(self.server, self.server.round.get_east_player()))
 
 	def tick(self):
 		self.try_new_connections()
@@ -95,7 +95,7 @@ class PlayerMoveState(GenericGameState):
 	def __init__(self, server, player):
 		GenericGameState.__init__(self, server)
 		self.player = player
-		player.move(server.game.pick_random_tile())
+		player.move(server.round.pick_random_tile())
 		for p in player.other_players():
 			p.other_move(player)
 
@@ -185,5 +185,5 @@ class ScoreState(GenericGameState):
 
 	def enter_state(self):
 		GenericGameState.enter_state(self)
-		self.server.game.end_of_game(self.player, self.win_type)
+		self.server.round.end_of_round(self.player, self.win_type)
 

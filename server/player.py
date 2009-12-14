@@ -21,8 +21,8 @@ class Player:
 	def set_wind(self, wind):
 		self.wind = wind
 
-	def set_game(self, game, hand):
-		self.game = game
+	def set_round(self, round, hand):
+		self.round = round
 		self.hand = hand
 
 	def other_players(self):
@@ -101,8 +101,8 @@ class NetworkPlayer(Player):
 		msg["right"] = self.right_player.name
 		msg["across"] = self.across_player.name
 		msg["my_wind"] = self.wind.name
-		msg["round_wind"] = self.game.round_wind.name
-		msg["dora"] = self.game.doras[0].name
+		msg["round_wind"] = self.round.round_wind.name
+		msg["dora"] = self.round.doras[0].name
 		msg["hand"] = " ".join( [ tile.name for tile in self.hand ] )
 		self.connection.send_dict(msg)
 

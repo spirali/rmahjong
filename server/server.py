@@ -9,6 +9,7 @@ class Server:
 	def __init__(self, port):
 		self.players = []
 		self.game = None
+		self.round = None
 		self.state = LobbyState(self, port)
 		self.state.enter_state()
 
@@ -19,6 +20,9 @@ class Server:
 
 	def set_game(self, game):
 		self.game = game
+
+	def start_new_round(self):
+		self.round = self.game.new_round()
 
 	def add_player(self, player):
 		self.players.append(player)

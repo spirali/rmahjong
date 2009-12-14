@@ -7,14 +7,25 @@ from eval import compute_score
 class Game:
 
 	def __init__(self, players):
+		self.players = players
+		self.round_id = 0
+
+	def new_round(self):
+		self.round_id += 1
+		return DebugRound(self.players)
+
+
+class Round:
+
+	def __init__(self, players):
 		self.random = Random(123)
-		self.init_game()
+		self.init_round()
 		self.init_players(players)
 
 	def get_east_player(self):
 		return self.players[0]
 
-	def init_game(self):
+	def init_round(self):
 		self.wall = 4 * all_tiles
 		self.doras = [ self.pick_random_tile() ]
 		self.round_wind = east_wind
@@ -26,7 +37,7 @@ class Game:
 			right = players[(i + 1) % 4]
 			across = players[(i + 2) % 4]
 			player.set_neighbours(left, right, across)
-			player.set_game(self, self.get_hand())
+			player.set_round(self, self.get_hand())
 			player.set_wind(winds[i])
 			player.round_is_ready()
 		self.players = players
@@ -39,7 +50,7 @@ class Game:
 	def get_hand(self):
 		return [ self.pick_random_tile() for i in xrange(13) ]
 
-	def end_of_game(self, winner, wintype):
+	def end_of_round(self, winner, wintype):
 		hand = winner.hand
 		scores  = compute_score(hand, winner.open_sets, self.doras, False, self.round_wind, winner.wind)		
 		payment = "XYZ"
@@ -47,8 +58,7 @@ class Game:
 			player.round_end(winner, wintype, payment, scores)
 
 
-# For debugging
-class FakeGame(Game):
+class DebugRound(Round):
 	
 	def __init__(self, players):
 		def tiles(strs):
@@ -68,7 +78,7 @@ class FakeGame(Game):
 		self.hands = map(tiles, hands) 
 		self.rnd = tiles(r)
 		
-		Game.__init__(self, players)
+		Round.__init__(self, players)
 
 	def get_hand(self):
 		hand = self.hands[0]
