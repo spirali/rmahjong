@@ -47,7 +47,7 @@ class Server:
 			while True:
 				self.state.tick()
 				self.player_tick()
-				time.sleep(0.1)
+				time.sleep(0.07)
 		finally:
 			self.server_quit()
 

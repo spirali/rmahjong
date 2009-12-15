@@ -13,17 +13,19 @@ class DictProtocol:
 		self.send_dict(kw)		
 
 	def send_dict(self, data):
-		for key_value in data.items():
-			self.connection.send("%s|%s\n" % key_value)
-		self.connection.send("|\n")
-	
+		msg_list = [ "%s|%s\n" % key_value for key_value in data.items() ]
+		msg_list.append("|\n")
+		self.connection.send("".join(msg_list))
+
 	def read_message(self):
-		line = self.connection.read_line()
-		if line:
-			if line == "|":
-				buffer = self.buffer
-				self.buffer = {}
-				return buffer
-			key, value = line.split("|", 1)
-			self.buffer[key] = value
-		return None
+		while True:
+			line = self.connection.read_line()
+			if line:
+				if line == "|":
+					buffer = self.buffer
+					self.buffer = {}
+					return buffer
+				key, value = line.split("|", 1)
+				self.buffer[key] = value
+			else:
+				return None
