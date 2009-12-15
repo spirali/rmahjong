@@ -10,27 +10,36 @@ BOT_PATH = "../bot/bot"
 class BotEngineException(Exception):
 	pass
 
+class BotEngineThread(Thread):
 
-class BotEngine(Thread):
-
-	def __init__(self):
+	def __init__(self, queue, process_out):
 		Thread.__init__(self)
-		self.queue = Queue(2)
-		self.process = Popen([ BOT_PATH ], bufsize = 0, stdin = PIPE, stdout = PIPE)
-		self.nonblocking = True
-		self.process_out = self.process.stdout
-		self.process_in = self.process.stdin
+		self.daemon = True
+		self.queue = queue
+		self.process_out = process_out
 		self.thread_quit = False
-		self.start()
 
 	def run(self):
 		while not self.thread_quit:
 			line = self.process_out.readline()
 			self.queue.put(line, True)
 
+class BotEngine():
+
+	def __init__(self):
+		self.queue = Queue(2)
+		self.process = Popen([ BOT_PATH ], bufsize = 0, stdin = PIPE, stdout = PIPE)
+		self.nonblocking = True
+		self.process_out = self.process.stdout
+		self.process_in = self.process.stdin
+		self.thread = BotEngineThread(self.queue, self.process_out)
+		self.thread.start()
+
 	def shutdown(self):
-		self.thread_quit = True
-		self._write("QUIT\n")
+		self.thread.thread_quit = True
+		self.process.terminate()
+		#self._write("QUIT\n")
+		#self.join()
 
 	def get_tile(self):
 		if self._is_next_line():

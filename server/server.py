@@ -2,12 +2,16 @@
 import time 
 
 from states import LobbyState, ScoreState
+from player import BotPlayer
 
 
 class Server:
 
 	def __init__(self, port):
 		self.players = []
+		self.players.append(BotPlayer(self))
+		self.players.append(BotPlayer(self))
+		self.players.append(BotPlayer(self))
 		self.game = None
 		self.round = None
 		self.state = LobbyState(self, port)
@@ -39,10 +43,17 @@ class Server:
 			player.tick()
 
 	def run(self):
-		while True:
-			self.state.tick()
-			self.player_tick()
-			time.sleep(0.1)
+		try:
+			while True:
+				self.state.tick()
+				self.player_tick()
+				time.sleep(0.1)
+		finally:
+			self.server_quit()
+
+	def server_quit(self):
+		for player in self.players:
+			player.server_quit()
 
 	def declare_win(self, player, wintype):
 		self.set_state(ScoreState(self, player, wintype))

@@ -2,6 +2,7 @@ from connection import ConnectionClosed
 from tile import Tile
 from eval import count_of_tiles_yaku, find_potential_chi
 from copy import copy
+from botengine import BotEngine
 
 class Player:
 
@@ -42,6 +43,9 @@ class Player:
 	def player_dropped_tile(self, player, tile):
 		pass
 
+	def round_is_ready(self):
+		pass
+
 	def hand_actions(self):
 		options = []
 		if count_of_tiles_yaku(self.hand, self.open_sets) > 0:
@@ -75,6 +79,11 @@ class Player:
 			my_set.closed = False
 			self.open_sets.append(my_set)
 			self.can_drop_tile = True
+
+	def drop_tile(self, tile):
+		self.hand.remove(tile)
+		self.drop_zone.append(tile)
+		self.server.state.drop_tile(self, tile)
 
 class NetworkPlayer(Player):
 
@@ -123,9 +132,7 @@ class NetworkPlayer(Player):
 				return
 			self.can_drop_tile = False
 			tile = Tile(message["tile"])
-			self.hand.remove(tile)
-			self.drop_zone.append(tile)
-			self.server.state.drop_tile(self, tile)
+			self.drop_tile(tile)
 			return
 
 		if name == "READY":
@@ -164,8 +171,6 @@ class NetworkPlayer(Player):
 				choose_tiles = [ t.name for set, t in find_potential_chi(self.hand, tile) ]
 				chi_choose = " ".join(choose_tiles)
 			actions.append("Pass")
-		else:
-			self.server.player_is_ready(self)
 
 		msg_actions = " ".join(actions)
 		msg = { "message" : "DROPPED", 
@@ -174,6 +179,10 @@ class NetworkPlayer(Player):
 				"chi_choose" : chi_choose,
 				"actions" : msg_actions }
 		self.connection.send_dict(msg)
+		
+		if not actions:
+			# This should be called after sending DROPPED, because this can cause new game state
+			self.server.player_is_ready(self) 
 
 	def round_end(self, player, win_type, payment, scores):
 		msg = {}
@@ -195,3 +204,47 @@ class NetworkPlayer(Player):
 				"stolen_tile" : tile.name
 		}
 		self.connection.send_dict(msg)
+
+	def server_quit(self):
+		pass
+
+
+bot_names = (name for name in [ "Panda", "StormMaster", "Yogi" ])
+
+
+class BotPlayer(Player):
+
+	def __init__(self, server):
+		Player.__init__(self, server, bot_names.next())
+		self.engine = BotEngine()
+		self.action = None
+
+	def tick(self):
+		if self.action:
+			self.action()
+
+	def server_quit(self):
+		self.engine.shutdown()
+
+
+	def move(self, tile):
+		Player.move(self, tile)
+		self._set_basic_state()
+		self.engine.question_discard()
+		self.action = self.action_discard
+
+
+	def action_discard(self):
+		tile = self.engine.get_tile()
+		if tile:
+			self.action = None
+			self.drop_tile(tile)
+
+	def _set_basic_state(self):
+		self.engine.set_hand(self.hand)
+		self.engine.set_wall(self.round.hidden_tiles_for_player(self))
+		self.engine.set_sets(self.open_sets)
+		self.engine.set_turns(self.round.get_remaining_turns())
+
+	def player_dropped_tile(self, player, tile):
+		self.server.player_is_ready(self)

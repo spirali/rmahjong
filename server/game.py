@@ -12,7 +12,7 @@ class Game:
 
 	def new_round(self):
 		self.round_id += 1
-		return DebugRound(self.players)
+		return Round(self.players)
 
 
 class Round:
@@ -49,6 +49,12 @@ class Round:
 
 	def get_hand(self):
 		return [ self.pick_random_tile() for i in xrange(13) ]
+
+	def get_remaining_turns(self):
+		return len(self.wall) - 14
+
+	def hidden_tiles_for_player(self, player):
+		return player.left_player.hand + player.right_player.hand + player.across_player.hand + self.wall
 
 	def end_of_round(self, winner, wintype):
 		hand = winner.hand
