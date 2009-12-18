@@ -250,7 +250,7 @@ class BotPlayer(Player):
 		self.engine.set_hand(self.hand)
 		self.engine.set_wall(self.round.hidden_tiles_for_player(self))
 		self.engine.set_sets(self.open_sets)
-		self.engine.set_turns(self.round.get_remaining_turns())
+		self.engine.set_turns(self.round.get_remaining_turns_for_player(self))
 
 	def player_dropped_tile(self, player, tile):
 		if self != player:

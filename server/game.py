@@ -29,6 +29,7 @@ class Round:
 		self.wall = 4 * all_tiles
 		self.doras = [ self.pick_random_tile() ]
 		self.round_wind = east_wind
+		self.active_player = None
 
 	def init_players(self, players):
 		# TODO: Random seats
@@ -47,11 +48,19 @@ class Round:
 		self.wall.remove(tile)
 		return tile
 
+	def set_active_player(self, player):
+		self.active_player = player
+
 	def get_hand(self):
 		return [ self.pick_random_tile() for i in xrange(13) ]
 
 	def get_remaining_turns(self):
 		return len(self.wall) - 14
+
+	def get_remaining_turns_for_player(self, player):
+		players = self.players
+		i = (4 + players.index(player) - players.index(self.active_player) - 1) % 4
+		return (self.get_remaining_turns() - i) / 4
 
 	def hidden_tiles_for_player(self, player):
 		return player.left_player.hand + player.right_player.hand + player.across_player.hand + self.wall

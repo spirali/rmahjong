@@ -95,6 +95,8 @@ class PlayerMoveState(GenericGameState):
 	def __init__(self, server, player):
 		GenericGameState.__init__(self, server)
 		self.player = player
+		server.round.set_active_player(player)
+
 		for p in player.other_players():
 			p.other_move(player)
 		player.move(server.round.pick_random_tile())
