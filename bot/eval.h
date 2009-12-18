@@ -17,8 +17,8 @@ struct SearchContext {
 
 
 void init_tiles(int *tiles, int count, tile_id *out);
-float probability_of_get_missing(tile_id *tile, tile_id *wall, int wall_size, int turns);
 int tiles_count(tile_id *tile);
+float probability_of_get_missing(tile_id *tile, tile_id *wall, int wall_size, int turns);
 
 
 TileSet * all_tilesets();

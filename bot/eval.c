@@ -8,7 +8,7 @@
 #include "score.h"
 #include "io.h"
 
-double good_combinations_count(tile_id *tile, int ti, int used, double mul, double sum, tile_id *wall, int others,  int turns)
+static double good_combinations_count(tile_id *tile, int ti, int used, double mul, double sum, tile_id *wall, int others,  int turns)
 {
 	if (ti >= TILES_COUNT) {
 		if (used > turns) {
@@ -50,7 +50,7 @@ float probability_of_get_missing(tile_id *tile, tile_id *wall, int wall_size, in
 	return ((double) gc) / combinations_d(wall_size, turns);
 }
 
-int find_missing_tiles(tile_id *hand, tile_id *target, tile_id *missing)
+static int find_missing_tiles(tile_id *hand, tile_id *target, tile_id *missing)
 {
 	int t;
 	int sum = 0;
@@ -66,7 +66,7 @@ int find_missing_tiles(tile_id *hand, tile_id *target, tile_id *missing)
 	return sum;
 }
 
-void copy_tiles(tile_id *src, tile_id *dest)
+static void copy_tiles(tile_id *src, tile_id *dest)
 {
 	memcpy(dest, src, sizeof(tile_id) * TILES_COUNT);
 }
@@ -108,37 +108,37 @@ void check_sets(SearchContext *context, tile_id *sets_tiles)
 	
 }
 
-/* set - index in all sets
+/* set - remaining sets
    free - how many sets we have to select to get 4 sets */
-void compute_best(TileSet *all_sets, int set, int free, tile_id *sets_tiles, SearchContext *context)
+void compute_best(TileSet *set, int free, tile_id *sets_tiles, SearchContext *context)
 {
 	if (free == 0) {
 		check_sets(context, sets_tiles);
 		return;
 	}
-	if (set >= SETS_COUNT) {
+
+	if (set->type == INVALID_SET) {
 		return;
 	}
 
-	compute_best(all_sets, set + 1, free, sets_tiles, context);
-	TileSet *s = &all_sets[set];
-	context->sets[free - 1] = s;
-	if (set < TILES_COUNT) {
-		if (context->pair == s->tile) {
+	compute_best(set + 1, free, sets_tiles, context);
+	context->sets[free - 1] = set;
+	if (set->type != CHI) {
+		if (context->pair == set->tile) {
 			return;
 		}
 
-		sets_tiles[s->tile] += 3;
-		compute_best(all_sets, set + 1, free - 1, sets_tiles, context);
-		sets_tiles[s->tile] -= 3;
+		sets_tiles[set->tile] += 3;
+		compute_best(set + 1, free - 1, sets_tiles, context);
+		sets_tiles[set->tile] -= 3;
 	} else {
 		int t;
-		int tl = s->tile;
+		int tl = set->tile;
 		for (t=1; t <= free; t++) {
 			sets_tiles[tl]++;
 			sets_tiles[tl + 1]++;
 			sets_tiles[tl + 2]++;
-			compute_best(all_sets, set + 1, free - t, sets_tiles, context);
+			compute_best(set + 1, free - t, sets_tiles, context);
 		}
 
 		sets_tiles[tl]-=free;
@@ -162,7 +162,7 @@ void find_best(SearchContext *context, TileSet *all_sets)
 	for (t = 0; t < TILES_COUNT; t ++) {
 		context->pair = t;
 		sets_tiles[t] += 2;
-		compute_best(all_sets, 0, 4 - context->gc.open_sets_count, sets_tiles, context);
+		compute_best(all_sets, 4 - context->gc.open_sets_count, sets_tiles, context);
 		sets_tiles[t] -= 2;
 	}
 }
@@ -190,11 +190,41 @@ int pick_tile(tile_id *tiles, int id)
 	return t - 1;
 }
 
+TileSet * all_tilesets_for_hand(tile_id *hand)
+{
+	TileSet *sets = malloc(sizeof(TileSet) * (SETS_COUNT + 1));
+
+	int t;
+	int pos = 0;
+	for (t = 0; t < TILES_COUNT; t++) {
+		if (hand[t] > 0) {
+			sets[pos].type = PON;
+			sets[pos].tile = t;
+			pos++;
+		}
+	}
+
+	for (t = 0; t < 7; t++) {
+		sets[pos].type = CHI;
+		sets[pos].tile = TILE_B1 + t;
+		pos++;
+		sets[pos].type = CHI;
+		sets[pos].tile = TILE_P1 + t;
+		pos++;
+		sets[pos].type = CHI;
+		sets[pos].tile = TILE_C1 + t;
+		pos++;
+	}
+	sets[pos].type = INVALID_SET;
+	return sets;
+}
+
+
 int choose_drop_tile(GameContext *gc)
 {
 	SearchContext context;
 	context.gc = *gc;
-	TileSet *all = all_tilesets();
+	TileSet *all = all_tilesets_for_hand(gc->hand);
 	find_best(&context, all);
 	free(all);
 

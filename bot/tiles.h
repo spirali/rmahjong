@@ -50,6 +50,7 @@
 
 #define CHI 0
 #define PON 1
+#define INVALID_SET -1
 
 typedef char tile_id;
 
