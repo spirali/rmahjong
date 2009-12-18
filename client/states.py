@@ -21,9 +21,8 @@ class State:
 	def tick(self):
 		if self.protocol:
 			message = self.protocol.read_message()
-			while message:
+			if message:
 				self.process_message(message)
-				message = self.protocol.read_message()
 
 	def process_message(self, message):
 		self.mahjong.process_network_message(message)

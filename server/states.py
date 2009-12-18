@@ -95,9 +95,9 @@ class PlayerMoveState(GenericGameState):
 	def __init__(self, server, player):
 		GenericGameState.__init__(self, server)
 		self.player = player
-		player.move(server.round.pick_random_tile())
 		for p in player.other_players():
 			p.other_move(player)
+		player.move(server.round.pick_random_tile())
 
 	def drop_tile(self, player, tile):
 		assert player == self.player

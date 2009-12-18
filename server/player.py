@@ -70,7 +70,7 @@ class Player:
 
 		return options
 
-	def round_end(self, player, win_type, payment, scores, total_fans):
+	def round_end(self, player, win_type, payment, scores):
 		pass
 
 	def stolen_tile(self, player, from_player, action, set, tile):
@@ -229,6 +229,12 @@ class BotPlayer(Player):
 
 	def move(self, tile):
 		Player.move(self, tile)
+
+		actions = " ".join(self.hand_actions())
+		if "Tsumo" in actions:
+			self.server.declare_win(self, "Tsumo")
+			return
+
 		self._set_basic_state()
 		self.engine.question_discard()
 		self.action = self.action_discard
@@ -247,4 +253,8 @@ class BotPlayer(Player):
 		self.engine.set_turns(self.round.get_remaining_turns())
 
 	def player_dropped_tile(self, player, tile):
-		self.server.player_is_ready(self)
+		if self != player:
+			actions = self.steal_actions(player, tile)
+			if "Ron" in actions:
+				self.server.player_try_steal_tile(self, "Ron", None)
+			self.server.player_is_ready(self)

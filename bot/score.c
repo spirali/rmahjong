@@ -91,9 +91,10 @@ int score_of_hand(tile_id *tiles, int pair, TileSet **sets)
 {
  	int fan = count_of_fan(tiles, pair, sets);   
 	int t;
-	int score = 20;
-	for (t = 0; t < fan + 2; t++) {
+	int score = 80;
+	for (t = 2; t < fan + 2; t++) {
 		score *= 2;
 	}
-	return (score - 1) / 100 + 1;
+	return score;
+	/*return (score - 1) / 100 + 1;*/
 }

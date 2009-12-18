@@ -107,7 +107,7 @@ class Mahjong:
 		return "0.0"
 
 	def process_network_message(self, message):
-		print "Unknown message: " + repr(message)
+		print "Unknown message (%s): %s" % (self.state.__class__.__name__, repr(message))
 
 	def arrange_hand(self):
 		self.table.arrange_hand()

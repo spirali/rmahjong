@@ -71,20 +71,25 @@ class DebugRound(Round):
 			return map(Tile, strs)
 
 		hands = [
-			[ "WW", "C1", "C1", "C4", "C1", "C2", "C3", "DR", "B9", "DR", "B8", "B7", "DR" ],
-			[ "DR", "DR", "C5", "C6", "C4", "C2", "C3", "B8", "B9", "WN", "WN", "B7", "DR" ],
+			[ "WW", "DG", "DG", "DG", "DR", "DR", "DR", "DW", "DW", "DW", "B8", "B7", "C9" ],
+			[ "C9", "C9", "C5", "C6", "C4", "C2", "C3", "C1", "DW", "DW", "DW", "B7", "B7" ],
 			[ "C1", "B1", "B9", "C2", "WW", "WW", "WN", "WS", "DR", "DG", "DW", "C5", "P7" ],
 			[ "DG", "DG", "DR", "DW", "DG", "DW", "DW", "DR", "B1", "B2", "B2", "B2", "B1" ],
-			[ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C2" ],
-			[ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C9" ],
+	#		[ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C2" ],
+	#		[ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C9" ],
 		]
 
-		r = [ "B1", "C1", "WN", "P9", "DR", "C2", "C9" ]
+		r = [ "B1", "WW", "WN", "P9", "DR", "C2", "C9" ]
 	
 		self.hands = map(tiles, hands) 
 		self.rnd = tiles(r)
-		
 		Round.__init__(self, players)
+
+		for h in self.hands:
+			for t in h:
+				if t in self.wall:
+					self.wall.remove(t)
+		
 
 	def get_hand(self):
 		hand = self.hands[0]

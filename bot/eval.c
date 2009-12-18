@@ -95,12 +95,13 @@ void check_sets(SearchContext *context, tile_id *sets_tiles)
 		if (gc > 0) {
 			double result = gc / combinations_d(context->gc.wall_size, context->gc.turns);
 			double value = result * score_of_hand(context->gc.hand, context->pair, context->sets);
-			value = result;
+		//	value = result;
 
 			if (value > context->best_value) {
 				context->best_value = value;
 				copy_tiles(sets_tiles, context->best_target);
-	//			printf("New b %lf %lf\n", result, value);
+				//dump_tiles(context->best_target);
+				//printf("New b %lf %lf %i\n", result, value,  score_of_hand(context->gc.hand, context->pair, context->sets));
 			}
 		}
 	}
@@ -199,6 +200,7 @@ int choose_drop_tile(GameContext *gc)
 
 	tile_id unn[TILES_COUNT];
 	int unn_count = unnecessary_tiles(gc->hand, context.best_target, unn);
+	
 	int id = rand() % unn_count;
 	return pick_tile(unn, id);
 }
