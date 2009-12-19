@@ -57,7 +57,7 @@ class LobbyState:
 		players = self.server.players
 		game = Game(players)
 		self.server.set_game(game)
-		self.server.start_new_round()
+		self.server.start_new_round(False)
 		self.server.set_state(PlayerMoveState(self.server, self.server.round.get_east_player()))
 
 	def tick(self):
@@ -95,11 +95,13 @@ class PlayerMoveState(GenericGameState):
 	def __init__(self, server, player):
 		GenericGameState.__init__(self, server)
 		self.player = player
-		server.round.set_active_player(player)
 
-		for p in player.other_players():
-			p.other_move(player)
-		player.move(server.round.pick_random_tile())
+	def enter_state(self):
+		self.server.round.set_active_player(self.player)
+
+		for p in self.player.other_players():
+			p.other_move(self.player)
+		self.player.move(self.server.round.pick_random_tile())
 
 	def drop_tile(self, player, tile):
 		assert player == self.player
@@ -185,8 +187,20 @@ class ScoreState(GenericGameState):
 		self.player = player
 		self.looser = looser
 		self.win_type = win_type
+		self.ready_players = []
 
 	def enter_state(self):
 		GenericGameState.enter_state(self)
 		self.server.round.end_of_round(self.player, self.looser, self.win_type)
+
+	def player_is_ready(self, player):
+		if player not in self.ready_players:
+			self.ready_players.append(player)
+		if len(self.ready_players) == 4:
+			self.start_new_round()
+
+	def start_new_round(self):
+		rotate_players = not self.player.is_dealer()
+		self.server.start_new_round(rotate_players)
+		self.server.set_state(PlayerMoveState(self.server, self.server.round.get_east_player()))
 

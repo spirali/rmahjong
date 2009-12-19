@@ -112,6 +112,10 @@ class NetworkPlayer(Player):
 		msg["left"] = self.left_player.name
 		msg["right"] = self.right_player.name
 		msg["across"] = self.across_player.name
+		msg["left_score"] = self.left_player.score
+		msg["right_score"] = self.right_player.score
+		msg["across_score"] = self.across_player.score
+		msg["my_score"] = self.score
 		msg["my_wind"] = self.wind.name
 		msg["round_wind"] = self.round.round_wind.name
 		msg["dora"] = self.round.doras[0].name
@@ -129,6 +133,7 @@ class NetworkPlayer(Player):
 
 	def process_message(self, message):
 		name = message["message"]
+		print message
 
 		if name == "DROP":
 			if not self.can_drop_tile:
@@ -267,3 +272,7 @@ class BotPlayer(Player):
 			if "Ron" in actions:
 				self.server.player_try_steal_tile(self, "Ron", None)
 			self.server.player_is_ready(self)
+
+	def round_end(self, player, looser, win_type, payment_name, scores, minipints, diffs):
+		self.server.player_is_ready(self)
+

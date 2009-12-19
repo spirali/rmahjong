@@ -10,8 +10,15 @@ class Game:
 		self.players = players
 		self.round_id = 0
 
-	def new_round(self):
+	def new_round(self, rotate_players):
 		self.round_id += 1
+
+		# Rotate players
+		if rotate_players:
+			east_player = self.players[0]
+			self.players.remove(east_player)
+			self.players.append(east_player)
+
 		return DebugRound(self.players)
 
 
@@ -109,8 +116,8 @@ class DebugRound(Round):
 			return map(Tile, strs)
 
 		hands = [
-			[ "WW", "DG", "DG", "DG", "DR", "DR", "DR", "DW", "DW", "DW", "B8", "B7", "B6" ],
-			#[ "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9" ],
+			#[ "WW", "DG", "DG", "DG", "DR", "DR", "DR", "DW", "DW", "DW", "B8", "B7", "B6" ],
+			[ "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9" ],
 			[ "C9", "C9", "C5", "C6", "C4", "C2", "C3", "C1", "DW", "DW", "DW", "B7", "B7" ],
 			[ "C1", "B1", "B9", "C2", "WW", "WW", "WN", "WS", "DR", "DG", "DW", "C5", "P7" ],
 			[ "DG", "DG", "DR", "DW", "DG", "DW", "DW", "DR", "B1", "B2", "B2", "B2", "B1" ],

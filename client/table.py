@@ -94,14 +94,12 @@ class Table:
 
 	def __init__(self):
 		self.tp = TilePainter((640,480))
+		self.reset_all()
+
+	def reset_all(self):
 		self.tiles = []
 		self.hand = []
 		self.doras = []
-
-		dz_my = DropZone(self, (380, 470), direction_up, 6)
-		dz_across = DropZone(self, (580, 140), direction_down, 6)
-		dz_right = DropZone(self, (640, 410), direction_left, 6)
-		dz_left = DropZone(self, (320, 210), direction_right,6)
 
 		self.open_set_positions = [ 
 			((1005,690), direction_up, 0), 
@@ -110,6 +108,13 @@ class Table:
 			((45,680), direction_right, 0),
 		]
 
+		self.init_dropzones()
+
+	def init_dropzones(self):
+		dz_my = DropZone(self, (380, 470), direction_up, 6)
+		dz_across = DropZone(self, (580, 140), direction_down, 6)
+		dz_right = DropZone(self, (640, 410), direction_left, 6)
+		dz_left = DropZone(self, (320, 210), direction_right,6)
 		self.drop_zones = [ dz_my, dz_right, dz_across, dz_left ]
 
 	def sort_hand(self):

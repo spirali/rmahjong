@@ -25,8 +25,8 @@ class Server:
 	def set_game(self, game):
 		self.game = game
 
-	def start_new_round(self):
-		self.round = self.game.new_round()
+	def start_new_round(self, rotate_players):
+		self.round = self.game.new_round(rotate_players)
 
 	def add_player(self, player):
 		self.players.append(player)

@@ -2,6 +2,7 @@ from connection import Connection
 from dictprotocol import DictProtocol
 from gui import Button, Label, ScoreTable, PaymentTable
 from table import winds
+from copy import copy
 
 class State:
 	
@@ -28,10 +29,29 @@ class State:
 		self.mahjong.process_network_message(message)
 
 
-class ConnectingState(State):
+class RoundPreparingState(State):
+	
+	def process_message(self, message):
+		name = message["message"]
+		if name == "ROUND":
+			self.mahjong.init_round(message)
+			return
+		if name == "MOVE":
+			actions = message["actions"].split()
+			state = MyMoveState(self.mahjong, message["tile"], actions)
+			self.mahjong.set_state(state)
+			return
+		if name == "OTHER_MOVE":
+			state = OtherMoveState(self.mahjong, message["wind"])
+			self.mahjong.set_state(state)
+			return
+		State.process_message(self, message)		
+
+
+class ConnectingState(RoundPreparingState):
 
 	def __init__(self, mahjong):
-		State.__init__(self, mahjong)
+		RoundPreparingState.__init__(self, mahjong)
 		self.protocol = None
 
 	def enter_state(self):
@@ -67,27 +87,7 @@ class ConnectingState(State):
 		if name == "WELCOME":
 			self.set_label("Waiting for other players ... ")
 			return
-		if name == "ROUND":
-			self.init_round(message)
-			return
-		if name == "MOVE":
-			actions = message["actions"].split()
-			state = MyMoveState(self.mahjong, message["tile"], actions)
-			self.mahjong.set_state(state)
-			return
-		if name == "OTHER_MOVE":
-			state = OtherMoveState(self.mahjong, message["wind"])
-			self.mahjong.set_state(state)
-			return
-		State.process_message(self, message)		
-
-	def init_round(self, message):
-		names = [ self.mahjong.get_username(), message["right"], message["across"], message["left"] ]
-		self.mahjong.init_player_boxes(names)
-		self.mahjong.table.set_new_hand(message["hand"].split())
-		self.mahjong.table.add_dora(message["dora"])
-		self.mahjong.my_wind = message["my_wind"]
-		self.mahjong.round_wind = message["round_wind"]
+		RoundPreparingState.process_message(self, message)
 
 
 class ErrorState(State):
@@ -134,6 +134,7 @@ class RoundState(State):
 			state = MyMoveState(self.mahjong, message["tile"], actions)
 			self.mahjong.set_state(state)
 			return
+
 		if name == "OTHER_MOVE":
 			state = OtherMoveState(self.mahjong, message["wind"])
 			self.mahjong.set_state(state)
@@ -284,13 +285,13 @@ class OtherMoveState(RoundState):
 			tile.highlight = False
 			tile.callback = None
 
-class ScoreState(State):
+class ScoreState(RoundPreparingState):
 	
 	def __init__(self, mahjong, round_end_message):
-		State.__init__(self, mahjong)
+		RoundPreparingState.__init__(self, mahjong)
 		self.message = round_end_message
 		self.widgets = []
-		
+
 	def enter_state(self):
 		State.enter_state(self)
 		button = Button( (475,380), (120, 30), "Show score", self.show_score_clicked)
@@ -323,7 +324,7 @@ class ScoreState(State):
 		self.setup_widgets([table, button])
 
 	def show_payments(self, button):
-		button = Button( (400,560), (300, 25), "I am ready for next round", None)
+		button = Button( (400,560), (300, 25), "I am ready for next round", self.send_ready)
 		results = []
 		for wind in winds:
 			name = (self.mahjong.get_player_name(wind))
@@ -333,6 +334,12 @@ class ScoreState(State):
 		results.sort(key = lambda r: r[1], reverse = True)
 		table = PaymentTable(results)
 		self.setup_widgets([table, button])
+
+	def send_ready(self, button):
+		widgets = copy(self.widgets)
+		widgets.remove(button)
+		self.setup_widgets(widgets)
+		self.protocol.send_message(message="READY")
 
 
 class TestState(State):

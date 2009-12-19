@@ -12,12 +12,19 @@ class Mahjong:
 	def __init__(self):
 		self.table = Table()
 		self.gui = GuiManager()
-		self.player_boxes = []
 		self.state = None
 		self.quit_flag = False
+		self.protocol = None
+
+		self.player_boxes = []
 		self.my_wind = None
 		self.round_wind = None
-		self.protocol = None
+
+	def reset_all(self):
+		for box in self.player_boxes:
+			self.gui.remove_widget(box)
+		self.player_boxes = []
+		self.table.reset_all()
 
 	def set_state(self, state):
 		if self.state:
@@ -56,12 +63,12 @@ class Mahjong:
 			self.gui.tick()
 			clock.tick(10)
 
-	def init_player_boxes(self, names):
+	def init_player_boxes(self, names, score):
 		self.player_boxes = [
-			PlayerBox((50, 700), names[0], 25000, direction_up, (0,-80)),
-			PlayerBox((954, 300), names[1], 25000, direction_left, (-210, 0)), 
-			PlayerBox((700, 0), names[2], 25000, direction_up, (0,80)),
-			PlayerBox((0, 300), names[3], 25000, direction_right, (80,0)) ]
+			PlayerBox((50, 700), names[0], score[0], direction_up, (0,-80)),
+			PlayerBox((954, 300), names[1], score[1], direction_left, (-210, 0)), 
+			PlayerBox((700, 0), names[2], score[2], direction_up, (0,80)),
+			PlayerBox((0, 300), names[3], score[3], direction_right, (80,0)) ]
 		for widget in self.player_boxes:
 			self.gui.add_widget(widget)
 
@@ -108,6 +115,16 @@ class Mahjong:
 
 	def arrange_hand(self):
 		self.table.arrange_hand()
+
+	def init_round(self, message):
+		self.reset_all()
+		names = [ self.get_username(), message["right"], message["across"], message["left"] ]
+		scores = [ message["my_score"], message["right_score"], message["across_score"], message["left_score"] ]
+		self.init_player_boxes(names, scores)
+		self.table.set_new_hand(message["hand"].split())
+		self.table.add_dora(message["dora"])
+		self.my_wind = message["my_wind"]
+		self.round_wind = message["round_wind"]
 
 
 def main_init():
