@@ -1,7 +1,7 @@
 from connection import Connection
 from dictprotocol import DictProtocol
-from gui import Button, Label, ScoreTable
-
+from gui import Button, Label, ScoreTable, PaymentTable
+from table import winds
 
 class State:
 	
@@ -298,6 +298,7 @@ class ScoreState(State):
 		self.setup_widgets([ button, shoutbox ])
 
 	def setup_widgets(self, widgets):
+		self.remove_widgets()
 		self.widgets = widgets
 		for widget in self.widgets:
 			self.mahjong.gui.add_widget(widget)
@@ -311,13 +312,26 @@ class ScoreState(State):
 		self.remove_widgets()
 
 	def show_score_clicked(self, button):
-		self.remove_widgets()
 		score_items = self.message["score_items"].split(";")
 		total_fans = self.message["total_fans"]
+		minipoints = self.message["minipoints"]
 		payment = self.message["payment"]
 		player_name = self.mahjong.get_player_name(self.message["player"])
-		table = ScoreTable(score_items , total_fans, payment, player_name)
+		total = str(total_fans) + " (minipoints: " + str(minipoints) + ")"
+		table = ScoreTable(score_items , total, payment, player_name)
+		button = Button( (400,560), (300, 25), "Show payments", self.show_payments)
+		self.setup_widgets([table, button])
+
+	def show_payments(self, button):
 		button = Button( (400,560), (300, 25), "I am ready for next round", None)
+		results = []
+		for wind in winds:
+			name = (self.mahjong.get_player_name(wind))
+			score = (int(self.message[wind + "_score"]))
+			payment = (int(self.message[wind + "_payment"]))
+			results.append((name, score, payment))
+		results.sort(key = lambda r: r[1], reverse = True)
+		table = PaymentTable(results)
 		self.setup_widgets([table, button])
 
 
@@ -335,7 +349,6 @@ class TestState(State):
 			self.mahjong.table.add_open_set(x, [ "C2", "DR", "DR", "DR" ], [0])
 			self.mahjong.table.add_open_set(x, [ "C2", "C1", "C2", "C3" ], [3])
 
-
 		from table import all_tile_names
 		for tile in all_tile_names[:18]:
 			self.mahjong.table.new_tile_to_dropzone(0, tile)
@@ -344,5 +357,6 @@ class TestState(State):
 			self.mahjong.table.new_tile_to_dropzone(3, tile)
 		
 		self.mahjong.init_player_boxes(["A","B", "C", "D"])
+
 	def tick(self):
 		pass

@@ -49,6 +49,10 @@ def round_to_base(num, base):
 
 
 def compute_payment(fans, minipoints, wintype, player_wind):
+	""" Returns: (name, x, y)
+		x payment of looser (if Ron), payment of non-dealer (if Tsumo)
+		y payment of dealer (if Tsumo)
+	""" 
 	if fans < 5:
 		name, score = "", scoring_table[minipoints][fans - 1]
 	else:
@@ -64,10 +68,63 @@ def compute_payment(fans, minipoints, wintype, player_wind):
 			return (name, (round_to_base(score / 2, 100), 0))
 		else:
 			return (name, (round_to_base(score / 4, 100), round_to_base(score / 2, 100)))
-	
-def compute_score(hand, open_sets, doras, riichi, round_wind, player_wind):
+
+def quick_pons_and_kans(hand):
+	d = {}
+	for tile in hand:
+		d[tile] = hand.count(tile)
+	pons = []
+	kans = []
+	for tile,i in d.items():
+		if i == 3:
+			pons.append(tile)
+		if i == 4:
+			kans.append(tile)
+	return (pons, kans)
+
+def points_sum(tiles, nontermial_points):
+	s = 0
+	for tile in tiles:		
+		if tile.is_nonterminal():
+			s += nontermial_points
+		else:
+			s += nontermial_points * 2
+	return s
+
+def compute_minipoints(hand, open_sets, wintype, round_wind, player_wind):
+	if not open_sets and wintype == "Ron":
+		points = 30
+	else:
+		points = 20
+
+	pons, kans = quick_pons_and_kans(hand)
+	points += points_sum(pons, 4)
+	points += points_sum(kans, 16)
+	points += points_sum([set.tile for set in open_sets if set.is_pon()], 2)
+	points += points_sum([set.tile for set in open_sets if set.is_kan()], 4)
+
+	for tile in [ red_dragon, white_dragon, green_dragon, round_wind, player_wind ]:
+		if hand.count(tile) == 2:
+			points += 2	
+
+	if wintype == "Tsumo":
+		points += 2
+
+	# TODO: Waitings
+
+	return round_to_base(points, 10)
+
+
+def compute_score(hand, open_sets, wintype, doras, riichi, round_wind, player_wind):
 	yaku = find_tiles_yaku(hand, open_sets)
-	return yaku
+	minipoints = compute_minipoints(hand, open_sets, wintype, round_wind, player_wind)
+	fans = sum(map(lambda r: r[1], yaku))
+	
+	# TODO: Riichi
+	# TODO: Doras
+	# TODO: Red-fives
+
+	return (compute_payment(fans, minipoints, wintype, player_wind), yaku, minipoints)
 	
 
 def detect_pairs(hand):
@@ -144,12 +201,12 @@ def for_all_sets(sets, fn):
 
 
 def score_yaku_pai(pair_tile, sets):
-	def dragon_pon_or_kon(set):
+	def dragon_pon_or_kan(set):
 		if set.all_tiles_is(red_dragon) or set.all_tiles_is(white_dragon) or set.all_tiles_is(green_dragon):
 			return 1
 		else:
 			return 0
-	return sum_over_sets(sets, dragon_pon_or_kon)
+	return sum_over_sets(sets, dragon_pon_or_kan)
 
 
 def score_tan_yao(pair_tile, sets):

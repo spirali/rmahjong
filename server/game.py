@@ -12,7 +12,7 @@ class Game:
 
 	def new_round(self):
 		self.round_id += 1
-		return Round(self.players)
+		return DebugRound(self.players)
 
 
 class Round:
@@ -65,13 +65,42 @@ class Round:
 	def hidden_tiles_for_player(self, player):
 		return player.left_player.hand + player.right_player.hand + player.across_player.hand + self.wall
 
-	def end_of_round(self, winner, wintype):
-		hand = winner.hand
-		scores  = compute_score(hand, winner.open_sets, self.doras, False, self.round_wind, winner.wind)		
-		payment = "XYZ"
-		for player in self.players:
-			player.round_end(winner, wintype, payment, scores)
+	def end_of_round(self, winner, looser, wintype):
+		payment, scores, minipoints  = compute_score(winner.hand, winner.open_sets, wintype, self.doras, False, self.round_wind, winner.wind)
+		diffs = self.payment_diffs(payment, wintype, winner, looser)
+		
+		for player in diffs:
+			player.score += diffs[player]		
 
+		if wintype == "Tsumo":
+			if payment[1][1] != 0:
+				payment_name = payment[0] + " " + str(payment[1][0]) + "/" + str(payment[1][1])
+			else:
+				payment_name = payment[0] + " " + str(payment[1][0])
+		else:
+			payment_name = payment[0] + " " + str(payment[1])
+			
+		for player in self.players:
+			player.round_end(winner, looser, wintype, payment_name, scores, minipoints, diffs)
+
+	def payment_diffs(self, payment, wintype, winner, looser):
+		others = winner.other_players()
+		if wintype == "Ron":
+			others.remove(looser)
+			return { others[0]: 0, others[1]: 0, winner: payment[1], looser: -payment[1] }
+		else:
+			s = 0
+			d = {}
+			po, pe = payment[1]
+			for player in others:
+				if player.is_dealer():
+					d[player] = - pe
+					s += pe
+				else:
+					d[player] = - po
+					s += po
+			d[winner] = s
+			return d
 
 class DebugRound(Round):
 	
@@ -80,12 +109,13 @@ class DebugRound(Round):
 			return map(Tile, strs)
 
 		hands = [
-			[ "WW", "DG", "DG", "DG", "DR", "DR", "DR", "DW", "DW", "DW", "B8", "B7", "C9" ],
+			[ "WW", "DG", "DG", "DG", "DR", "DR", "DR", "DW", "DW", "DW", "B8", "B7", "B6" ],
+			#[ "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9" ],
 			[ "C9", "C9", "C5", "C6", "C4", "C2", "C3", "C1", "DW", "DW", "DW", "B7", "B7" ],
 			[ "C1", "B1", "B9", "C2", "WW", "WW", "WN", "WS", "DR", "DG", "DW", "C5", "P7" ],
 			[ "DG", "DG", "DR", "DW", "DG", "DW", "DW", "DR", "B1", "B2", "B2", "B2", "B1" ],
-	#		[ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C2" ],
-	#		[ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C9" ],
+			[ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C2" ],
+			[ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C9" ],
 		]
 
 		r = [ "B1", "WW", "WN", "P9", "DR", "C2", "C9" ]

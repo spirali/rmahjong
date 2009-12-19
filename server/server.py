@@ -55,8 +55,8 @@ class Server:
 		for player in self.players:
 			player.server_quit()
 
-	def declare_win(self, player, wintype):
-		self.set_state(ScoreState(self, player, wintype))
+	def declare_win(self, player, looser, wintype):
+		self.set_state(ScoreState(self, player, looser, wintype))
 
 	def player_is_ready(self, player):
 		self.state.player_is_ready(player)

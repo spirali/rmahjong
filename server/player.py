@@ -26,6 +26,9 @@ class Player:
 		self.round = round
 		self.hand = hand
 
+	def is_dealer(self):
+		return self.wind.name == "WE"
+
 	def other_players(self):
 		""" Returns other players in order from right """
 		return [ self.right_player, self.across_player, self.left_player ]
@@ -70,7 +73,7 @@ class Player:
 
 		return options
 
-	def round_end(self, player, win_type, payment, scores):
+	def round_end(self, player, looser, win_type, payment_name, scores, minipints, diffs):
 		pass
 
 	def stolen_tile(self, player, from_player, action, set, tile):
@@ -152,7 +155,7 @@ class NetworkPlayer(Player):
 			if not self.can_drop_tile or "Tsumo" not in self.hand_actions():
 				print "Tsumo is not allowed"
 				return
-			self.server.declare_win(self, "Tsumo")
+			self.server.declare_win(self, None, "Tsumo")
 			self.can_drop_tile = False
 			return
 
@@ -184,14 +187,20 @@ class NetworkPlayer(Player):
 			# This should be called after sending DROPPED, because this can cause new game state
 			self.server.player_is_ready(self) 
 
-	def round_end(self, player, win_type, payment, scores):
+	def round_end(self, player, looser, win_type, payment_name, scores, minipoints, payment_diffs):
 		msg = {}
 		msg["message"] = "ROUND_END"
-		msg["payment"] = payment
+		msg["payment"] = payment_name
 		msg["wintype"] = win_type
 		msg["player"] = player.wind.name
 		msg["total_fans"] = sum(map(lambda r: r[1], scores))
+		msg["minipoints"] = minipoints
 		msg["score_items"] = ";".join(map(lambda sc: "%s %s" % (sc[0], sc[1]), scores))
+
+		for player in self.server.players:
+			msg[player.wind.name + "_score"] = player.score 
+			msg[player.wind.name + "_payment"] = payment_diffs[player]
+	
 		self.connection.send_dict(msg)
 
 	def stolen_tile(self, player, from_player, action, set, tile):
@@ -232,7 +241,7 @@ class BotPlayer(Player):
 
 		actions = " ".join(self.hand_actions())
 		if "Tsumo" in actions:
-			self.server.declare_win(self, "Tsumo")
+			self.server.declare_win(self, None, "Tsumo")
 			return
 
 		self._set_basic_state()

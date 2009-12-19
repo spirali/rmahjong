@@ -82,7 +82,13 @@ class TileSet(object):
 	def __init__(self, closed):
 		self.closed = closed
 		
-	def is_pon_or_kon(self):
+	def is_pon_or_kan(self):
+		return False
+
+	def is_pon(self):
+		return False
+
+	def is_kan(self):
 		return False
 
 
@@ -101,9 +107,12 @@ class Pon(TileSet):
 	def tiles(self):
 		return [ self.tile, self.tile, self.tile ]
 	
-	def is_pon_or_kon(self):
+	def is_pon_or_kan(self):
 		return True
-	
+
+	def is_pon(self):
+		return True
+
 	def all_tiles(self, fn):
 		return fn(self.tile)
 

@@ -182,10 +182,10 @@ class ShoutBox(Widget):
 		
 class ScoreTable(Widget):
 	
-	def __init__(self, score_items, total_fans, payment, player_name):
+	def __init__(self, score_items, total, payment, player_name):
 		Widget.__init__(self, (350,150), (380,400))
 		self.surface = self.create_bg_surface()
-		self.surface.fill((0,0,0,90))
+		self.surface.fill((0,0,0,120))
 
 		yy = 10
 		self.draw_text(yy, "Winner: " + player_name)
@@ -197,10 +197,48 @@ class ScoreTable(Widget):
 			yy += 25
 		pygame.draw.line(self.surface, (255,255,255), (0, yy), (self.size[0], yy))
 		yy += 10
-		self.draw_text(yy, "Total: " + str(total_fans)) 
+		self.draw_text(yy, "Total: " + total) 
 		yy += 25
 		self.draw_text(yy, "Payment: " + payment) 
 		
 	def draw_text(self, y, text):
 		textsurface = graphics.font.render(text, True, (255,255,255))
 		self.surface.blit(textsurface, (20, y))
+
+
+class PaymentTable(Widget):
+	def __init__(self, results):
+		Widget.__init__(self, (350,150), (380,400))
+		self.surface = self.create_bg_surface()
+		self.surface.fill((0,0,0,120))
+
+		yy = 30
+		pygame.draw.line(self.surface, (255,255,255), (0, yy), (self.size[0], yy))
+		yy += 10
+		for name, score, payment in results:
+			self.draw_text(20, yy, name)
+			yy += 20
+			self.draw_text(20, yy, str(score))
+
+			if payment < 0:
+				color = (255, 0, 0)
+			elif payment > 0:
+				color = (0, 255, 0)
+			else: 
+				color = (255,255,255)	
+
+			self.draw_text(150, yy, self.payment_prefix(payment), color = color)
+			yy += 30
+			pygame.draw.line(self.surface, (255,255,255), (0, yy), (self.size[0], yy))
+			yy += 15
+
+	def draw_text(self, x, y, text, color = (255,255,255)):
+		textsurface = graphics.font.render(text, True, color)
+		self.surface.blit(textsurface, (x, y))
+
+	def payment_prefix(self, payment):
+		if payment >= 0:
+			return "+" + str(payment)
+		else:
+			return str(payment)
+

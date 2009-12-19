@@ -1,12 +1,10 @@
 import pygame
 
 from graphics import init_fonts
-from table import Table
+from table import Table, winds
 from gui import GuiManager, PlayerBox
 from directions import direction_up, direction_down, direction_left, direction_right
 from states import ConnectingState, TestState
-
-winds = [ "WE", "WS", "WW", "WN" ]
 
 
 class Mahjong:
@@ -48,7 +46,6 @@ class Mahjong:
 		self.table.draw()
 		self.gui.draw(screen)
 		pygame.display.flip()
-
 
 	def run(self):
 		clock = pygame.time.Clock()

@@ -144,7 +144,7 @@ class StealTileState(GenericGameState):
 				self.server.set_state(PlayerMoveState(self.server, self.player.right_player))
 			elif s_action == "Ron":
 				s_player.new_hand_tile(self.droped_tile)
-				self.server.declare_win(s_player, "Ron")
+				self.server.declare_win(s_player, self.player, "Ron")
 			else:
 				state = DropAfterStealState(self.server, s_player, self.player, self.droped_tile, s_action, s_chichoose)
 				self.server.set_state(state)
@@ -180,12 +180,13 @@ class DropAfterStealState(GenericGameState):
 
 class ScoreState(GenericGameState):
 	
-	def __init__(self, server, player, win_type):
+	def __init__(self, server, player, looser, win_type):
 		GenericGameState.__init__(self, server)
 		self.player = player
+		self.looser = looser
 		self.win_type = win_type
 
 	def enter_state(self):
 		GenericGameState.enter_state(self)
-		self.server.round.end_of_round(self.player, self.win_type)
+		self.server.round.end_of_round(self.player, self.looser, self.win_type)
 
