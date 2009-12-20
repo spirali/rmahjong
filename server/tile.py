@@ -59,6 +59,18 @@ class Tile(object):
 			n = 9
 		return Tile(self.get_type() + str(n))
 
+	def as_bamboo(self):
+		return Tile("B" + self.name[1])
+
+	def as_char(self):
+		return Tile("C" + self.name[1])
+
+	def as_pins(self):
+		return Tile("P" + self.name[1])
+
+	def is_bamboo(self):
+		return self.name[0] == "B"
+
 
 red_dragon = Tile("DR")
 white_dragon = Tile("DW")
@@ -174,6 +186,18 @@ class Chi(TileSet):
 
 	def all_tiles_is(self, tile):
 		return False
+
+	def is_bamboo(self):
+		return self.tile1.is_bamboo()
+
+	def as_char(self):
+		return Chi(self.tile1.as_char(), self.tile2.as_char(), self.tile3.as_char())
+
+	def as_bamboo(self):
+		return Chi(self.tile1.as_bamboo(), self.tile2.as_bamboo(), self.tile3.as_bamboo())
+
+	def as_pins(self):
+		return Chi(self.tile1.as_pins(), self.tile2.as_pins(), self.tile3.as_pins())
 
 	def __eq__(self, x):
 		return x.is_chi() and self.tile1 == x.tile1

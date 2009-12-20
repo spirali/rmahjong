@@ -199,6 +199,11 @@ def for_all_sets(sets, fn):
 			return False
 	return True
 
+def is_sets_closed(sets):
+	for set in sets:
+		if not set.closed:
+			return False
+	return True
 
 def score_yaku_pai(pair_tile, sets):
 	def dragon_pon_or_kan(set):
@@ -227,11 +232,21 @@ def score_ipeikou(pair_tile, sets):
 			count += 1
 	return count
 
+def score_sanshoku_doujun(pair_tile, sets):
+	for set in sets:
+		if set.is_chi() and set.is_bamboo() and sets.count(set.as_pins()) > 0 and sets.count(set.as_char()) > 0:
+			if is_sets_closed(sets):
+				return 2
+			else:
+				return 1
+	return 0
+			
 
 score_functions = [ 
 	("Yaku-Pai", score_yaku_pai),
 	("Tan-Yao", score_tan_yao),
 	("Ipeikou", score_ipeikou),
+	("Sanshoku doujun", score_sanshoku_doujun),
 ]
 
 
