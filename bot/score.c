@@ -121,6 +121,30 @@ int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count)
 				break;
 			}
 		}
+		/* Itsu */
+		int c1 = 0, c4 = 0, c7 = 0, p1 = 0, p4 = 0, p7 = 0, b1 = 0, b4 = 0, b7 = 0;
+		
+		for (t = 0; t < chi_count; t++) {
+			switch(chi[t]->tile) {
+				case TILE_C1: c1 = 1; continue;
+				case TILE_C4: c4 = 1; continue;
+				case TILE_C6: c7 = 1; continue;
+				case TILE_P1: p1 = 1; continue;
+				case TILE_P4: p4 = 1; continue;
+				case TILE_P7: p7 = 1; continue;
+				case TILE_B1: b1 = 1; continue;
+				case TILE_B4: b4 = 1; continue;
+				case TILE_B7: b7 = 1; continue;
+				default: continue;
+			}
+		}
+		if ((c1 && c4 && c7) || (p1 && p4 && p7) || (b1 && b4 && b7)) {
+			if (open_sets_count) {
+				fan++;
+			} else {
+				fan += 2;
+			}
+		}
 	}
 
 	return fan;

@@ -38,6 +38,8 @@ test_hands = [
 	([ "C6", "C7", "C8", "B6", "B7", "B8", "P6", "P7", "P8", "C9", "C9", "B1", "B1", "B1" ], [], 2), #10, Sanshoku doujun (closed)
 	([ "B6", "B7", "B8", "P6", "P7", "P8", "C9", "C9" ], [ pon("B2"), chi("C6") ], 1 ), #11, Sanshoku doujun (opened)
 	([ "C6", "C7", "C8", "B6", "B7", "B8", "P6", "P7", "P8", "C2", "C2", "B6", "B7", "B8" ], [], 4), #12, Sanshoku doujun (closed), Ipeikou, Tan-Yao
+	([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P1", "WN", "WN" ], [], 2), #13, Itsu (closed)
+	([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "WE", "WE" ], [ chi("P7") ], 1), #14, Itsu (opened)
 ]
 
 
@@ -98,7 +100,7 @@ class BoxEngineTestCase(TestCase):
 		try:
 			e.set_blocking()
 			h = tiles([ "DG", "DG", "C9", "B1", "B2", "B3", "WN", "WN" ])
-			e.set_turns(100)
+			e.set_turns(30)
 			e.set_hand(h)
 			e.set_sets([chi("C1"), pon("DR")])
 			e.set_wall(4 * all_tiles)

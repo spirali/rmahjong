@@ -1,5 +1,6 @@
 from tile import Pon, Chi
 from tile import red_dragon, white_dragon, green_dragon
+from tile import bamboos, chars, pins
 from copy import copy
 
 def find_tiles_yaku(hand, open_sets):
@@ -240,13 +241,26 @@ def score_sanshoku_doujun(pair_tile, sets):
 			else:
 				return 1
 	return 0
-			
+
+itsu_sets_bamboos = [ Chi(bamboos[0], bamboos[1], bamboos[2]), Chi(bamboos[3], bamboos[4], bamboos[5]), Chi(bamboos[6], bamboos[7], bamboos[8]) ]
+itsu_sets_chars = [ Chi(chars[0], chars[1], chars[2]), Chi(chars[3], chars[4], chars[5]), Chi(chars[6], chars[7], chars[8]) ]
+itsu_sets_pins = [ Chi(pins[0], pins[1], pins[2]), Chi(pins[3], pins[4], pins[5]), Chi(pins[6], pins[7], pins[8]) ]
+		
+def score_itsu(pair_tile, sets):
+	if (sets.count(itsu_sets_bamboos[0]) > 0 and sets.count(itsu_sets_bamboos[1]) > 0 and sets.count(itsu_sets_bamboos[2])) or \
+		(sets.count(itsu_sets_chars[0]) > 0 and sets.count(itsu_sets_chars[1]) > 0 and sets.count(itsu_sets_chars[2])) or \
+		(sets.count(itsu_sets_pins[0]) > 0 and sets.count(itsu_sets_pins[1]) > 0 and sets.count(itsu_sets_pins[2])):
+		if is_sets_closed(sets):
+			return 2
+		else:
+			return 1
 
 score_functions = [ 
 	("Yaku-Pai", score_yaku_pai),
 	("Tan-Yao", score_tan_yao),
 	("Ipeikou", score_ipeikou),
 	("Sanshoku doujun", score_sanshoku_doujun),
+	("Itsu", score_itsu),
 ]
 
 
