@@ -47,6 +47,12 @@ class BotEngine():
 		else:
 			return None
 
+	def get_int(self):
+		if self._is_next_line():
+			return int(self._read_line().strip())
+		else:
+			return None
+
 	def set_blocking(self):
 		self.nonblocking = False
 	
@@ -69,6 +75,9 @@ class BotEngine():
 
 	def question_discard(self):
 		self._write("DISCARD\n")
+
+	def question_yaku(self):
+		self._write("YAKU\n")
 
 	def _write(self, string):
 		self.process_in.write(string)

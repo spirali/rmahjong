@@ -52,6 +52,11 @@
 #define PON 1
 #define INVALID_SET -1
 
+#define IS_CHI_INDICATOR(x) (((x) >= TILE_B1 && (x) <= TILE_B7) || (((x) >= TILE_C1) && (x) <= TILE_C7) || (((x) >= TILE_P1) && (x) <= TILE_P7))
+
+#define IS_NONTERMINAL(x) (((x) > TILE_B1 && (x) < TILE_B9) || ((x) > TILE_P1 && (x) < TILE_P9) || ((x)> TILE_C1 && (x) < TILE_C9))
+
+
 typedef char tile_id;
 
 typedef struct TileSet TileSet;

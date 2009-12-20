@@ -72,6 +72,12 @@ void process_commands(FILE *file, FILE *fileout, GameContext *gc)
 			continue;
 		}
 
+		if (!strcmp(line, "YAKU")) {
+			int yaku = compute_yaku_of_hand(gc->hand, gc->open_sets, gc->open_sets_count);
+			fprintf(fileout, "%i\n", yaku);
+			continue;
+		}
+
 		fprintf(fileout, "Error: Unknown command\n");
 	}
 }

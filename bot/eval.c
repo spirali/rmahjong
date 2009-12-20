@@ -234,3 +234,74 @@ int choose_drop_tile(GameContext *gc)
 	int id = rand() % unn_count;
 	return pick_tile(unn, id);
 }
+
+int detect_sets(tile_id *hand, tile_id *original_hand, int pair,  TileSet **sets, int set_id, int h, int open_sets_count)
+{
+	if (set_id >= 4) {
+		return count_of_fan(original_hand, pair, sets, open_sets_count);
+	}
+	
+	if (hand[h] == 0) {
+		return detect_sets(hand, original_hand, pair, sets, set_id, h + 1, open_sets_count);
+	}
+
+	if (hand[h] >= 3) {
+		TileSet set;
+		set.tile = h;
+		set.type = PON;
+		sets[set_id] = &set;
+
+		hand[h] -= 3;
+		int r = detect_sets(hand, original_hand, pair, sets, set_id + 1, h, open_sets_count);
+		hand[h] += 3;
+		if (r > 0)
+			return r;
+	}
+
+	if (IS_CHI_INDICATOR(h)) {
+		if (hand[h + 1] == 0 || hand[h + 2] == 0)
+			return 0;
+
+		TileSet set;
+		set.tile = h;
+		set.type = CHI;
+		sets[set_id] = &set;
+
+		hand[h]--;
+		hand[h + 1]--;
+		hand[h + 2]--;
+		int r = detect_sets(hand, original_hand, pair, sets, set_id + 1, h, open_sets_count);
+		hand[h]++;
+		hand[h + 1]++;
+		hand[h + 2]++;
+		return r;
+	}
+
+	return 0;
+}
+
+int compute_yaku_of_hand(tile_id *hand, TileSet *open_sets, int open_sets_count)
+{
+	tile_id h[TILES_COUNT];
+	copy_tiles(hand, h);
+	int t;
+
+	TileSet *sets[4];
+	
+	for (t = 0; t < open_sets_count; t++) {
+		sets[t] = &open_sets[t];
+	}
+
+
+	for (t = 0; t < TILES_COUNT; t++) {
+		if (h[t] >= 2) {
+			h[t] -= 2;
+			int r = detect_sets(h, hand, t, sets, open_sets_count, 0, open_sets_count);
+			h[t] += 2;
+			if (r) {
+				return r;
+			}
+		}
+	}
+	return 0;
+}

@@ -24,24 +24,25 @@ def pon(tile_name):
 	return pon
 
 
+test_hands = [
+	([ "WW", "C1", "C1", "C1", "C1", "C2", "C3", "DR", "B9", "DR", "B8", "B7", "DR", "WW" ], [], 1), #0, Yaku-Pai
+	([ "DR", "DR", "C1", "C1", "C1", "C2", "C3", "B8", "B9", "WN", "WN", "B7", "DR", "WN" ], [], 1), #1, Yaku-Pai
+	([ "C1", "B1", "B9", "C2", "WW", "WW", "WN", "WS", "DR", "DG", "DW", "C5", "P7", "P9" ], [], 0), #2, Nothing
+	([ "DG", "DG", "DR", "DW", "DG", "DW", "DW", "DR", "B1", "B2", "B2", "B2", "B1", "DR" ], [], 3), #3, 3x Yaku-Pai
+	([ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C2", "C2" ], [], 1), #4, Tan-Yao
+	([ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C9", "C9" ], [], 0), #5, Nothing
+	([ "WW", "C1", "C1", "C1", "B9", "B8", "B7", "WW" ], [ pon("DR"), chi("C1")], 1), #6, Yaku-Pai
+	([ "WW", "C1", "C1", "C1", "B9", "B8", "B7", "WW" ], [ pon("DR"), pon("DG")], 2), #7, 2x Yaku-Pai
+	([ "C2", "C3", "C4", "C2", "C3", "C4", "P8", "P8", "P8", "P5", "P6", "P7", "C9", "C9" ], [], 1), #8, Ipeikou
+	([ "C2", "C3", "C4", "C2", "C3", "C4", "P8", "P8", "P8", "C9", "C9" ], [ chi("P5") ], 0), #9, Nothing
+
+]
+
+
 class EvalHandTestCase(TestCase):
 
 	def test_yaku_count(self):
-		hands = [
-			([ "WW", "C1", "C1", "C1", "C1", "C2", "C3", "DR", "B9", "DR", "B8", "B7", "DR", "WW" ], [], 1), #0, Yaku-Pai
-			([ "DR", "DR", "C1", "C1", "C1", "C2", "C3", "B8", "B9", "WN", "WN", "B7", "DR", "WN" ], [], 1), #1, Yaku-Pai
-			([ "C1", "B1", "B9", "C2", "WW", "WW", "WN", "WS", "DR", "DG", "DW", "C5", "P7", "P9" ], [], 0), #2, Nothing
-			([ "DG", "DG", "DR", "DW", "DG", "DW", "DW", "DR", "B1", "B2", "B2", "B2", "B1", "DR" ], [], 3), #3, 3x Yaku-Pai
-			([ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C2", "C2" ], [], 1), #4, Tan-Yao
-			([ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C9", "C9" ], [], 0), #5, Nothing
-			([ "WW", "C1", "C1", "C1", "B9", "B8", "B7", "WW" ], [ pon("DR"), chi("C1")], 1), #6, Yaku-Pai
-			([ "WW", "C1", "C1", "C1", "B9", "B8", "B7", "WW" ], [ pon("DR"), pon("DG")], 2), #7, 2x Yaku-Pai
-			([ "C2", "C3", "C4", "C2", "C3", "C4", "P8", "P8", "P8", "P5", "P6", "P7", "C9", "C9" ], [], 1), #8, Ipeikou
-			([ "C2", "C3", "C4", "C2", "C3", "C4", "P8", "P8", "P8", "C9", "C9" ], [ chi("P5") ], 0), #9, Nothing
-
-		]
-
-		for hand_id, h in enumerate(hands):
+		for hand_id, h in enumerate(test_hands):
 			hand, open_sets, r = h
 			score = count_of_tiles_yaku(tiles(hand), open_sets)
 			self.assert_(score == r, "Hand %i returned score %i" % (hand_id, score))
@@ -105,6 +106,20 @@ class BoxEngineTestCase(TestCase):
 		finally:
 			e.shutdown()
 
+	def test_bot_yaku_count(self):
+		e = BotEngine()
+		try:
+			e.set_blocking()
+			for hand_id, h in enumerate(test_hands):
+				hand, open_sets, r = h
+				e.set_hand(tiles(hand))
+				e.set_sets(open_sets)
+				e.question_yaku()
+				score = e.get_int() 
+				self.assert_(score == r, "Hand %i returned score %i" % (hand_id, score))
+		
+		finally:
+			e.shutdown()
 
 if __name__ == '__main__':
     unittest.main()
