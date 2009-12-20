@@ -218,10 +218,20 @@ def score_tan_yao(pair_tile, sets):
 	else:
 		return 0
 
+def score_ipeikou(pair_tile, sets):
+	count = 0
+	for i, set in enumerate(sets):
+		if not set.closed:
+			return 0
+		if set.is_chi() and sets[i + 1:].count(set) == 1:
+			count += 1
+	return count
+
 
 score_functions = [ 
 	("Yaku-Pai", score_yaku_pai),
 	("Tan-Yao", score_tan_yao),
+	("Ipeikou", score_ipeikou),
 ]
 
 

@@ -91,6 +91,9 @@ class TileSet(object):
 	def is_kan(self):
 		return False
 
+	def is_chi(self):
+		return False
+
 
 class Pon(TileSet):
 	
@@ -130,6 +133,9 @@ class Pon(TileSet):
 	def __repr__(self):
 		return "Pon: " + str(self.tile)
 
+	def __eq__(self, x):
+		return x.is_pon() and self.tile == x.tile
+
 
 class Chi(TileSet):
 	
@@ -163,7 +169,11 @@ class Chi(TileSet):
 		else:
 			return 0
 
+	def is_chi(self):
+		return True
+
 	def all_tiles_is(self, tile):
 		return False
 
-
+	def __eq__(self, x):
+		return x.is_chi() and self.tile1 == x.tile1

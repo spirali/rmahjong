@@ -43,10 +43,10 @@ static int score_san_shoku_dokou(int tile_1, int tile_2, int tile_3)
 	return 0;
 }
 
-static int count_of_fan(tile_id *tile, int pair, TileSet **sets)
+static int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count)
 {
     int fan = 0;
-    int t;
+    int s, t;
 
 	TileSet *chi[4], *pon[4];
 	int chi_count = 0;
@@ -84,12 +84,26 @@ static int count_of_fan(tile_id *tile, int pair, TileSet **sets)
 			fan += score_san_shoku_dokou(pon[3]->tile, pon[1]->tile, pon[2]->tile);
 		}
 	}
+
+	/* Ipeikou */
+	if (open_sets_count == 0) {
+		for (t = 0; t < chi_count - 1; t++) {
+			int count = 0;
+			for (s = t + 1; s < chi_count; s++) {
+				if (chi[s]->tile == chi[t]->tile)
+					count++;
+			}
+			if (count == 1)
+				fan++;
+		}
+	}
+
 	return fan;
 }
 
-int score_of_hand(tile_id *tiles, int pair, TileSet **sets)
+int score_of_hand(tile_id *tiles, int pair, TileSet **sets, int open_sets_count)
 {
- 	int fan = count_of_fan(tiles, pair, sets);   
+ 	int fan = count_of_fan(tiles, pair, sets, open_sets_count);   
 	int t;
 	int score = 80;
 	for (t = 2; t < fan + 2; t++) {

@@ -4,6 +4,6 @@
 
 #include "tiles.h"
 
-int score_of_hand(tile_id *tiles, int pair, TileSet **sets);
+int score_of_hand(tile_id *tiles, int pair, TileSet **sets, int opened_sets);
 
 #endif 

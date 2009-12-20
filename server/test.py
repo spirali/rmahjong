@@ -13,11 +13,15 @@ def tiles(strs):
 
 def chi(tile_name):
 	t = Tile(tile_name)
-	return Chi(t, t.next_tile(), t.next_tile().next_tile())
+	chi = Chi(t, t.next_tile(), t.next_tile().next_tile())
+	chi.closed = False
+	return chi
 
 
 def pon(tile_name):
-	return Pon(Tile(tile_name))
+	pon =  Pon(Tile(tile_name))
+	pon.closed = False
+	return pon
 
 
 class EvalHandTestCase(TestCase):
@@ -31,7 +35,10 @@ class EvalHandTestCase(TestCase):
 			([ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C2", "C2" ], [], 1), #4, Tan-Yao
 			([ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C9", "C9" ], [], 0), #5, Nothing
 			([ "WW", "C1", "C1", "C1", "B9", "B8", "B7", "WW" ], [ pon("DR"), chi("C1")], 1), #6, Yaku-Pai
-			([ "WW", "C1", "C1", "C1", "B9", "B8", "B7", "WW" ], [ pon("DR"), pon("DG")], 2), #6, 2x Yaku-Pai
+			([ "WW", "C1", "C1", "C1", "B9", "B8", "B7", "WW" ], [ pon("DR"), pon("DG")], 2), #7, 2x Yaku-Pai
+			([ "C2", "C3", "C4", "C2", "C3", "C4", "P8", "P8", "P8", "P5", "P6", "P7", "C9", "C9" ], [], 1), #8, Ipeikou
+			([ "C2", "C3", "C4", "C2", "C3", "C4", "P8", "P8", "P8", "C9", "C9" ], [ chi("P5") ], 0), #9, Nothing
+
 		]
 
 		for hand_id, h in enumerate(hands):

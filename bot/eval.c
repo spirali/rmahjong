@@ -94,7 +94,7 @@ void check_sets(SearchContext *context, tile_id *sets_tiles)
 		double gc = good_combinations_count(missing, 0, 0, 1, 0, context->gc.wall, others, context->gc.turns);
 		if (gc > 0) {
 			double result = gc / combinations_d(context->gc.wall_size, context->gc.turns);
-			double value = result * score_of_hand(context->gc.hand, context->pair, context->sets);
+			double value = result * score_of_hand(context->gc.hand, context->pair, context->sets, context->gc.open_sets_count);
 		//	value = result;
 
 			if (value > context->best_value) {

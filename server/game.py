@@ -109,6 +109,7 @@ class Round:
 			d[winner] = s
 			return d
 
+
 class DebugRound(Round):
 	
 	def __init__(self, players):
@@ -135,7 +136,6 @@ class DebugRound(Round):
 			for t in h:
 				if t in self.wall:
 					self.wall.remove(t)
-		
 
 	def get_hand(self):
 		hand = self.hands[0]
