@@ -71,6 +71,12 @@ class BotEngine():
 		self._write("DORAS\n")
 		self._set_tiles(doras)
 
+	def set_round_wind(self, tile):
+		self._write("ROUND_WIND\n" + tile.name + "\n")
+
+	def set_player_wind(self, tile):
+		self._write("PLAYER_WIND\n" + tile.name + "\n")
+
 	def set_sets(self, sets):
 		self._write("SETS\n")
 		for set in sets:

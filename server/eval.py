@@ -3,16 +3,16 @@ from tile import red_dragon, white_dragon, green_dragon
 from tile import bamboos, chars, pins
 from copy import copy
 
-def find_tiles_yaku(hand, open_sets):
+def find_tiles_yaku(hand, open_sets, round_wind, player_wind):
 	for pair, rest in detect_pairs(hand):
 		sets = find_sets(rest, open_sets)
 		if sets:
-			return eval_sets(pair, sets)
+			return eval_sets(pair, sets, round_wind, player_wind)
 	return []
 
 
-def count_of_tiles_yaku(hand, open_sets):
-	score = find_tiles_yaku(hand, open_sets)
+def count_of_tiles_yaku(hand, open_sets, round_wind, player_wind):
+	score = find_tiles_yaku(hand, open_sets, round_wind, player_wind)
 	return sum(map(lambda r: r[1], score))
 
 
@@ -117,7 +117,7 @@ def compute_minipoints(hand, open_sets, wintype, round_wind, player_wind):
 
 
 def compute_score(hand, open_sets, wintype, doras, riichi, round_wind, player_wind):
-	yaku = find_tiles_yaku(hand, open_sets)
+	yaku = find_tiles_yaku(hand, open_sets, round_wind, player_wind)
 
 	dora_yaku = 0
 	for dora in doras:
@@ -190,12 +190,29 @@ def find_sets(hand, open_sets):
 	return check_triples(hand, 1 + len(open_sets))
 
 
-def eval_sets(pair, sets):
+def eval_sets(pair, sets, round_wind, player_wind):
 	result = []
 	for name, fn in score_functions:
 		score = fn(pair, sets)
 		if score > 0:
 			result.append((name, score))
+
+	yaku_pai_base = 0 
+	for set in sets:
+		if set.is_pon():
+			if set.tile == round_wind:
+				yaku_pai_base += 1
+			if set.tile == player_wind:
+				yaku_pai_base += 1
+
+	if yaku_pai_base > 0:
+		for name, yaku in result:
+			if name == "Yaku-Pai":
+				result.remove((name, yaku))
+				result.append((name, yaku + yaku_pai_base))
+				break
+		else:
+			result.append((name, yaku_pai_base))
 	return result
 
 

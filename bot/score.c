@@ -42,7 +42,7 @@ static int score_san_shoku_dokou(int tile_1, int tile_2, int tile_3)
 	return 0;
 }
 
-int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count)
+int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count, int round_wind, int player_wind)
 {
 	int fan = 0;
 	int s, t;
@@ -54,8 +54,16 @@ int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count)
 
 	/* Yaku-pai */
 	for (t = 0; t < 4; t++) {
-		if (sets[t]->type == PON && sets[t]->tile >= TILE_DRAGONS_FIRST && sets[t]->tile <= TILE_DRAGONS_LAST)
-			fan++;
+		if (sets[t]->type == PON) {
+			 if (sets[t]->tile >= TILE_DRAGONS_FIRST && sets[t]->tile <= TILE_DRAGONS_LAST) {
+				fan++;
+			 } else {
+				 if (sets[t]->tile == round_wind)
+					fan++;
+				 if (sets[t]->tile == player_wind)
+					fan++;
+			}
+		}
 
 		// General preprocess
 		if (sets[t]->type == CHI) {
@@ -150,9 +158,9 @@ int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count)
 	return fan;
 }
 
-int score_of_hand(tile_id *tiles, int pair, TileSet **sets, int open_sets_count)
+int score_of_hand(tile_id *tiles, int pair, TileSet **sets, int open_sets_count, int round_wind, int player_wind)
 {
- 	int fan = count_of_fan(tiles, pair, sets, open_sets_count);   
+ 	int fan = count_of_fan(tiles, pair, sets, open_sets_count, round_wind, player_wind);   
 	int t;
 	int score = 80;
 	for (t = 2; t < fan + 2; t++) {

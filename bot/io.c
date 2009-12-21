@@ -40,6 +40,19 @@ int read_tiles(FILE *file, tile_id *out)
 	return 1;
 }
 
+tile_id read_tile(FILE *file)
+{
+	char line[LINE_LENGTH_LIMIT];
+	char *s = fgets(line, LINE_LENGTH_LIMIT, file);
+	if (s == NULL)
+		return TILE_NONE;
+
+	char *delim = "\n\t\r ";
+	char *token = strtok(line, delim);
+	return tile_from_name(token);
+}
+
+
 tile_id * read_tiles_array(FILE *file)
 {
 	tile_id tiles[TILES_COUNT];

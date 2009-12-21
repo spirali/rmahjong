@@ -51,7 +51,7 @@ class Player:
 
 	def hand_actions(self):
 		options = []
-		if count_of_tiles_yaku(self.hand, self.open_sets) > 0:
+		if count_of_tiles_yaku(self.hand, self.open_sets, self.round.round_wind, self.wind) > 0:
 			options.append("Tsumo")
 		return options
 
@@ -68,7 +68,7 @@ class Player:
 			if find_potential_chi(self.hand, tile):
 				options.append("Chi")
 
-		if count_of_tiles_yaku(self.hand + [ tile ], self.open_sets) > 0 and not self.is_furiten():
+		if count_of_tiles_yaku(self.hand + [ tile ], self.open_sets, self.round.round_wind, self.wind) > 0 and not self.is_furiten():
 			options.append("Ron")
 
 		return options
@@ -276,3 +276,5 @@ class BotPlayer(Player):
 
 	def round_is_ready(self):
 		self.engine.set_doras(self.round.doras)
+		self.engine.set_round_wind(self.round.round_wind)
+		self.engine.set_player_wind(self.wind)

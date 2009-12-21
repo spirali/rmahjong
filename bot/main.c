@@ -73,7 +73,7 @@ void process_commands(FILE *file, FILE *fileout, GameContext *gc)
 		}
 
 		if (!strcmp(line, "YAKU")) {
-			int yaku = compute_yaku_of_hand(gc->hand, gc->open_sets, gc->open_sets_count);
+			int yaku = compute_yaku_of_hand(gc->hand, gc->open_sets, gc->open_sets_count, gc->round_wind, gc->player_wind);
 			fprintf(fileout, "%i\n", yaku);
 			continue;
 		}
@@ -86,6 +86,22 @@ void process_commands(FILE *file, FILE *fileout, GameContext *gc)
 			}
 			// TODO: Process DORA
 			free(array);
+			continue;
+		}
+
+		if (!strcmp(line, "ROUND_WIND")) {
+			gc->round_wind = read_tile(file);
+			if (gc->round_wind == TILE_NONE) {
+				fprintf(fileout, "Error: Invalid format (%s)\n", line);
+			}
+			continue;
+		}
+
+		if (!strcmp(line, "PLAYER_WIND")) {
+			gc->player_wind = read_tile(file);
+			if (gc->player_wind == TILE_NONE) {
+				fprintf(fileout, "Error: Invalid format (%s)\n", line);
+			}
 			continue;
 		}
 

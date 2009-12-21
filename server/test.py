@@ -48,8 +48,16 @@ class EvalHandTestCase(TestCase):
 	def test_yaku_count(self):
 		for hand_id, h in enumerate(test_hands):
 			hand, open_sets, r = h
-			score = count_of_tiles_yaku(tiles(hand), open_sets)
+			score = count_of_tiles_yaku(tiles(hand), open_sets, Tile("XX"), Tile("XX"))
 			self.assert_(score == r, "Hand %i returned score %i" % (hand_id, score))
+
+		hand = [ "WE", "C1", "C1", "C1", "WN", "WN", "WN", "DR", "B9", "DR", "B8", "B7", "WE", "WE" ]
+		open_sets = []
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, Tile("WE"), Tile("WN")), 2)
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, Tile("WE"), Tile("WE")), 2)
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, Tile("WE"), Tile("WS")), 1)
+		hand = [ "WE", "DW", "DW", "DW", "C1", "C2", "C3", "DR", "B9", "DR", "B8", "B7", "WE", "WE" ]
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, Tile("WE"), Tile("WS")), 2)
 
 	def test_basic_payment(self):
 		self.assert_(compute_payment(2, 40, "Ron", Tile("WN")) == ("", 2600))
@@ -124,6 +132,39 @@ class BoxEngineTestCase(TestCase):
 		
 		finally:
 			e.shutdown()
+
+	def test_bot_yaku_count2(self):
+		e = BotEngine()
+		try:
+			e.set_blocking()
+			hand = [ "WE", "C1", "C1", "C1", "DR", "B9", "DR", "B8", "B7", "WE", "WE" ]
+			e.set_hand(tiles(hand))
+			e.set_sets([ pon("WN") ])
+
+			e.set_round_wind(Tile("WE"))
+			e.set_player_wind(Tile("WN"))
+			e.question_yaku()
+			self.assertEquals(e.get_int(), 2)
+
+			e.set_round_wind(Tile("WE"))
+			e.set_player_wind(Tile("WE"))
+			e.question_yaku()
+			self.assertEquals(e.get_int(), 2)
+
+			e.set_round_wind(Tile("WE"))
+			e.set_player_wind(Tile("WS"))
+			e.question_yaku()
+			self.assertEquals(e.get_int(), 1)
+
+			e.set_sets([ pon("DW") ])
+			e.set_round_wind(Tile("WE"))
+			e.set_player_wind(Tile("WS"))
+			e.question_yaku()
+			self.assertEquals(e.get_int(), 2)
+
+		finally:
+			e.shutdown()
+
 
 if __name__ == '__main__':
     unittest.main()

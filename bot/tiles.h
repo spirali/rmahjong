@@ -57,7 +57,7 @@
 #define IS_NONTERMINAL(x) (((x) > TILE_B1 && (x) < TILE_B9) || ((x) > TILE_P1 && (x) < TILE_P9) || ((x)> TILE_C1 && (x) < TILE_C9))
 
 
-typedef char tile_id;
+typedef unsigned char tile_id;
 
 typedef struct TileSet TileSet;
 struct TileSet { 

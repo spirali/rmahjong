@@ -94,7 +94,7 @@ void check_sets(SearchContext *context, tile_id *sets_tiles)
 		double gc = good_combinations_count(missing, 0, 0, 1, 0, context->gc.wall, others, context->gc.turns);
 		if (gc > 0) {
 			double result = gc / combinations_d(context->gc.wall_size, context->gc.turns);
-			double value = result * score_of_hand(context->gc.hand, context->pair, context->sets, context->gc.open_sets_count);
+			double value = result * score_of_hand(context->gc.hand, context->pair, context->sets, context->gc.open_sets_count, context->gc.round_wind, context->gc.player_wind);
 		//	value = result;
 
 			if (value > context->best_value) {
@@ -235,14 +235,14 @@ int choose_drop_tile(GameContext *gc)
 	return pick_tile(unn, id);
 }
 
-int detect_sets(tile_id *hand, tile_id *original_hand, int pair,  TileSet **sets, int set_id, int h, int open_sets_count)
+int detect_sets(tile_id *hand, tile_id *original_hand, int pair,  TileSet **sets, int set_id, int h, int open_sets_count, int round_wind, int player_wind)
 {
 	if (set_id >= 4) {
-		return count_of_fan(original_hand, pair, sets, open_sets_count);
+		return count_of_fan(original_hand, pair, sets, open_sets_count, round_wind, player_wind);
 	}
 	
 	if (hand[h] == 0) {
-		return detect_sets(hand, original_hand, pair, sets, set_id, h + 1, open_sets_count);
+		return detect_sets(hand, original_hand, pair, sets, set_id, h + 1, open_sets_count, round_wind, player_wind);
 	}
 
 	if (hand[h] >= 3) {
@@ -252,7 +252,7 @@ int detect_sets(tile_id *hand, tile_id *original_hand, int pair,  TileSet **sets
 		sets[set_id] = &set;
 
 		hand[h] -= 3;
-		int r = detect_sets(hand, original_hand, pair, sets, set_id + 1, h, open_sets_count);
+		int r = detect_sets(hand, original_hand, pair, sets, set_id + 1, h, open_sets_count, round_wind, player_wind);
 		hand[h] += 3;
 		if (r > 0)
 			return r;
@@ -270,7 +270,7 @@ int detect_sets(tile_id *hand, tile_id *original_hand, int pair,  TileSet **sets
 		hand[h]--;
 		hand[h + 1]--;
 		hand[h + 2]--;
-		int r = detect_sets(hand, original_hand, pair, sets, set_id + 1, h, open_sets_count);
+		int r = detect_sets(hand, original_hand, pair, sets, set_id + 1, h, open_sets_count, round_wind, player_wind);
 		hand[h]++;
 		hand[h + 1]++;
 		hand[h + 2]++;
@@ -280,7 +280,7 @@ int detect_sets(tile_id *hand, tile_id *original_hand, int pair,  TileSet **sets
 	return 0;
 }
 
-int compute_yaku_of_hand(tile_id *hand, TileSet *open_sets, int open_sets_count)
+int compute_yaku_of_hand(tile_id *hand, TileSet *open_sets, int open_sets_count, int round_wind, int player_wind)
 {
 	tile_id h[TILES_COUNT];
 	copy_tiles(hand, h);
@@ -296,7 +296,7 @@ int compute_yaku_of_hand(tile_id *hand, TileSet *open_sets, int open_sets_count)
 	for (t = 0; t < TILES_COUNT; t++) {
 		if (h[t] >= 2) {
 			h[t] -= 2;
-			int r = detect_sets(h, hand, t, sets, open_sets_count, 0, open_sets_count);
+			int r = detect_sets(h, hand, t, sets, open_sets_count, 0, open_sets_count, round_wind, player_wind);
 			h[t] += 2;
 			if (r) {
 				return r;
