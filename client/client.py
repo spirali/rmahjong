@@ -122,7 +122,7 @@ class Mahjong:
 		scores = [ message["my_score"], message["right_score"], message["across_score"], message["left_score"] ]
 		self.init_player_boxes(names, scores)
 		self.table.set_new_hand(message["hand"].split())
-		self.table.add_dora(message["dora"])
+		self.table.add_dora_indicator(message["dora_indicator"])
 		self.my_wind = message["my_wind"]
 		self.round_wind = message["round_wind"]
 

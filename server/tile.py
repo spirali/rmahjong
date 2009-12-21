@@ -81,6 +81,7 @@ south_wind = Tile("WS")
 west_wind = Tile("WW")
 north_wind = Tile("WN")
 
+dragons = [ red_dragon, white_dragon, green_dragon ]
 winds = [ east_wind, south_wind, west_wind, north_wind ]
 honors = [ red_dragon, white_dragon, green_dragon, east_wind, south_wind, west_wind, north_wind ]
 pins = [ Tile("P1"), Tile("P2"), Tile("P3"), Tile("P4"), Tile("P5"), Tile("P6"), Tile("P7"), Tile("P8"), Tile("P9") ]
@@ -88,6 +89,12 @@ chars = [ Tile("C1"), Tile("C2"), Tile("C3"), Tile("C4"), Tile("C5"), Tile("C6")
 bamboos = [ Tile("B1"), Tile("B2"), Tile("B3"), Tile("B4"), Tile("B5"), Tile("B6"), Tile("B7"), Tile("B8"), Tile("B9") ]
 all_tiles = honors + pins + chars + bamboos
 
+def dora_from_indicator(tile):
+	if tile.is_suit():
+		return tile.next_tile()
+	if tile in winds:
+		return winds[ (winds.index(tile) + 1) % 4 ]
+	return dragons[ (dragons.index(tile) + 1) % 4 ]
 
 class TileSet(object):
 	

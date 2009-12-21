@@ -67,6 +67,10 @@ class BotEngine():
 		self._write("WALL\n")	
 		self._set_tiles(tiles)
 
+	def set_doras(self, doras):
+		self._write("DORAS\n")
+		self._set_tiles(doras)
+
 	def set_sets(self, sets):
 		self._write("SETS\n")
 		for set in sets:

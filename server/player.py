@@ -118,7 +118,7 @@ class NetworkPlayer(Player):
 		msg["my_score"] = self.score
 		msg["my_wind"] = self.wind.name
 		msg["round_wind"] = self.round.round_wind.name
-		msg["dora"] = self.round.doras[0].name
+		msg["dora_indicator"] = self.round.dora_indicators[0].name
 		msg["hand"] = " ".join( [ tile.name for tile in self.hand ] )
 		self.connection.send_dict(msg)
 
@@ -133,7 +133,6 @@ class NetworkPlayer(Player):
 
 	def process_message(self, message):
 		name = message["message"]
-		print message
 
 		if name == "DROP":
 			if not self.can_drop_tile:
@@ -240,7 +239,6 @@ class BotPlayer(Player):
 	def server_quit(self):
 		self.engine.shutdown()
 
-
 	def move(self, tile):
 		Player.move(self, tile)
 
@@ -276,3 +274,5 @@ class BotPlayer(Player):
 	def round_end(self, player, looser, win_type, payment_name, scores, minipints, diffs):
 		self.server.player_is_ready(self)
 
+	def round_is_ready(self):
+		self.engine.set_doras(self.round.doras)

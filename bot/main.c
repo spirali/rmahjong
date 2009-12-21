@@ -78,6 +78,17 @@ void process_commands(FILE *file, FILE *fileout, GameContext *gc)
 			continue;
 		}
 
+		if (!strcmp(line, "DORAS")) {
+			tile_id *array = read_tiles_array(file);
+			if (array == NULL) {
+				fprintf(fileout, "Error: Invalid format (%s)\n", line);
+				continue;
+			}
+			// TODO: Process DORA
+			free(array);
+			continue;
+		}
+
 		fprintf(fileout, "Error: Unknown command\n");
 	}
 }

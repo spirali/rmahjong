@@ -1,5 +1,5 @@
 
-from tile import all_tiles, east_wind, winds, Tile
+from tile import all_tiles, east_wind, winds, Tile, dora_from_indicator
 from random import Random
 from eval import compute_score
 
@@ -34,7 +34,8 @@ class Round:
 
 	def init_round(self):
 		self.wall = 4 * all_tiles
-		self.doras = [ self.pick_random_tile() ]
+		self.dora_indicators = [ self.pick_random_tile() ]
+		self.doras = [ dora_from_indicator(self.dora_indicators[0]) ]
 		self.round_wind = east_wind
 		self.active_player = None
 
@@ -126,7 +127,7 @@ class DebugRound(Round):
 			[ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C9" ],
 		]
 
-		r = [ "B1", "WW", "WN", "P9", "DR", "C2", "C9" ]
+		r = [ "DR", "WW", "WN", "P9", "DR", "C2", "C9" ]
 	
 		self.hands = map(tiles, hands) 
 		self.rnd = tiles(r)

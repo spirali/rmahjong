@@ -118,11 +118,20 @@ def compute_minipoints(hand, open_sets, wintype, round_wind, player_wind):
 
 def compute_score(hand, open_sets, wintype, doras, riichi, round_wind, player_wind):
 	yaku = find_tiles_yaku(hand, open_sets)
+
+	dora_yaku = 0
+	for dora in doras:
+		dora_yaku += hand.count(dora)
+		for set in open_sets:
+			dora_yaku.count_of_tile(dora)
+	
+	if dora_yaku > 0:
+		yaku.append(("Dora", dora_yaku))
+
 	minipoints = compute_minipoints(hand, open_sets, wintype, round_wind, player_wind)
 	fans = sum(map(lambda r: r[1], yaku))
 	
 	# TODO: Riichi
-	# TODO: Doras
 	# TODO: Red-fives
 
 	return (compute_payment(fans, minipoints, wintype, player_wind), yaku, minipoints)

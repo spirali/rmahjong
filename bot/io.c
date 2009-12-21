@@ -40,6 +40,30 @@ int read_tiles(FILE *file, tile_id *out)
 	return 1;
 }
 
+tile_id * read_tiles_array(FILE *file)
+{
+	tile_id tiles[TILES_COUNT];
+	if (read_tiles(file, tiles) == 0) {
+		return NULL;
+	}
+	int count = 0;
+	int t;
+	for (t = 0; t < TILES_COUNT; t++) {
+		count += tiles[t];
+	}
+	tile_id *array = malloc(sizeof(tile_id) * (count + 1));
+	int i = 0;
+	for (t = 0; t < TILES_COUNT; t++) {
+		int s;
+		for (s = 0; s < tiles[t]; t++) {
+			array[i++] = t;
+		}
+	}
+	array[i] = TILE_NONE;
+	return array;
+}
+
+
 int read_sets(FILE *file, TileSet *set, int max, int *count)
 {
 	char line[LINE_LENGTH_LIMIT];
