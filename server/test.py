@@ -19,7 +19,7 @@ import unittest
 from unittest import TestCase
 
 from tile import Tile, Chi, Pon, all_tiles
-from eval import count_of_tiles_yaku, compute_payment
+from eval import count_of_tiles_yaku, compute_payment, hand_in_tenpai
 from botengine import BotEngine
 
 
@@ -101,6 +101,15 @@ class EvalHandTestCase(TestCase):
 		self.assertEquals(compute_payment(13, 40, "Ron", Tile("WE")), ("Yakuman", 48000))
 		self.assertEquals(compute_payment(13, 40, "Tsumo", Tile("WN")), ("Yakuman", (8000, 16000)))
 		self.assertEquals(compute_payment(13, 40, "Tsumo", Tile("WE")), ("Yakuman", (16000, 0)))
+
+	def test_tenpai(self):
+		hands = (([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P1", "WN"], [], True),
+						([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P3", "P1", "WN"], [], False),
+						([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "WN"], [ pon("P1") ], True))
+		for h, open_sets, tenpai in hands:
+			hand = tiles(h)
+			self.assertEquals(hand_in_tenpai(hand, open_sets), tenpai)
+			
 
 class BoxEngineTestCase(TestCase):
 

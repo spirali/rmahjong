@@ -17,7 +17,7 @@
 
 from tile import Pon, Chi
 from tile import red_dragon, white_dragon, green_dragon
-from tile import bamboos, chars, pins
+from tile import bamboos, chars, pins, all_tiles
 from copy import copy
 
 def find_tiles_yaku(hand, open_sets, round_wind, player_wind):
@@ -324,3 +324,14 @@ def find_potential_chi(hand, tile):
 		r.append((Chi(ppt, pt, tile), ppt))
 	return r
 
+def hand_in_tenpai(hand, open_sets):
+
+	# TODO: Special hands
+
+	for tile in all_tiles:
+		for pair, rest in detect_pairs(hand + [tile]):
+			sets = find_sets(rest, open_sets)
+			if sets:
+				return True
+
+	return False
