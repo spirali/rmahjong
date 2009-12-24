@@ -103,6 +103,12 @@ class Player:
 		if player == self:
 			my_set = copy(set)
 			my_set.closed = False
+
+			tiles = my_set.tiles()
+			tiles.remove(tile)
+			for t in tiles:
+				self.hand.remove(t)
+	
 			self.open_sets.append(my_set)
 			self.can_drop_tile = True
 
