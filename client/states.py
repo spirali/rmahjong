@@ -157,7 +157,7 @@ class RoundState(State):
 			self.mahjong.set_state(state)
 			return
 
-		if name == "ROUND_END":
+		if name == "ROUND_END" or name == "DRAW":
 			state = ScoreState(self.mahjong, message)
 			self.mahjong.set_state(state)
 			return
@@ -311,9 +311,23 @@ class ScoreState(RoundPreparingState):
 
 	def enter_state(self):
 		State.enter_state(self)
-		button = Button( (475,380), (120, 30), "Show score", self.show_score_clicked)
-		shoutbox = self.mahjong.create_shoutbox(self.message["player"], self.message["wintype"] + "!")
-		self.setup_widgets([ button, shoutbox ])
+
+		name = self.message["message"]
+		if name == "ROUND_END":	
+			button = Button( (475,380), (120, 30), "Show score", self.show_score_clicked)
+			shoutbox = self.mahjong.create_shoutbox(self.message["player"], self.message["wintype"] + "!")
+			self.setup_widgets([ button, shoutbox ])
+		else:
+			# Draw
+			if self.message["tenpai"]:
+				players = [ self.mahjong.get_player_name(player) for player in self.message["tenpai"].split() ]
+				text = "in tenpai: " + ",".join(players)
+			else:
+				text = "Nobody is tenpai"
+
+			label = Label( (250, 350), (550,45), "Draw (" + text + ")")
+			button = Button( (475,410), (120, 30), "Show score", self.show_payments)
+			self.setup_widgets([ button, label ])
 
 	def setup_widgets(self, widgets):
 		self.remove_widgets()

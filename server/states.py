@@ -74,7 +74,7 @@ class LobbyState:
 		game = Game(players)
 		self.server.set_game(game)
 		self.server.start_new_round(False)
-		self.server.set_state(PlayerMoveState(self.server, self.server.round.get_east_player()))
+		self.server.set_state(PlayerMoveState(self.server, self.server.round.get_dealer()))
 
 	def tick(self):
 		self.try_new_connections()
@@ -159,7 +159,10 @@ class StealTileState(GenericGameState):
 
 			s_player, s_action, s_chichoose = self.ready_players[0]
 			if s_action == "Pass":
-				self.server.set_state(PlayerMoveState(self.server, self.player.right_player))
+				if self.server.round.is_draw():
+					self.server.set_state(DrawState(self.server))
+				else:
+					self.server.set_state(PlayerMoveState(self.server, self.player.right_player))
 			elif s_action == "Ron":
 				s_player.new_hand_tile(self.droped_tile)
 				self.server.declare_win(s_player, self.player, "Ron")
@@ -196,27 +199,51 @@ class DropAfterStealState(GenericGameState):
 		self.server.set_state(StealTileState(self.server, player, tile))
 
 
-class ScoreState(GenericGameState):
-	
-	def __init__(self, server, player, looser, win_type):
-		GenericGameState.__init__(self, server)
-		self.player = player
-		self.looser = looser
-		self.win_type = win_type
-		self.ready_players = []
+class WaitingForReadyPlayersState(GenericGameState):
 
-	def enter_state(self):
-		GenericGameState.enter_state(self)
-		self.server.round.end_of_round(self.player, self.looser, self.win_type)
+	def __init__(self, server):
+		GenericGameState.__init__(self, server)
+		self.ready_players = []
 
 	def player_is_ready(self, player):
 		if player not in self.ready_players:
 			self.ready_players.append(player)
 		if len(self.ready_players) == 4:
-			self.start_new_round()
+			self.all_players_are_ready()
 
-	def start_new_round(self):
+	def all_players_are_ready(self):
+		pass
+
+
+class ScoreState(WaitingForReadyPlayersState):
+	
+	def __init__(self, server, player, looser, win_type):
+		WaitingForReadyPlayersState.__init__(self, server)
+		self.player = player
+		self.looser = looser
+		self.win_type = win_type
+
+	def enter_state(self):
+		GenericGameState.enter_state(self)
+		self.server.round.end_of_round(self.player, self.looser, self.win_type)
+
+	def all_players_are_ready(self):
 		rotate_players = not self.player.is_dealer()
 		self.server.start_new_round(rotate_players)
-		self.server.set_state(PlayerMoveState(self.server, self.server.round.get_east_player()))
+		self.server.set_state(PlayerMoveState(self.server, self.server.round.get_dealer()))
 
+
+class DrawState(WaitingForReadyPlayersState):
+	
+	def __init__(self, server):
+		WaitingForReadyPlayersState.__init__(self, server)
+
+	def enter_state(self):
+		GenericGameState.enter_state(self)
+		winners, looser = self.server.round.end_of_round_draw()
+		self.winners = winners
+
+	def all_players_are_ready(self):
+		rotate_players = self.server.round.get_dealer() not in self.winners
+		self.server.start_new_round(rotate_players)
+		self.server.set_state(PlayerMoveState(self.server, self.server.round.get_dealer()))

@@ -35,7 +35,7 @@ class Game:
 			self.players.remove(east_player)
 			self.players.append(east_player)
 
-		return DebugRound(self.players)
+		return Round(self.players)
 
 
 class Round:
@@ -45,7 +45,7 @@ class Round:
 		self.init_round()
 		self.init_players(players)
 
-	def get_east_player(self):
+	def get_dealer(self):
 		return self.players[0]
 
 	def init_round(self):
@@ -79,7 +79,10 @@ class Round:
 		return [ self.pick_random_tile() for i in xrange(13) ]
 
 	def get_remaining_turns(self):
-		return len(self.wall) - 14
+		return len(self.wall) - 14 + len(self.dora_indicators)
+
+	def is_draw(self):
+		return self.get_remaining_turns() < 1
 
 	def get_remaining_turns_for_player(self, player):
 		players = self.players
@@ -106,6 +109,30 @@ class Round:
 			
 		for player in self.players:
 			player.round_end(winner, looser, wintype, payment_name, scores, minipoints, diffs)
+
+	def end_of_round_draw(self):
+		winners = [ player for player in self.players if player.is_tenpai() ]
+		loosers = [ player for player in self.players if not player.is_tenpai () ]
+		diffs = {}
+
+		if len(winners) != 0 and len(loosers) != 0:
+			l_payment = -3000 / len(loosers)
+			w_payment = 3000 / len(winners)
+			for player in winners: 
+				diffs[player] = w_payment
+				player.score += w_payment
+
+			for player in loosers: 
+				diffs[player] = l_payment
+				player.score += l_payment
+		else:
+			for player in self.players:
+				diffs[player] = 0
+
+		for player in self.players:
+			player.round_end_draw(winners, loosers, diffs)
+		
+		return winners, loosers
 
 	def payment_diffs(self, payment, wintype, winner, looser):
 		others = winner.other_players()
@@ -136,7 +163,7 @@ class DebugRound(Round):
 		hands = [
 			#[ "WW", "DG", "DG", "DG", "DR", "DR", "DR", "DW", "DW", "DW", "B8", "B7", "B6" ],
 			[ "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9" ],
-			[ "C9", "C9", "C5", "C6", "C4", "C2", "C3", "C1", "DW", "DW", "DW", "B7", "B7" ],
+			[ "C8", "C9", "C5", "C6", "C4", "C2", "C3", "C1", "DW", "DW", "DW", "B7", "B7" ],
 			[ "C1", "B1", "B9", "C2", "WW", "WW", "WN", "WS", "DR", "DG", "DW", "C5", "P7" ],
 			[ "DG", "DG", "DR", "DW", "DG", "DW", "DW", "DR", "B1", "B2", "B2", "B2", "B1" ],
 			[ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C2" ],

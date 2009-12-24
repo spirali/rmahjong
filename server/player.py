@@ -17,7 +17,7 @@
 
 from connection import ConnectionClosed
 from tile import Tile
-from eval import count_of_tiles_yaku, find_potential_chi
+from eval import count_of_tiles_yaku, find_potential_chi, hand_in_tenpai
 from copy import copy
 from botengine import BotEngine
 
@@ -76,6 +76,9 @@ class Player:
 		# TODO
 		return False
 
+	def is_tenpai(self):
+		return hand_in_tenpai(self.hand, self.open_sets)
+
 	def steal_actions(self, player, tile):
 		options = []
 		if self.hand.count(tile) >= 2:
@@ -91,6 +94,9 @@ class Player:
 		return options
 
 	def round_end(self, player, looser, win_type, payment_name, scores, minipints, diffs):
+		pass
+
+	def round_end_draw(self, winners, loosers, payment_diffs):
 		pass
 
 	def stolen_tile(self, player, from_player, action, set, tile):
@@ -224,6 +230,18 @@ class NetworkPlayer(Player):
 	
 		self.connection.send_dict(msg)
 
+	def round_end_draw(self, winners, loosers, payment_diffs):
+		msg = {}
+		msg["message"] = "DRAW"
+		msg["tenpai"] = " ".join((player.wind.name for player in winners))
+		msg["not_tenpai"] = " ".join((player.wind.name for player in loosers))
+
+		for player in self.server.players:
+			msg[player.wind.name + "_score"] = player.score 
+			msg[player.wind.name + "_payment"] = payment_diffs[player]
+
+		self.connection.send_dict(msg)
+	
 	def stolen_tile(self, player, from_player, action, set, tile):
 		Player.stolen_tile(self, player, from_player, action, set, tile)
 		msg = { "message" : "STOLEN_TILE",
@@ -289,6 +307,9 @@ class BotPlayer(Player):
 			self.server.player_is_ready(self)
 
 	def round_end(self, player, looser, win_type, payment_name, scores, minipints, diffs):
+		self.server.player_is_ready(self)
+
+	def round_end_draw(self, winners, loosers, diffs):
 		self.server.player_is_ready(self)
 
 	def round_is_ready(self):
