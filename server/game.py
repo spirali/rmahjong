@@ -65,6 +65,7 @@ class Round:
 
 	def init_players(self, players):
 		for i, player in enumerate(players):
+			player.player_round_reset()
 			left = players[(i + 3) % 4]
 			right = players[(i + 1) % 4]
 			across = players[(i + 2) % 4]

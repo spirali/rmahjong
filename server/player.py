@@ -32,6 +32,11 @@ class Player:
 		self.drop_zone = []
 		self.open_sets = []
 
+	def player_round_reset(self):
+		self.drop_zone = []
+		self.open_sets = []
+		self.can_drop_tile = False
+
 	def set_neighbours(self, left, right, across):
 		self.left_player = left
 		self.right_player = right
