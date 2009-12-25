@@ -153,7 +153,7 @@ int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count, i
 			switch(chi[t]->tile) {
 				case TILE_C1: c1 = 1; continue;
 				case TILE_C4: c4 = 1; continue;
-				case TILE_C6: c7 = 1; continue;
+				case TILE_C7: c7 = 1; continue;
 				case TILE_P1: p1 = 1; continue;
 				case TILE_P4: p4 = 1; continue;
 				case TILE_P7: p7 = 1; continue;
@@ -178,9 +178,14 @@ int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count, i
 int score_of_hand(tile_id *tiles, int pair, TileSet **sets, int open_sets_count, int round_wind, int player_wind)
 {
  	int fan = count_of_fan(tiles, pair, sets, open_sets_count, round_wind, player_wind);   
+
+	if (fan == 0 && open_sets_count) {
+		return 0;
+	}
+
 	int t;
 	int score = 80;
-	for (t = 2; t < fan + 2; t++) {
+	for (t = 0; t < fan; t++) {
 		score *= 2;
 	}
 	return score;

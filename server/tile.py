@@ -168,7 +168,7 @@ class Pon(TileSet):
 		return "Pon: " + str(self.tile)
 
 	def __eq__(self, x):
-		return x.is_pon() and self.tile == x.tile
+		return isinstance(x, TileSet) and x.is_pon() and self.tile == x.tile
 
 
 class Chi(TileSet):
@@ -222,4 +222,4 @@ class Chi(TileSet):
 		return Chi(self.tile1.as_pins(), self.tile2.as_pins(), self.tile3.as_pins())
 
 	def __eq__(self, x):
-		return x.is_chi() and self.tile1 == x.tile1
+		return isinstance(x, TileSet) and x.is_chi() and self.tile1 == x.tile1

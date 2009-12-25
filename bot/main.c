@@ -90,6 +90,23 @@ void process_commands(FILE *file, FILE *fileout, GameContext *gc)
 			continue;
 		}
 
+		if (!strcmp(line, "STEAL")) {
+			int tile = read_tile(file);
+			TileSet sets[5];
+			int sets_count;
+			if (!read_sets(file, sets, 5, &sets_count) || tile == TILE_NONE) {
+				fprintf(fileout, "Error: Invalid format (%s)\n", line);
+			} else {
+				int choice = steal_chance(gc, sets, sets_count, tile);
+				if (choice == -1) {
+					fprintf(fileout, "Pass\n");
+				} else {
+					dump_set(fileout, &sets[choice]);
+				}
+			}
+			continue;	
+		}
+
 		if (!strcmp(line, "YAKU")) {
 			int yaku = compute_yaku_of_hand(gc->hand, gc->open_sets, gc->open_sets_count, gc->round_wind, gc->player_wind);
 			fprintf(fileout, "%i\n", yaku);
@@ -123,7 +140,7 @@ void process_commands(FILE *file, FILE *fileout, GameContext *gc)
 			continue;
 		}
 
-		fprintf(fileout, "Error: Unknown command\n");
+		fprintf(fileout, "Error: Unknown command (%s)\n", line);
 	}
 }
 

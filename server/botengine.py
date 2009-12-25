@@ -18,7 +18,7 @@
 from subprocess import PIPE, Popen
 from threading import Thread, Lock
 from Queue import Queue
-from tile import Tile
+from tile import Tile, Pon, Chi
 
 BOT_PATH = "../bot/bot"
 
@@ -69,6 +69,22 @@ class BotEngine():
 		else:
 			return None
 
+	def get_set_or_pass(self):
+		if self._is_next_line():
+			line = self._read_line().strip()
+			if "Pass" == line:
+				return line
+			tp, tile_name = line.split()
+			tile = Tile(tile_name)
+			if tp == "Chi":
+				next_tile = tile.next_tile()
+				return Chi(tile, next_tile, next_tile.next_tile())
+			else:
+				return Pon(tile)
+		else:
+			return None
+
+
 	def set_blocking(self):
 		self.nonblocking = False
 	
@@ -95,9 +111,7 @@ class BotEngine():
 
 	def set_sets(self, sets):
 		self._write("SETS\n")
-		for set in sets:
-			self._write("%s %s " % (set.get_name(), set.get_tile_for_engine().name))
-		self._write("\n")
+		self._write_sets(sets)
 
 	def question_discard(self):
 		self._write("DISCARD\n")
@@ -105,12 +119,22 @@ class BotEngine():
 	def question_yaku(self):
 		self._write("YAKU\n")
 
+	def question_steal(self, tile, sets):
+		self._write("STEAL\n")
+		self._write(tile.name + "\n")
+		self._write_sets(sets)
+
 	def _write(self, string):
 		self.process_in.write(string)
 
 	def _set_tiles(self, tiles):
 		message = " ".join((tile.name for tile in tiles))
 		self._write(message + "\n")
+
+	def _write_sets(self, sets):
+		for set in sets:
+			self._write("%s %s " % (set.get_name(), set.get_tile_for_engine().name))
+		self._write("\n")
 
 	def _read_line(self):
 		line = self.queue.get()

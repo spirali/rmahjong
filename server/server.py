@@ -77,8 +77,8 @@ class Server:
 	def player_is_ready(self, player):
 		self.state.player_is_ready(player)
 
-	def player_try_steal_tile(self, player, action, chi_choose):
-		self.state.player_try_steal_tile(player, action, chi_choose)
+	def player_try_steal_tile(self, player, action, opened_set):
+		self.state.player_try_steal_tile(player, action, opened_set)
 
 server = Server(4500)
 server.run()

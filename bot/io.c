@@ -36,6 +36,20 @@ void dump_tiles(tile_id *tile)
 	printf(" }\n");
 }
 
+void dump_set(FILE *fileout, TileSet *set)
+{
+	char *str;
+	switch (set->type) {
+		case CHI:
+			str = "Chi"; break;
+		case PON:
+			str = "Pon"; break;
+		default:
+			str = "Error"; break;
+	}
+	fprintf(fileout, "%s %s\n", str, tile_name[set->tile]);
+}
+
 int read_tiles(FILE *file, tile_id *out)
 {
 	char line[LINE_LENGTH_LIMIT];

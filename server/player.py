@@ -16,7 +16,7 @@
 
 
 from connection import ConnectionClosed
-from tile import Tile
+from tile import Tile, Pon, Chi
 from eval import count_of_tiles_yaku, find_potential_chi, hand_in_tenpai
 from copy import copy
 from botengine import BotEngine
@@ -99,9 +99,9 @@ class Player:
 	def round_end_draw(self, winners, loosers, payment_diffs):
 		pass
 
-	def stolen_tile(self, player, from_player, action, set, tile):
+	def stolen_tile(self, player, from_player, action, opened_set, tile):
 		if player == self:
-			my_set = copy(set)
+			my_set = copy(opened_set)
 			my_set.closed = False
 
 			tiles = my_set.tiles()
@@ -122,6 +122,8 @@ class NetworkPlayer(Player):
 	def __init__(self, server, name, connection):
 		Player.__init__(self, server, name)
 		self.connection = connection
+		self.potential_chi = None
+		self.steal_tile = None
 
 	def process_messages(self):
 		try:
@@ -178,10 +180,17 @@ class NetworkPlayer(Player):
 		if name == "STEAL":
 			action = message["action"]
 			if "chi_choose" in message:
-				chi_choose = Tile(message["chi_choose"])
+				chi_tile = Tile(message["chi_choose"])
+				for s, marker in self.potential_chi:
+					if marker == chi_tile:
+						opened_set = s
+						break
 			else:
-				chi_choose = None
-			self.server.player_try_steal_tile(self, action, chi_choose)
+				opened_set = Pon(self.steal_tile)
+
+			self.potential_chi = None
+			self.steal_tile = None
+			self.server.player_try_steal_tile(self, action, opened_set)
 			return
 
 		if name == "TSUMO":
@@ -203,8 +212,10 @@ class NetworkPlayer(Player):
 		chi_choose = ""
 
 		if actions:
+			self.steal_tile = tile
 			if "Chi" in actions:
-				choose_tiles = [ t.name for set, t in find_potential_chi(self.hand, tile) ]
+				self.potential_chi = find_potential_chi(self.hand, tile)
+				choose_tiles = [ t.name for set, t in self.potential_chi ]
 				chi_choose = " ".join(choose_tiles)
 			actions.append("Pass")
 
@@ -248,13 +259,13 @@ class NetworkPlayer(Player):
 
 		self.connection.send_dict(msg)
 	
-	def stolen_tile(self, player, from_player, action, set, tile):
-		Player.stolen_tile(self, player, from_player, action, set, tile)
+	def stolen_tile(self, player, from_player, action, opened_set, tile):
+		Player.stolen_tile(self, player, from_player, action, opened_set, tile)
 		msg = { "message" : "STOLEN_TILE",
 				"action" : action,
 				"player" : player.wind.name,
 				"from_player" : from_player.wind.name,
-				"tiles" : " ".join([tile.name for tile in set.tiles()]),
+				"tiles" : " ".join([tile.name for tile in opened_set.tiles()]),
 				"stolen_tile" : tile.name
 		}
 		self.connection.send_dict(msg)
@@ -292,12 +303,20 @@ class BotPlayer(Player):
 		self.engine.question_discard()
 		self.action = self.action_discard
 
-
 	def action_discard(self):
 		tile = self.engine.get_tile()
 		if tile:
 			self.action = None
 			self.drop_tile(tile)
+
+	def action_steal(self):
+		set_or_pass = self.engine.get_set_or_pass()
+		if set_or_pass:
+			self.action = None
+			if set_or_pass == "Pass":
+				self.server.player_is_ready(self)
+			else:
+				self.server.player_try_steal_tile(self, set_or_pass.get_name(), set_or_pass)
 
 	def _set_basic_state(self):
 		self.engine.set_hand(self.hand)
@@ -310,7 +329,18 @@ class BotPlayer(Player):
 			actions = self.steal_actions(player, tile)
 			if "Ron" in actions:
 				self.server.player_try_steal_tile(self, "Ron", None)
-			self.server.player_is_ready(self)
+
+			if actions:
+				sets = []
+				if "Pon" in actions:
+					sets.append(Pon(tile))
+				if "Chi" in actions:
+					sets += [ set for set, t in find_potential_chi(self.hand, tile) ]
+				self._set_basic_state()
+				self.engine.question_steal(tile, sets)
+				self.action = self.action_steal
+			else:
+				self.server.player_is_ready(self)
 
 	def round_end(self, player, looser, win_type, payment_name, scores, minipints, diffs):
 		self.server.player_is_ready(self)
@@ -322,3 +352,12 @@ class BotPlayer(Player):
 		self.engine.set_doras(self.round.doras)
 		self.engine.set_round_wind(self.round.round_wind)
 		self.engine.set_player_wind(self.wind)
+
+	def stolen_tile(self, player, from_player, action, set, tile):
+		Player.stolen_tile(self, player, from_player, action, set, tile)
+
+		if self == player:
+			self._set_basic_state()
+			self.engine.question_discard()
+			self.action = self.action_discard
+

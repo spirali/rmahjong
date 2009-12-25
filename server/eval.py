@@ -140,7 +140,7 @@ def compute_score(hand, open_sets, wintype, doras, riichi, round_wind, player_wi
 	for dora in doras:
 		dora_yaku += hand.count(dora)
 		for set in open_sets:
-			dora_yaku.count_of_tile(dora)
+			dora_yaku += set.count_of_tile(dora)
 	
 	if dora_yaku > 0:
 		yaku.append(("Dora", dora_yaku))

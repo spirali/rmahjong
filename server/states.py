@@ -146,9 +146,9 @@ class StealTileState(GenericGameState):
 			self.ready_players.append((player, "Pass", None))
 		self.check_ready_players()
 
-	def player_try_steal_tile(self, player, action, chi_choose):
+	def player_try_steal_tile(self, player, action, opened_set):
 		if not self.is_player_ready(player):
-			self.ready_players.append((player, action, chi_choose))
+			self.ready_players.append((player, action, opened_set))
 		self.check_ready_players()
 
 	def check_ready_players(self):
@@ -173,26 +173,17 @@ class StealTileState(GenericGameState):
 
 class DropAfterStealState(GenericGameState):
 
-	def __init__(self, server, player, from_player, stolen_tile, action, chi_choose):
+	def __init__(self, server, player, from_player, stolen_tile, action, opened_set):
 		GenericGameState.__init__(self, server)
 		self.player = player
 		self.stolen_tile = stolen_tile
 		self.action = action
 		self.from_player = from_player
-		self.chi_choose = chi_choose
+		self.opened_set = opened_set
 
 	def enter_state(self):
-		if self.action == "Chi":
-			for s, marker in find_potential_chi(self.player.hand, self.stolen_tile):
-				if marker == self.chi_choose:
-					set = s
-					break
-
-		if self.action == "Pon":
-			set = Pon(self.stolen_tile)
-		
 		for player in self.server.players:
-			player.stolen_tile(self.player, self.from_player, self.action, set, self.stolen_tile)
+			player.stolen_tile(self.player, self.from_player, self.action, self.opened_set, self.stolen_tile)
 
 	def drop_tile(self, player, tile):
 		assert player == self.player

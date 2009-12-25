@@ -111,12 +111,22 @@ void check_sets(SearchContext *context, tile_id *sets_tiles)
 		double gc = good_combinations_count(missing, 0, 0, 1, 0, context->gc.wall, others, context->gc.turns);
 		if (gc > 0) {
 			double result = gc / combinations_d(context->gc.wall_size, context->gc.turns);
-			double value = result * score_of_hand(context->gc.hand, context->pair, context->sets, context->gc.open_sets_count, context->gc.round_wind, context->gc.player_wind);
+			int score = score_of_hand(context->gc.hand, context->pair, context->sets, context->gc.open_sets_count, context->gc.round_wind, context->gc.player_wind);
+			double value = result * score;
 		//	value = result;
 
 			if (value > context->best_value) {
 				context->best_value = value;
 				copy_tiles(sets_tiles, context->best_target);
+				
+				#ifdef DEBUG
+				context->best_score = score;
+				context->best_prob = result;
+				context->best_sets[0] = context->sets[0];
+				context->best_sets[1] = context->sets[1];
+				context->best_sets[2] = context->sets[2];
+				context->best_sets[3] = context->sets[3];
+				#endif
 				//dump_tiles(context->best_target);
 				//printf("New b %lf %lf %i\n", result, value,  score_of_hand(context->gc.hand, context->pair, context->sets));
 			}
@@ -139,8 +149,8 @@ void compute_best(TileSet *set, int free, tile_id *sets_tiles, SearchContext *co
 	}
 
 	compute_best(set + 1, free, sets_tiles, context);
-	context->sets[free - 1] = set;
 	if (set->type != CHI) {
+		context->sets[free - 1] = set;
 		if (context->pair == set->tile) {
 			return;
 		}
@@ -152,6 +162,7 @@ void compute_best(TileSet *set, int free, tile_id *sets_tiles, SearchContext *co
 		int t;
 		int tl = set->tile;
 		for (t=1; t <= free; t++) {
+			context->sets[free - t] = set;
 			sets_tiles[tl]++;
 			sets_tiles[tl + 1]++;
 			sets_tiles[tl + 2]++;
@@ -173,7 +184,7 @@ void find_best(SearchContext *context, TileSet *all_sets)
 	zero_tiles(context->best_target);
 
 	for (t = 0; t < context->gc.open_sets_count; t++)  {
-		context->sets[3 - t] = &context->gc.open_sets[3 - t];
+		context->sets[3 - t] = &context->gc.open_sets[t];
 	}
 
 	for (t = 0; t < TILES_COUNT; t ++) {
@@ -309,7 +320,6 @@ int compute_yaku_of_hand(tile_id *hand, TileSet *open_sets, int open_sets_count,
 		sets[t] = &open_sets[t];
 	}
 
-
 	for (t = 0; t < TILES_COUNT; t++) {
 		if (h[t] >= 2) {
 			h[t] -= 2;
@@ -321,4 +331,33 @@ int compute_yaku_of_hand(tile_id *hand, TileSet *open_sets, int open_sets_count,
 		}
 	}
 	return 0;
+}
+
+int steal_chance(GameContext *gc, TileSet *sets, int sets_count, int tile)
+{
+	SearchContext context;
+	context.gc = *gc;
+	TileSet *all = all_tilesets_for_hand(gc->hand);
+	find_best(&context, all);
+
+	double best_value = context.best_value;
+	int best_choice = -1;
+
+	int t;
+	context.gc.open_sets_count++;
+	context.gc.hand[tile]++;
+	for(t=0; t < sets_count; t++) {
+		context.gc.open_sets[context.gc.open_sets_count - 1] = sets[t];
+		remove_set_from_tiles(context.gc.hand, &sets[t]);
+		find_best(&context, all);
+		add_set_to_tiles(context.gc.hand, &sets[t]);
+		if (best_value < context.best_value) {
+			best_value = context.best_value;
+			best_choice = t;
+		}
+	}
+	context.gc.open_sets_count--;
+	context.gc.hand[tile]--;
+	free(all);
+	return best_choice;
 }
