@@ -17,6 +17,7 @@
 
 import time
 import sys
+import logging
 
 from states import LobbyState, ScoreState
 from player import BotPlayer
@@ -25,9 +26,11 @@ from game import Game
 class Server:
 
 	def __init__(self, port, count_of_network_players):
+		logging.info("Starting server on port " + str(port))
 		self.players = []
 		for i in xrange(4 - count_of_network_players):
 			self.players.append(BotPlayer(self))
+			logging.info("Added bot " + self.players[-1].name)
 
 		self.game = None
 		self.round = None
@@ -84,5 +87,6 @@ class Server:
 if len(sys.argv) == 1:
 	print "Usage:", sys.argv[0], "<number_of_players>"
 else:
+	logging.basicConfig(filename = "server.log", format = "%(asctime)s - %(levelname)s - %(message)s", level = logging.DEBUG)
 	server = Server(4500, int(sys.argv[1]))
 	server.run()

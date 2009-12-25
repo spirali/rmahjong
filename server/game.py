@@ -14,11 +14,12 @@
 # along with this program; see the file COPYING. If not, see 
 # <http://www.gnu.org/licenses/>.
 
+import logging
+from copy import copy
 
 from tile import all_tiles, east_wind, winds, Tile, dora_from_indicator
 from random import Random
 from eval import compute_score
-from copy import copy
 
 class Game:
 
@@ -26,6 +27,7 @@ class Game:
 		self.random = Random(seed)
 		self.players = copy(players)
 		self.random.shuffle(self.players)
+		logging.info("Players order: " + str(self.players))
 		self.round_id = 0
 
 	def new_round(self, rotate_players):
@@ -46,6 +48,7 @@ class Round:
 		self.random = random
 		self.init_round()
 		self.init_players(players)
+		logging.info("Round is ready")
 
 	def get_dealer(self):
 		return self.players[0]
@@ -56,6 +59,9 @@ class Round:
 		self.doras = [ dora_from_indicator(self.dora_indicators[0]) ]
 		self.round_wind = east_wind
 		self.active_player = None
+		logging.info("New round")
+		logging.info("Dora indicator: " + str(self.dora_indicators[0]))
+		logging.info("Round wind: " + str(self.round_wind))
 
 	def init_players(self, players):
 		for i, player in enumerate(players):

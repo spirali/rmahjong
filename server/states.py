@@ -14,7 +14,7 @@
 # along with this program; see the file COPYING. If not, see 
 # <http://www.gnu.org/licenses/>.
 
-
+import logging
 from message import check_message
 from player import NetworkPlayer
 from connection import Connection
@@ -56,11 +56,11 @@ class LobbyState:
 			if conn:
 				dp = DictProtocol(conn)
 				self.connections.append(dp)
-				print "New peer: " + str(conn.get_peer_name())
+				logging.info("New peer: " + str(conn.get_peer_name()))
 
 		
 	def new_player(self, connection, msg):
-		print "New network player: " + msg["user_name"]
+		logging.info("New network player: " + msg["user_name"])
 		connection.send_message(message="WELCOME", version = "0.0")
 		player = NetworkPlayer(self.server, msg["user_name"], connection)
 		self.server.add_player(player)
@@ -78,7 +78,7 @@ class LobbyState:
 		self.process_messages()
 
 	def player_leaved(self, player):
-		print "Player %s leaved" % player.name
+		logging.info("Player %s leaved" % player.name)
 
 
 class GenericGameState:
@@ -110,6 +110,7 @@ class PlayerMoveState(GenericGameState):
 		self.player = player
 
 	def enter_state(self):
+		logging.debug("PlayerMoveState: %s %s" % (self.player.name, self.player.hand))
 		self.server.round.set_active_player(self.player)
 
 		for p in self.player.other_players():
@@ -132,6 +133,7 @@ class StealTileState(GenericGameState):
 		self.ready_players = [ (player, "Pass", None) ]
 
 	def enter_state(self):
+		logging.debug("StealTileState: %s %s" % (self.player.name, self.player.hand))
 		for p in self.server.players:
 			p.player_dropped_tile(self.player, self.droped_tile)
 
@@ -153,6 +155,8 @@ class StealTileState(GenericGameState):
 			players = self.player.other_players() + [ self.player ]
 			self.ready_players.sort(key = lambda i: players.index(i[0]))
 			self.ready_players.sort(key = lambda i: steal_priority.index(i[1]))
+
+			logging.debug("Responses on drop: %s" % self.ready_players)
 
 			s_player, s_action, s_chichoose = self.ready_players[0]
 			if s_action == "Pass":
@@ -213,6 +217,11 @@ class ScoreState(WaitingForReadyPlayersState):
 
 	def enter_state(self):
 		GenericGameState.enter_state(self)
+		logging.info("Score: winner=%s; looser=%s; wintype=%s" % (self.player, self.looser, self.win_type))
+
+		for player in [ self.player ] + self.player.other_players():
+			logging.info("Player %s %s %s: " % (player.name, player.hand, player.open_sets))		
+
 		self.server.round.end_of_round(self.player, self.looser, self.win_type)
 
 	def all_players_are_ready(self):
@@ -228,8 +237,15 @@ class DrawState(WaitingForReadyPlayersState):
 
 	def enter_state(self):
 		GenericGameState.enter_state(self)
-		winners, looser = self.server.round.end_of_round_draw()
+		winners, loosers = self.server.round.end_of_round_draw()
 		self.winners = winners
+
+		logging.info("Draw:")
+		for player in winners:
+			logging.info("Winner %s %s %s: " % (player.name, player.hand, player.open_sets))		
+
+		for player in loosers:
+			logging.info("Looser %s %s %s: " % (player.name, player.hand, player.open_sets))		
 
 	def all_players_are_ready(self):
 		rotate_players = self.server.round.get_dealer() not in self.winners

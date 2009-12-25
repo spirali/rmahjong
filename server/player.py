@@ -14,11 +14,12 @@
 # along with this program; see the file COPYING. If not, see 
 # <http://www.gnu.org/licenses/>.
 
+import logging
+from copy import copy
 
 from connection import ConnectionClosed
 from tile import Tile, Pon, Chi
 from eval import count_of_tiles_yaku, find_potential_chi, hand_in_tenpai
-from copy import copy
 from botengine import BotEngine
 
 class Player:
@@ -64,7 +65,7 @@ class Player:
 		pass
 
 	def round_is_ready(self):
-		pass
+		logging.info("Player '%s' intial hand: %s" % (self.name, self.hand))
 
 	def hand_actions(self):
 		options = []
@@ -117,6 +118,13 @@ class Player:
 		self.drop_zone.append(tile)
 		self.server.state.drop_tile(self, tile)
 
+	def __str__(self):
+		return self.name
+
+	def __repr__(self):
+		return "<P: %s>" % self.name
+
+
 class NetworkPlayer(Player):
 
 	def __init__(self, server, name, connection):
@@ -138,6 +146,7 @@ class NetworkPlayer(Player):
 		self.process_messages()
 
 	def round_is_ready(self):
+		Player.round_is_ready(self)
 		msg = {}
 		msg["message"] = "ROUND"
 		msg["left"] = self.left_player.name
@@ -349,6 +358,7 @@ class BotPlayer(Player):
 		self.server.player_is_ready(self)
 
 	def round_is_ready(self):
+		Player.round_is_ready(self)
 		self.engine.set_doras(self.round.doras)
 		self.engine.set_round_wind(self.round.round_wind)
 		self.engine.set_player_wind(self.wind)
