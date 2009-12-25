@@ -175,6 +175,7 @@ class Table:
 			if tile.name == tile_name:
 				tile.remove()
 				return
+		raise Exception("Tile is not in hand")
 
 	def picked_tile_position(self):
 		px, py = 320 + 10, 690

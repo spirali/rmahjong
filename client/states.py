@@ -388,13 +388,19 @@ class TestState(State):
 			self.mahjong.table.add_open_set(x, [ "C2", "C1", "C2", "C3" ], [3])
 
 		from table import all_tile_names
-		for tile in all_tile_names[:18]:
+		for tile in all_tile_names[:13]:
 			self.mahjong.table.new_tile_to_dropzone(0, tile)
 			self.mahjong.table.new_tile_to_dropzone(1, tile)
 			self.mahjong.table.new_tile_to_dropzone(2, tile)
 			self.mahjong.table.new_tile_to_dropzone(3, tile)
+
+		self.mahjong.table.steal_from_dropzone(0)
+		self.mahjong.table.new_tile_to_dropzone(0, "DR")
+		self.mahjong.table.steal_from_dropzone(0)
+		self.mahjong.table.new_tile_to_dropzone(0, "DW")
+
 		
-		self.mahjong.init_player_boxes(["A","B", "C", "D"])
+		self.mahjong.init_player_boxes(["A","B", "C", "D"], (1000, 2000, 25000, 30000))
 
 	def tick(self):
 		pass

@@ -259,14 +259,14 @@ class NetworkPlayer(Player):
 
 		self.connection.send_dict(msg)
 	
-	def stolen_tile(self, player, from_player, action, opened_set, tile):
-		Player.stolen_tile(self, player, from_player, action, opened_set, tile)
+	def stolen_tile(self, player, from_player, action, opened_set, stolen_tile):
+		Player.stolen_tile(self, player, from_player, action, opened_set, stolen_tile)
 		msg = { "message" : "STOLEN_TILE",
 				"action" : action,
 				"player" : player.wind.name,
 				"from_player" : from_player.wind.name,
 				"tiles" : " ".join([tile.name for tile in opened_set.tiles()]),
-				"stolen_tile" : tile.name
+				"stolen_tile" : stolen_tile.name
 		}
 		self.connection.send_dict(msg)
 
