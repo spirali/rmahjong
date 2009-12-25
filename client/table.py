@@ -104,6 +104,7 @@ class DropZone:
 		return tile
 
 	def pop_tile(self):
+		self.tile_in_row -= 1
 		self.position = self.last_pos
 		self.last_tile.remove()
 	
