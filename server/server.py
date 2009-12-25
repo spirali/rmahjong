@@ -15,7 +15,8 @@
 # <http://www.gnu.org/licenses/>.
 
 
-import time 
+import time
+import sys
 
 from states import LobbyState, ScoreState
 from player import BotPlayer
@@ -23,11 +24,11 @@ from game import Game
 
 class Server:
 
-	def __init__(self, port):
+	def __init__(self, port, count_of_network_players):
 		self.players = []
-		self.players.append(BotPlayer(self))
-		self.players.append(BotPlayer(self))
-		self.players.append(BotPlayer(self))
+		for i in xrange(4 - count_of_network_players):
+			self.players.append(BotPlayer(self))
+
 		self.game = None
 		self.round = None
 		self.state = LobbyState(self, port)
@@ -80,5 +81,8 @@ class Server:
 	def player_try_steal_tile(self, player, action, opened_set):
 		self.state.player_try_steal_tile(player, action, opened_set)
 
-server = Server(4500)
-server.run()
+if len(sys.argv) == 1:
+	print "Usage:", sys.argv[0], "<number_of_players>"
+else:
+	server = Server(4500, int(sys.argv[1]))
+	server.run()
