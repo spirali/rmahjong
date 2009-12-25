@@ -19,7 +19,6 @@ from message import check_message
 from player import NetworkPlayer
 from connection import Connection
 from dictprotocol import DictProtocol
-from game import Game
 from tile import Chi, Pon
 from eval import find_potential_chi
 
@@ -70,9 +69,7 @@ class LobbyState:
 			self.init_game()
 
 	def init_game(self):
-		players = self.server.players
-		game = Game(players)
-		self.server.set_game(game)
+		self.server.start_new_game()
 		self.server.start_new_round(False)
 		self.server.set_state(PlayerMoveState(self.server, self.server.round.get_dealer()))
 

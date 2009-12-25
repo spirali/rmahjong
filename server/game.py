@@ -18,12 +18,14 @@
 from tile import all_tiles, east_wind, winds, Tile, dora_from_indicator
 from random import Random
 from eval import compute_score
-
+from copy import copy
 
 class Game:
 
-	def __init__(self, players):
-		self.players = players
+	def __init__(self, players, seed):
+		self.random = Random(seed)
+		self.players = copy(players)
+		self.random.shuffle(self.players)
 		self.round_id = 0
 
 	def new_round(self, rotate_players):
@@ -35,13 +37,13 @@ class Game:
 			self.players.remove(east_player)
 			self.players.append(east_player)
 
-		return Round(self.players)
+		return Round(self.players, self.random)
 
 
 class Round:
 
-	def __init__(self, players):
-		self.random = Random(123)
+	def __init__(self, players, random):
+		self.random = random
 		self.init_round()
 		self.init_players(players)
 
@@ -56,7 +58,6 @@ class Round:
 		self.active_player = None
 
 	def init_players(self, players):
-		# TODO: Random seats
 		for i, player in enumerate(players):
 			left = players[(i + 3) % 4]
 			right = players[(i + 1) % 4]

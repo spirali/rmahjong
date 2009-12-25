@@ -19,7 +19,7 @@ import time
 
 from states import LobbyState, ScoreState
 from player import BotPlayer
-
+from game import Game
 
 class Server:
 
@@ -38,8 +38,8 @@ class Server:
 		self.state = state
 		self.state.enter_state()
 
-	def set_game(self, game):
-		self.game = game
+	def start_new_game(self):
+		self.game = Game(self.players, None)
 
 	def start_new_round(self, rotate_players):
 		self.round = self.game.new_round(rotate_players)
