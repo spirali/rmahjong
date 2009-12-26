@@ -88,6 +88,7 @@ class DropZone:
 
 	def next_position(self):
 		p = self.position
+		self.last_pos = p
 		self.tile_in_row += 1
 		if self.tile_in_row == self.row_size:
 			self.tile_in_row = 0
@@ -98,13 +99,12 @@ class DropZone:
 		return p
 			
 	def new_tile(self, name):
-		self.last_pos = self.position
 		tile = self.table.new_tile(name, self.next_position(), self.direction)
 		self.last_tile = tile
 		return tile
 
 	def pop_tile(self):
-		self.tile_in_row -= 1
+		self.tile_in_row = (self.tile_in_row - 1) % self.row_size
 		self.position = self.last_pos
 		self.last_tile.remove()
 	
