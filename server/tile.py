@@ -109,7 +109,7 @@ def dora_from_indicator(tile):
 		return tile.next_tile()
 	if tile in winds:
 		return winds[ (winds.index(tile) + 1) % 4 ]
-	return dragons[ (dragons.index(tile) + 1) % 4 ]
+	return dragons[ (dragons.index(tile) + 1) % 3 ]
 
 class TileSet(object):
 	
