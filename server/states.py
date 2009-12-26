@@ -159,14 +159,13 @@ class StealTileState(GenericGameState):
 			logging.debug("Responses on drop: %s" % self.ready_players)
 
 			s_player, s_action, s_chichoose = self.ready_players[0]
-			if s_action == "Pass":
-				if self.server.round.is_draw():
-					self.server.set_state(DrawState(self.server))
-				else:
-					self.server.set_state(PlayerMoveState(self.server, self.player.right_player))
-			elif s_action == "Ron":
+			if s_action == "Ron":
 				s_player.new_hand_tile(self.droped_tile)
 				self.server.declare_win(s_player, self.player, "Ron")
+			elif self.server.round.is_draw():
+				self.server.set_state(DrawState(self.server))
+			elif s_action == "Pass":
+				self.server.set_state(PlayerMoveState(self.server, self.player.right_player))
 			else:
 				state = DropAfterStealState(self.server, s_player, self.player, self.droped_tile, s_action, s_chichoose)
 				self.server.set_state(state)
