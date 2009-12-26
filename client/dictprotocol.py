@@ -14,6 +14,7 @@
 # along with this program; see the file COPYING. If not, see 
 # <http://www.gnu.org/licenses/>.
 
+import logging
 
 class DictProtocol:
 
@@ -28,6 +29,7 @@ class DictProtocol:
 		self.send_dict(kw)		
 
 	def send_dict(self, data):
+		logging.debug("SEND:" + str(data))
 		msg_list = [ "%s|%s\n" % key_value for key_value in data.items() ]
 		msg_list.append("|\n")
 		self.connection.send("".join(msg_list))
@@ -39,6 +41,7 @@ class DictProtocol:
 				if line == "|":
 					buffer = self.buffer
 					self.buffer = {}
+					logging.debug("RECV:" + str(buffer))
 					return buffer
 				key, value = line.split("|", 1)
 				self.buffer[key] = value

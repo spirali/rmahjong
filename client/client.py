@@ -16,6 +16,7 @@
 
 
 import pygame
+import logging
 
 from graphics import init_fonts
 from table import Table, winds
@@ -145,6 +146,7 @@ class Mahjong:
 
 
 def main_init():
+	logging.basicConfig(filename = "client.log", format = "%(asctime)s - %(levelname)s - %(message)s", level = logging.DEBUG)
 	pygame.display.init()
 	pygame.font.init()
 	init_fonts()
