@@ -107,6 +107,10 @@ class Round:
 		for player in diffs:
 			player.score += diffs[player]		
 
+		logging.info("Payment: " + str(payment))
+		logging.info("Scores: " + str(scores))
+		logging.info("Minipoints: " + str(minipoints))
+
 		if wintype == "Tsumo":
 			if payment[1][1] != 0:
 				payment_name = payment[0] + " " + str(payment[1][0]) + "/" + str(payment[1][1])
