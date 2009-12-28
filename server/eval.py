@@ -130,6 +130,10 @@ def compute_minipoints(hand, open_sets, wintype, round_wind, player_wind):
 
 	# TODO: Waitings
 
+	if points == 20:
+		# In what case can 20 points happend??
+		return 30
+
 	return round_to_base(points, 10)
 
 
