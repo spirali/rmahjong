@@ -343,8 +343,7 @@ class BotPlayer(Player):
 			actions = self.steal_actions(player, tile)
 			if "Ron" in actions:
 				self.server.player_try_steal_tile(self, "Ron", None)
-
-			if actions:
+			elif actions:
 				sets = []
 				if "Pon" in actions:
 					sets.append(Pon(tile))
