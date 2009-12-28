@@ -241,7 +241,7 @@ class NetworkPlayer(Player):
 				"actions" : msg_actions }
 		self.connection.send_dict(msg)
 		
-		if not actions and self != player:
+		if not actions:
 			# This should be called after sending DROPPED, because it can cause new game state
 			self.server.player_is_ready(self) 
 
@@ -354,6 +354,9 @@ class BotPlayer(Player):
 				self.action = self.action_steal
 			else:
 				self.server.player_is_ready(self)
+		else:
+				self.server.player_is_ready(self)
+
 
 	def round_end(self, player, looser, win_type, payment_name, scores, minipints, diffs):
 		self.server.player_is_ready(self)

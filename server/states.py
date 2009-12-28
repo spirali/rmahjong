@@ -130,7 +130,7 @@ class StealTileState(GenericGameState):
 		GenericGameState.__init__(self, server)
 		self.player = player
 		self.droped_tile = droped_tile
-		self.ready_players = [ (player, "Pass", None) ]
+		self.ready_players = []
 
 	def enter_state(self):
 		logging.debug("StealTileState: %s %s" % (self.player.name, self.player.hand))
