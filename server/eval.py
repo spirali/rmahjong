@@ -247,6 +247,12 @@ def for_all_sets(sets, fn):
 			return False
 	return True
 
+def for_any_sets(sets, fn):
+	for set in sets:
+		if fn(set):
+			return True
+	return False
+
 def is_sets_closed(sets):
 	for set in sets:
 		if not set.closed:
@@ -302,12 +308,43 @@ def score_itsu(pair_tile, sets):
 		else:
 			return 1
 
+def score_chanta(pair_tile, sets):
+	if pair_tile.is_nonterminal() or not for_any_sets(sets, lambda s: s.is_chi()):
+		return 0	
+
+	for set in sets:
+		if not set.any_tiles(lambda t: t.is_honor() or t.is_terminal()):
+			return 0
+
+	if score_junchan(pair_tile, sets) > 0:
+		return 0
+
+	if is_sets_closed(sets):
+		return 2
+	else:
+		return 1
+
+def score_junchan(pair_tile, sets):
+	if not pair_tile.is_terminal() or not for_any_sets(sets, lambda s: s.is_chi()):
+		return 0	
+
+	for set in sets:
+		if not set.any_tiles(lambda t: t.is_terminal()):
+			return 0
+	if is_sets_closed(sets):
+		return 3
+	else:
+		return 2
+
+
 score_functions = [ 
 	("Yaku-Pai", score_yaku_pai),
 	("Tan-Yao", score_tan_yao),
 	("Ipeikou", score_ipeikou),
 	("Sanshoku doujun", score_sanshoku_doujun),
 	("Itsu", score_itsu),
+	("Chanta", score_chanta),
+	("Junchan taiyai", score_junchan),
 ]
 
 

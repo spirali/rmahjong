@@ -19,7 +19,7 @@ import unittest
 from unittest import TestCase
 
 from tile import Tile, Chi, Pon, all_tiles
-from eval import count_of_tiles_yaku, compute_payment, hand_in_tenpai, compute_score
+from eval import count_of_tiles_yaku, compute_payment, hand_in_tenpai, compute_score, find_tiles_yaku
 from botengine import BotEngine
 
 
@@ -41,14 +41,14 @@ def pon(tile_name):
 
 
 test_hands = [
-	([ "WW", "C1", "C1", "C1", "C1", "C2", "C3", "DR", "B9", "DR", "B8", "B7", "DR", "WW" ], [], 1), #0, Yaku-Pai
-	([ "DR", "DR", "C1", "C1", "C1", "C2", "C3", "B8", "B9", "WN", "WN", "B7", "DR", "WN" ], [], 1), #1, Yaku-Pai
+	([ "WW", "C4", "C4", "C4", "C4", "C2", "C3", "DR", "B9", "DR", "B8", "B7", "DR", "WW" ], [], 1), #0, Yaku-Pai
+	([ "DR", "DR", "C1", "C1", "C4", "C2", "C3", "B8", "B9", "WN", "WN", "B7", "DR", "WN" ], [], 1), #1, Yaku-Pai
 	([ "C1", "B1", "B9", "C2", "WW", "WW", "WN", "WS", "DR", "DG", "DW", "C5", "P7", "P9" ], [], 0), #2, Nothing
 	([ "DG", "DG", "DR", "DW", "DG", "DW", "DW", "DR", "B1", "B2", "B2", "B2", "B1", "DR" ], [], 3), #3, 3x Yaku-Pai
 	([ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C2", "C2" ], [], 1), #4, Tan-Yao
 	([ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C9", "C9" ], [], 0), #5, Nothing
-	([ "WW", "C1", "C1", "C1", "B9", "B8", "B7", "WW" ], [ pon("DR"), chi("C1")], 1), #6, Yaku-Pai
-	([ "WW", "C1", "C1", "C1", "B9", "B8", "B7", "WW" ], [ pon("DR"), pon("DG")], 2), #7, 2x Yaku-Pai
+	([ "WW", "C1", "C1", "C1", "B9", "B8", "B7", "WW" ], [ pon("DR"), chi("C2")], 1), #6, Yaku-Pai
+	([ "WW", "C1", "C1", "C1", "B6", "B8", "B7", "WW" ], [ pon("DR"), pon("DG")], 2), #7, 2x Yaku-Pai
 	([ "C2", "C3", "C4", "C2", "C3", "C4", "P8", "P8", "P8", "P5", "P6", "P7", "C9", "C9" ], [], 1), #8, Ipeikou
 	([ "C2", "C3", "C4", "C2", "C3", "C4", "P8", "P8", "P8", "C9", "C9" ], [ chi("P5") ], 0), #9, Nothing
 	([ "C6", "C7", "C8", "B6", "B7", "B8", "P6", "P7", "P8", "C9", "C9", "B1", "B1", "B1" ], [], 2), #10, Sanshoku doujun (closed)
@@ -58,6 +58,14 @@ test_hands = [
 	([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "WE", "WE" ], [ chi("P7") ], 1), #14, Itsu (opened)
 	([ "C5", "P3", "P8", "C1", "C4", "P6", "DG", "B9", "WS", "B5", "B5", "P5", "B6", "C6"], [], 0), #15, Nothing
 	([ "WN", "B9", "B6", "WN", "B4", "B8", "B5", "B7"], [chi("B1"), chi("P5")], 1), #16, Itsu (opened)
+	([ "WW", "C9", "C8", "C7", "C1", "C2", "C3", "B1", "B1", "B1", "B1", "B2", "B3", "WW" ], [], 2), #17, Chanta
+	([ "C6", "C9", "C8", "C7", "C1", "C2", "C3", "B1", "B1", "B1", "B1", "B2", "B3", "C6" ], [], 0), #18, Nothing 
+	([ "DR", "C9", "C8", "C7", "C1", "C2", "C3", "B1", "B1", "B1", "B4", "B2", "B3", "DR" ], [], 0), #19, Nothing 
+	([ "WW", "C9", "C8", "C7", "C1", "C2", "C3", "DR", "DR", "DR", "B1", "B2", "B3", "WW" ], [], 3), #20, Chanta, Yaku-pai
+	([ "B9", "C9", "C8", "C7", "C1", "C2", "C3", "B1", "B1", "B1", "B1", "B2", "B3", "B9" ], [], 3), #21, Junchan
+	([ "WW", "C1", "C2", "C3", "B7", "B8", "B9", "WW" ], [ pon("B9"), chi("P1") ], 1), #22, Chanta, (open)
+	([ "B9", "C1", "C2", "C3", "B1", "B1", "B1", "B9" ], [ pon("P1"), chi("C7") ], 2), #23, Junchan
+	([ "WN", "P2", "P3", "P1", "WN", "C3", "C2", "C1" ], [ pon("WE"), chi("C7") ], 1), #24, Chanta (open)
 ]
 
 
@@ -67,14 +75,15 @@ class EvalHandTestCase(TestCase):
 		for hand_id, h in enumerate(test_hands):
 			hand, open_sets, r = h
 			score = count_of_tiles_yaku(tiles(hand), open_sets, Tile("XX"), Tile("XX"))
-			self.assert_(score == r, "Hand %i returned score %i" % (hand_id, score))
+			yaku = find_tiles_yaku(tiles(hand), open_sets, Tile("XX"), Tile("XX"))
+			self.assert_(score == r, "Hand %i returned score %i %s" % (hand_id, score, yaku))
 
-		hand = [ "WE", "C1", "C1", "C1", "WN", "WN", "WN", "DR", "B9", "DR", "B8", "B7", "WE", "WE" ]
+		hand = [ "WE", "C2", "C2", "C2", "WN", "WN", "WN", "DR", "B9", "DR", "B8", "B7", "WE", "WE" ]
 		open_sets = []
 		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, Tile("WE"), Tile("WN")), 2)
 		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, Tile("WE"), Tile("WE")), 2)
 		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, Tile("WE"), Tile("WS")), 1)
-		hand = [ "WE", "DW", "DW", "DW", "C1", "C2", "C3", "DR", "B9", "DR", "B8", "B7", "WE", "WE" ]
+		hand = [ "WE", "DW", "DW", "DW", "C4", "C2", "C3", "DR", "B9", "DR", "B8", "B7", "WE", "WE" ]
 		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, Tile("WE"), Tile("WS")), 2)
 
 		hand = [ "WN", "B9", "B6", "WN", "B4", "B8", "B5", "B7"]
@@ -135,7 +144,7 @@ class BotEngineTestCase(TestCase):
 			e.set_wall(4 * all_tiles)
 			e.question_discard()
 			tile = e.get_tile()
-			self.assertEquals(tile, Tile("C9"))
+			self.assert_(tile in h)
 		finally:
 			e.shutdown()
 
@@ -150,7 +159,7 @@ class BotEngineTestCase(TestCase):
 			e.set_wall(4 * all_tiles)
 			e.question_discard()
 			tile = e.get_tile()
-			self.assertEquals(tile, Tile("C9"))
+			self.assert_(tile in h)
 		finally:
 			e.shutdown()
 
