@@ -233,7 +233,7 @@ def eval_sets(pair, sets, round_wind, player_wind):
 				result.append((name, yaku + yaku_pai_base))
 				break
 		else:
-			result.append((name, yaku_pai_base))
+			result.append(("Yaku-Pai", yaku_pai_base))
 	return result
 
 
