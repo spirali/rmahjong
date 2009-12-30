@@ -295,6 +295,16 @@ def score_sanshoku_doujun(pair_tile, sets):
 				return 1
 	return 0
 
+def score_sanshoku_douko(pair_tile, sets):
+	for set in sets:
+		if set.is_pon_or_kan() and set.is_bamboo():
+			pins = [ s for s in sets if s.is_pon_or_kan() and s.tile == set.tile.as_pins() ]
+			chars = [ s for s in sets if s.is_pon_or_kan() and s.tile == set.tile.as_char() ]
+			if pins and chars:
+				return 2
+	return 0
+
+
 itsu_sets_bamboos = [ Chi(bamboos[0], bamboos[1], bamboos[2]), Chi(bamboos[3], bamboos[4], bamboos[5]), Chi(bamboos[6], bamboos[7], bamboos[8]) ]
 itsu_sets_chars = [ Chi(chars[0], chars[1], chars[2]), Chi(chars[3], chars[4], chars[5]), Chi(chars[6], chars[7], chars[8]) ]
 itsu_sets_pins = [ Chi(pins[0], pins[1], pins[2]), Chi(pins[3], pins[4], pins[5]), Chi(pins[6], pins[7], pins[8]) ]
@@ -345,6 +355,7 @@ score_functions = [
 	("Itsu", score_itsu),
 	("Chanta", score_chanta),
 	("Junchan taiyai", score_junchan),
+	("Sanshoku douko", score_sanshoku_douko),
 ]
 
 

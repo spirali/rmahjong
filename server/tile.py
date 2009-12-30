@@ -86,6 +86,12 @@ class Tile(object):
 	def is_bamboo(self):
 		return self.name[0] == "B"
 
+	def is_char(self):
+		return self.name[0] == "C"
+
+	def is_pins(self):
+		return self.name[0] == "P"
+
 
 red_dragon = Tile("DR")
 white_dragon = Tile("DW")
@@ -169,6 +175,24 @@ class Pon(TileSet):
 
 	def __eq__(self, x):
 		return isinstance(x, TileSet) and x.is_pon() and self.tile == x.tile
+
+	def is_bamboo(self):
+		return self.tile.is_bamboo()
+
+	def is_char(self):
+		return self.tile.is_char()
+
+	def is_pins(self):
+		return self.tile.is_pins()
+
+	def as_char(self):
+		return Pon(self.tile.as_char())
+
+	def as_bamboo(self):
+		return Pon(self.tile.as_bamboo())
+
+	def as_pins(self):
+		return Pon(self.tile.as_pins())
 
 
 class Chi(TileSet):

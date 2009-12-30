@@ -66,6 +66,8 @@ test_hands = [
 	([ "WW", "C1", "C2", "C3", "B7", "B8", "B9", "WW" ], [ pon("B9"), chi("P1") ], 1), #22, Chanta, (open)
 	([ "B9", "C1", "C2", "C3", "B1", "B1", "B1", "B9" ], [ pon("P1"), chi("C7") ], 2), #23, Junchan
 	([ "WN", "P2", "P3", "P1", "WN", "C3", "C2", "C1" ], [ pon("WE"), chi("C7") ], 1), #24, Chanta (open)
+	([ "P2", "P2", "P2", "P2", "P3", "P4", "P9", "P9" ], [ pon("B2"), pon("C2") ], 2), #25, Sanshoku douko
+	([ "WN", "WN", "P9", "P9", "P9", "C9", "C9", "C9","C3","C4","C5", "B9","B9", "B9"], [], 2), #26, Sanshoku douko
 ]
 
 
