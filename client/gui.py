@@ -132,12 +132,13 @@ class Label(Widget):
 
 class PlayerBox(Widget):
 	
-	def __init__(self, position, player_name, score, direction, shout_vector):
+	def __init__(self, position, player_name, wind, score, direction, shout_vector):
 		Widget.__init__(self, position, (200, 70))
 		self.player_name = player_name
 		self.score = score
 		self.direction = direction
 		self.selected = False
+		self.wind = wind
 		self.shout_vector = shout_vector
 		self.update()
 
@@ -159,6 +160,12 @@ class PlayerBox(Widget):
 		px = (surface.get_width() - textsurface.get_width()) / 2
 		py = (surface.get_height() - textsurface.get_height()) / 4 * 3
 		surface.blit(textsurface, (px, py))
+
+		textsurface = graphics.font_small.render(self.wind.capitalize(), True, (128,128,128))
+		px = surface.get_width() - textsurface.get_width()
+		py = 0
+		surface.blit(textsurface, (px, py))
+
 		self.surface = pygame.transform.rotate(surface, self.direction.angle)
 
 	def create_shoutbox(self, text):

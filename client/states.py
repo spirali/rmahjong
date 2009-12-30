@@ -400,7 +400,7 @@ class TestState(State):
 		self.mahjong.table.new_tile_to_dropzone(0, "DW")
 
 		
-		self.mahjong.init_player_boxes(["A","B", "C", "D"], (1000, 2000, 25000, 30000))
+		self.mahjong.init_player_boxes(["A","B", "C", "D"], ["east", "south", "west", "north"], (1000, 2000, 25000, 30000))
 
 	def tick(self):
 		pass
