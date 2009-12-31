@@ -50,6 +50,18 @@ void dump_set(FILE *fileout, TileSet *set)
 	fprintf(fileout, "%s %s\n", str, tile_name[set->tile]);
 }
 
+void print_tiles(FILE *fileout, tile_id *tile)
+{
+	int t;
+	for (t = 0; t < TILES_COUNT; t++) {
+		int s;
+		for (s = 0; s < tile[t]; s++) {
+			printf("%s ", tile_name[t]);
+		}
+	}
+	printf("\n");
+}
+
 int read_tiles(FILE *file, tile_id *out)
 {
 	char line[LINE_LENGTH_LIMIT];

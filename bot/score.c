@@ -229,3 +229,26 @@ int score_of_hand(tile_id *tiles, int pair, TileSet **sets, int open_sets_count,
 	return score;
 	/*return (score - 1) / 100 + 1;*/
 }
+
+int score_of_seven_pairs(tile_id *hand)
+{
+	int fan = 2;
+
+	int t;
+	for (t = 0; t < TILES_COUNT; t++) {
+		if (hand[t] > 0 && !IS_NONTERMINAL(t)) {
+			break;
+		}
+	}
+
+	// Tanyao
+	if (t == TILES_COUNT) {
+		fan += 1;
+	}
+
+	int score = 80;
+	for (t = 0; t < fan; t++) {
+		score *= 2;
+	}
+	return score;
+}

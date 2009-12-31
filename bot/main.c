@@ -76,6 +76,13 @@ void process_commands(FILE *file, FILE *fileout, GameContext *gc)
 			continue;
 		}
 
+		if (!strcmp(line, "DISCARD_TILES")) {
+			tile_id tiles[TILES_COUNT];
+			drop_candidates(gc, tiles);
+			print_tiles(fileout, tiles);
+			continue;
+		}
+
 		if (!strcmp(line, "TURNS")) {
 			if (fscanf(file, "%i\n", &gc->turns) != 1) {
 				fprintf(fileout, "Error: Invalid format (%s)\n", line);

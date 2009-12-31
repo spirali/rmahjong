@@ -21,6 +21,9 @@ from tile import bamboos, chars, pins, all_tiles
 from copy import copy
 
 def find_tiles_yaku(hand, open_sets, round_wind, player_wind):
+	if not open_sets and all((hand.count(tile) == 2 for tile in hand)):
+		return score_special_chii_toitsu(hand)
+
 	for pair, rest in detect_pairs(hand):
 		sets = find_sets(rest, open_sets)
 		if sets:
@@ -346,7 +349,12 @@ def score_junchan(pair_tile, sets):
 	else:
 		return 2
 
-
+def score_special_chii_toitsu(hand):
+	yaku = [ ("Chii toitsu", 2) ]
+	if all((tile.is_nonterminal() for tile in hand)):
+		yaku.append(("Tan-Yao", 1))
+	return yaku
+		
 score_functions = [ 
 	("Yaku-Pai", score_yaku_pai),
 	("Tan-Yao", score_tan_yao),

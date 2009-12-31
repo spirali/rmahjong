@@ -63,6 +63,12 @@ class BotEngine():
 		else:
 			return None
 
+	def get_tiles(self):
+		if self._is_next_line():
+			return map(Tile, (self._read_line().strip().split()))
+		else:
+			return None
+
 	def get_int(self):
 		if self._is_next_line():
 			return int(self._read_line().strip())
@@ -115,6 +121,9 @@ class BotEngine():
 
 	def question_discard(self):
 		self._write("DISCARD\n")
+
+	def question_discard_tiles(self):
+		self._write("DISCARD_TILES\n")
 
 	def question_yaku(self):
 		self._write("YAKU\n")

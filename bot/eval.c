@@ -175,6 +175,58 @@ void compute_best(TileSet *set, int free, tile_id *sets_tiles, SearchContext *co
 	}
 }
 
+static void check_seven_pairs_helper(SearchContext *context, tile_id *tiles, int pair_id, int pair_selected)
+{
+	if (pair_selected == 7) {
+		tile_id missing[TILES_COUNT];
+		int mcount = find_missing_tiles(context->gc.hand, tiles, missing);
+
+
+		if (mcount > 6 || mcount == 0) {
+			return;
+		}
+
+		int others = context->gc.wall_size;
+		int t;
+		for (t = 0; t < TILES_COUNT; t++) {
+			if (missing[t] > 0) { others -= context->gc.wall[t]; }
+		}
+		if (others >= 0) {
+			double gc = good_combinations_count(missing, 0, 0, 1, 0, context->gc.wall, others, context->gc.turns);
+			if (gc > 0) {
+				double result = gc / combinations_d(context->gc.wall_size, context->gc.turns);
+				int score = score_of_seven_pairs(tiles);
+				double value = result * score;
+				if (value > context->best_value) {
+					context->best_value = value;
+					copy_tiles(tiles, context->best_target);
+					#ifdef DEBUG
+					context->best_score = score;
+					context->best_prob = result;
+					context->best_sets[0] = context->sets[0]; context->best_sets[1] = context->sets[1];	
+					context->best_sets[2] = context->sets[2]; context->best_sets[3] = context->sets[3];
+					#endif
+				}
+			}
+		}
+		return;
+	}
+	if (pair_id >= TILES_COUNT) {
+		return;
+	}
+	check_seven_pairs_helper(context, tiles, pair_id + 1, pair_selected);
+	tiles[pair_id] += 2;
+	check_seven_pairs_helper(context, tiles, pair_id + 1, pair_selected + 1);
+	tiles[pair_id] -= 2;
+}
+
+static void check_seven_pairs(SearchContext *context) 
+{
+	tile_id tiles[TILES_COUNT];
+	zero_tiles(tiles);
+	check_seven_pairs_helper(context, tiles, 0, 0);
+}
+
 void find_best(SearchContext *context, TileSet *all_sets) 
 {
 	int t;
@@ -182,6 +234,10 @@ void find_best(SearchContext *context, TileSet *all_sets)
 	zero_tiles(sets_tiles);
 	context->best_value = 0;
 	zero_tiles(context->best_target);
+
+	if (context->gc.open_sets_count == 0) {
+		check_seven_pairs(context);
+	}
 
 	for (t = 0; t < context->gc.open_sets_count; t++)  {
 		context->sets[3 - t] = &context->gc.open_sets[t];
@@ -247,18 +303,20 @@ TileSet * all_tilesets_for_hand(tile_id *hand)
 	return sets;
 }
 
-
-int choose_drop_tile(GameContext *gc)
+int drop_candidates(GameContext *gc, tile_id *candidates)
 {
 	SearchContext context;
 	context.gc = *gc;
 	TileSet *all = all_tilesets_for_hand(gc->hand);
 	find_best(&context, all);
 	free(all);
+	return unnecessary_tiles(gc->hand, context.best_target, candidates);
+}
 
+int choose_drop_tile(GameContext *gc)
+{
 	tile_id unn[TILES_COUNT];
-	int unn_count = unnecessary_tiles(gc->hand, context.best_target, unn);
-	
+	int unn_count = drop_candidates(gc, unn);
 	int id = rand() % unn_count;
 	return pick_tile(unn, id);
 }

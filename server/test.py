@@ -68,6 +68,9 @@ test_hands = [
 	([ "WN", "P2", "P3", "P1", "WN", "C3", "C2", "C1" ], [ pon("WE"), chi("C7") ], 1), #24, Chanta (open)
 	([ "P2", "P2", "P2", "P2", "P3", "P4", "P9", "P9" ], [ pon("B2"), pon("C2") ], 2), #25, Sanshoku douko
 	([ "WN", "WN", "P9", "P9", "P9", "C9", "C9", "C9","C3","C4","C5", "B9","B9", "B9"], [], 2), #26, Sanshoku douko
+	([ "WS", "WS", "P9", "P9", "P9", "P9", "P1", "P1","DR","DR","B3", "B3","B4", "B4"], [], 0), #27, Nothing 
+	([ "WE", "WE", "P9", "P9", "C9", "C9", "P1", "P1","DR","DR","B3", "B3","B4", "B4"], [], 2), #28, Chii toitsu
+	([ "C3", "C3", "P8", "P8", "C7", "C7", "P5", "P5","P6","P6","B3", "B3","B4", "B4"], [], 3), #29, Chii toitsu, tanyao
 ]
 
 
@@ -169,7 +172,8 @@ class BotEngineTestCase(TestCase):
 		e = BotEngine()
 		try:
 			e.set_blocking()
-			for hand_id, h in enumerate(test_hands):
+			# Remove last 2 tests (Hand: seven pairs), bot "question_yaku" detect only "normal sets"
+			for hand_id, h in enumerate(test_hands[:-2]): 
 				hand, open_sets, r = h
 				e.set_hand(tiles(hand))
 				e.set_sets(open_sets)
@@ -211,6 +215,32 @@ class BotEngineTestCase(TestCase):
 
 		finally:
 			e.shutdown()
+
+	def test_seven_pairs(self):
+		e = BotEngine()
+		try:
+			e.set_blocking()
+			h = tiles([ "C1", "C1", "C2", "C2", "C3", "C3", "B2", "B2", "B4", "B4", "P3", "P4", "DR", "DR" ])
+			e.set_hand(h)
+			e.set_turns(3)
+			e.set_sets([])
+			wall = 3 * all_tiles
+			wall.remove(Tile("P4"))
+			wall.remove(Tile("B2"))
+			wall.remove(Tile("C3"))
+			wall.remove(Tile("C3"))
+			e.set_wall(wall)
+			e.question_discard_tiles()
+			tile_list = e.get_tiles()
+			self.assertEquals(tile_list, [Tile("P4")])
+			h = tiles([ "C8", "C8", "C2", "C2", "C3", "C3", "B2", "B2", "B4", "B4", "P1", "P4", "B5", "B5" ])
+			e.set_hand(h)
+			e.question_discard_tiles()
+			tile_list = e.get_tiles()
+			self.assertEquals(tile_list, [Tile("P1")])
+		finally:
+			e.shutdown()
+	
 
 
 if __name__ == '__main__':
