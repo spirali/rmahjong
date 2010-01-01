@@ -14,7 +14,7 @@
 # along with this program; see the file COPYING. If not, see 
 # <http://www.gnu.org/licenses/>.
 
-
+import collections 
 from tile import Pon, Chi
 from tile import red_dragon, white_dragon, green_dragon
 from tile import bamboos, chars, pins, all_tiles
@@ -384,9 +384,21 @@ def find_potential_chi(hand, tile):
 		r.append((Chi(ppt, pt, tile), ppt))
 	return r
 
-def hand_in_tenpai(hand, open_sets):
+def tile_counts(hand):
+	d = collections.defaultdict(set)
+	for tile in hand:
+		d[hand.count(tile)].add(tile)
+	return d
 
+def hand_in_tenpai(hand, open_sets):
+	""" Function work with 13 tiles hand """
 	# TODO: Special hands
+
+	if not open_sets:
+		# Seven pairs
+		counts = tile_counts(hand)
+		if len(counts[1]) == 1 and len(counts[2]) == 6:
+			return True
 
 	for tile in all_tiles:
 		for pair, rest in detect_pairs(hand + [tile]):

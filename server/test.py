@@ -124,6 +124,8 @@ class EvalHandTestCase(TestCase):
 
 	def test_tenpai(self):
 		hands = (([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P1", "WN"], [], True),
+						([ "B3", "B3", "B2", "B2", "C9", "C9", "WW", "WW", "DR", "DR", "P1", "P1", "WN"], [], True),
+						([ "B3", "B3", "B2", "B2", "C9", "C9", "WW", "WW", "DR", "DR", "P1", "P7", "WN"], [], False),
 						([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P3", "P1", "WN"], [], False),
 						([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "WN"], [ pon("P1") ], True))
 		for h, open_sets, tenpai in hands:
