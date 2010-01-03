@@ -17,7 +17,8 @@ class GuiManager:
 		self.timeouts.append((timeout + pygame.time.get_ticks(), widget))
 
 	def remove_widget(self, widget):
-		self.widgets.remove(widget)
+		if widget in self.widgets:
+			self.widgets.remove(widget)
 
 	def draw(self, screen):
 		for widget in self.widgets:
@@ -146,6 +147,10 @@ class PlayerBox(Widget):
 		self.selected = value
 		self.update()
 
+	def score_delta(self, delta):
+		self.score += delta
+		self.update()
+
 	def update(self):
 		surface = self.create_bg_surface()
 		if self.selected:
@@ -189,7 +194,7 @@ class ShoutBox(Widget):
 		
 class ScoreTable(Widget):
 	
-	def __init__(self, score_items, total, payment, player_name):
+	def __init__(self, score_items, total, payment, player_name, looser_riichi):
 		Widget.__init__(self, (350,150), (380,400))
 		self.surface = self.create_bg_surface()
 		self.surface.fill((0,0,0,120))
@@ -207,13 +212,28 @@ class ScoreTable(Widget):
 		self.draw_text(yy, "Total: " + total) 
 		yy += 25
 		self.draw_text(yy, "Payment: " + payment) 
+		if int(looser_riichi) != 0:
+			yy += 25
+			self.draw_text(yy, "Riichi bets from others: +" + looser_riichi) 
+		
 		
 	def draw_text(self, y, text):
 		textsurface = graphics.font.render(text, True, (255,255,255))
 		self.surface.blit(textsurface, (20, y))
 
 
+class RiichiStick(Widget):
+
+	def __init__(self, position, size):
+		Widget.__init__(self, position, size)
+		self.surface = self.create_bg_surface()
+		self.surface.fill((235,235,235,255))
+		sx, sy = size
+		pygame.draw.circle(self.surface, (255,40,40, 128), (sx / 2, sy / 2), min(sx, sy) / 4)
+
+
 class PaymentTable(Widget):
+
 	def __init__(self, results):
 		Widget.__init__(self, (350,150), (380,400))
 		self.surface = self.create_bg_surface()

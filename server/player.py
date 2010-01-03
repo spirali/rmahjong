@@ -19,7 +19,7 @@ from copy import copy
 
 from connection import ConnectionClosed
 from tile import Tile, Pon, Chi
-from eval import count_of_tiles_yaku, find_potential_chi, hand_in_tenpai
+from eval import count_of_tiles_yaku, find_potential_chi, hand_in_tenpai, riichi_test
 from botengine import BotEngine
 
 class Player:
@@ -31,11 +31,15 @@ class Player:
 		self.can_drop_tile = False
 		self.drop_zone = []
 		self.open_sets = []
+		self.riichi = False
+		self.ippatsu_move_id = 0
 
 	def player_round_reset(self):
 		self.drop_zone = []
 		self.open_sets = []
 		self.can_drop_tile = False
+		self.riichi = False
+		self.ippatsu_move_id = 0
 
 	def set_neighbours(self, left, right, across):
 		self.left_player = left
@@ -69,13 +73,26 @@ class Player:
 	def player_dropped_tile(self, player, tile):
 		pass
 
+	def get_specials_yaku(self):
+		""" Returns potential special yaku """
+		specials = []
+		if self.riichi:
+			if self.ippatsu_move_id >= self.server.round.move_id:
+				specials.append(('Ippatsu', 1)) 
+			specials.append(('Riichi', 1)) 
+		return specials
+
 	def round_is_ready(self):
 		logging.info("Player '%s' intial hand: %s" % (self.name, self.hand))
 
 	def hand_actions(self):
 		options = []
-		if count_of_tiles_yaku(self.hand, self.open_sets, self.round.round_wind, self.wind) > 0:
+		if count_of_tiles_yaku(self.hand, self.open_sets, self.get_specials_yaku(), self.round.round_wind, self.wind) > 0:
 			options.append("Tsumo")
+
+		if not self.riichi and self.score >= 1000 and not self.open_sets and riichi_test(self.hand):
+			options.append("Riichi")
+		
 		return options
 
 	def is_furiten(self):
@@ -94,18 +111,22 @@ class Player:
 			if find_potential_chi(self.hand, tile):
 				options.append("Chi")
 
-		if count_of_tiles_yaku(self.hand + [ tile ], self.open_sets, self.round.round_wind, self.wind) > 0 and not self.is_furiten():
+		if count_of_tiles_yaku(self.hand + [ tile ], self.open_sets, self.get_specials_yaku(), self.round.round_wind, 
+				self.wind) > 0 and not self.is_furiten():
 			options.append("Ron")
 
 		return options
 
-	def round_end(self, player, looser, win_type, payment_name, scores, minipints, diffs):
+	def round_end(self, player, looser, win_type, payment_name, scores, minipints, diffs, looser_riichi):
 		pass
 
 	def round_end_draw(self, winners, loosers, payment_diffs):
 		pass
 
 	def stolen_tile(self, player, from_player, action, opened_set, tile):
+		if self.ippatsu_move_id:
+			self.ippatsu_move_id = 0 # Round is interrupeted
+
 		if player == self:
 			my_set = copy(opened_set)
 			my_set.closed = False
@@ -122,6 +143,12 @@ class Player:
 		self.hand.remove(tile)
 		self.drop_zone.append(tile)
 		self.server.state.drop_tile(self, tile)
+
+	def play_riichi(self):
+		self.riichi = True
+		self.ippatsu_move_id = self.round.move_id + 4
+		self.score -= 1000
+		self.server.round.on_riichi(self)
 
 	def __str__(self):
 		return self.name
@@ -209,13 +236,23 @@ class NetworkPlayer(Player):
 
 		if name == "TSUMO":
 			if not self.can_drop_tile or "Tsumo" not in self.hand_actions():
-				print "Tsumo is not allowed"
+				logging.error("Tsumo is not allowed")
 				return
 			self.server.declare_win(self, None, "Tsumo")
 			self.can_drop_tile = False
 			return
 
-		print "Unknown message " + str(message) + " from player: " + self.name
+		if name == "RIICHI":
+			if not self.can_drop_tile or "Riichi" not in self.hand_actions():
+				logging.error("Riichi is not allowed")
+				return
+			self.play_riichi()
+			return
+
+
+		s = "Unknown message " + str(message) + " from player: " + self.name
+		print s
+		logging.error(s)
 
 	def player_dropped_tile(self, player, tile):
 		if self != player:
@@ -245,7 +282,10 @@ class NetworkPlayer(Player):
 			# This should be called after sending DROPPED, because it can cause new game state
 			self.server.player_is_ready(self) 
 
-	def round_end(self, player, looser, win_type, payment_name, scores, minipoints, payment_diffs):
+	def player_played_riichi(self, player):
+		self.connection.send_message(message = "RIICHI", player = player.wind.name)
+
+	def round_end(self, player, looser, win_type, payment_name, scores, minipoints, payment_diffs, looser_riichi):
 		msg = {}
 		msg["message"] = "ROUND_END"
 		msg["payment"] = payment_name
@@ -253,6 +293,7 @@ class NetworkPlayer(Player):
 		msg["player"] = player.wind.name
 		msg["total_fans"] = sum(map(lambda r: r[1], scores))
 		msg["minipoints"] = minipoints
+		msg["looser_riichi"] = looser_riichi
 		msg["score_items"] = ";".join(map(lambda sc: "%s %s" % (sc[0], sc[1]), scores))
 
 		for player in self.server.players:
@@ -358,7 +399,7 @@ class BotPlayer(Player):
 				self.server.player_is_ready(self)
 
 
-	def round_end(self, player, looser, win_type, payment_name, scores, minipints, diffs):
+	def round_end(self, player, looser, win_type, payment_name, scores, minipints, diffs, looser_riichi):
 		self.server.player_is_ready(self)
 
 	def round_end_draw(self, winners, loosers, diffs):
@@ -378,3 +419,5 @@ class BotPlayer(Player):
 			self.engine.question_discard()
 			self.action = self.action_discard
 
+	def player_played_riichi(self, player):
+		pass

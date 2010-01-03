@@ -111,6 +111,7 @@ class PlayerMoveState(GenericGameState):
 
 	def enter_state(self):
 		logging.debug("PlayerMoveState: %s %s" % (self.player.name, self.player.hand))
+		self.server.round.player_on_move(self.player)
 		self.server.round.set_active_player(self.player)
 
 		for p in self.player.other_players():
@@ -182,6 +183,7 @@ class DropAfterStealState(GenericGameState):
 		self.opened_set = opened_set
 
 	def enter_state(self):
+		self.server.round.move_interrputed()
 		for player in self.server.players:
 			player.stolen_tile(self.player, self.from_player, self.action, self.opened_set, self.stolen_tile)
 

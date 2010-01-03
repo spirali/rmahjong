@@ -20,7 +20,7 @@ import logging
 
 from graphics import init_fonts
 from table import Table, winds
-from gui import GuiManager, PlayerBox
+from gui import GuiManager, PlayerBox, RiichiStick
 from directions import direction_up, direction_down, direction_left, direction_right
 from states import ConnectingState, TestState
 
@@ -37,12 +37,23 @@ class Mahjong:
 		self.player_boxes = []
 		self.my_wind = None
 		self.round_wind = None
+		self.riichi = False
+
+		self.riichi_sticks = [ 
+			RiichiStick((420,440),(160,12)),
+			RiichiStick((605,252),(12,160)),
+			RiichiStick((420,210),(160,12)),
+			RiichiStick((380,252),(12,160)),
+		]
 
 	def reset_all(self):
+		for stick in self.riichi_sticks:
+			self.gui.remove_widget(stick)
 		for box in self.player_boxes:
 			self.gui.remove_widget(box)
 		self.player_boxes = []
 		self.table.reset_all()
+		self.riichi = False
 
 	def set_state(self, state):
 		if self.state:
@@ -83,10 +94,10 @@ class Mahjong:
 
 	def init_player_boxes(self, names, player_winds, score):
 		self.player_boxes = [
-			PlayerBox((50, 700), names[0], player_winds[0], score[0], direction_up, (0,-80)),
-			PlayerBox((954, 300), names[1], player_winds[1], score[1], direction_left, (-210, 0)), 
-			PlayerBox((700, 0), names[2], player_winds[2], score[2], direction_up, (0,80)),
-			PlayerBox((0, 300), names[3], player_winds[3], score[3], direction_right, (80,0)) ]
+			PlayerBox((50, 700), names[0], player_winds[0], int(score[0]), direction_up, (0,-80)),
+			PlayerBox((954, 300), names[1], player_winds[1], int(score[1]), direction_left, (-210, 0)), 
+			PlayerBox((700, 0), names[2], player_winds[2], int(score[2]), direction_up, (0,80)),
+			PlayerBox((0, 300), names[3], player_winds[3], int(score[3]), direction_right, (80,0)) ]
 		for widget in self.player_boxes:
 			self.gui.add_widget(widget)
 
@@ -102,6 +113,13 @@ class Mahjong:
 
 	def add_dropped_tile(self, wind, tile_name):
 		self.table.new_tile_to_dropzone(self.player_id_by_wind(wind), tile_name)
+
+	def set_riichi(self, wind):
+		player_id = self.player_id_by_wind(wind)
+		self.player_boxes[player_id].score_delta(-1000)
+		self.gui.add_widget(self.riichi_sticks[player_id])
+		if player_id == 0:
+			self.riichi = True
 
 	def player_id_by_wind(self, wind):
 		my_id = winds.index(self.my_wind)

@@ -30,14 +30,17 @@ class Game:
 		logging.info("Players order: " + str(self.players))
 		self.round_id = 0
 
+	def rotate_players(self):
+		east_player = self.players[0]
+		self.players.remove(east_player)
+		self.players.append(east_player)
+	
 	def new_round(self, rotate_players):
 		self.round_id += 1
 
 		# Rotate players
 		if rotate_players:
-			east_player = self.players[0]
-			self.players.remove(east_player)
-			self.players.append(east_player)
+			self.rotate_players()
 
 		return Round(self.players, self.random)
 
@@ -59,6 +62,8 @@ class Round:
 		self.doras = [ dora_from_indicator(self.dora_indicators[0]) ]
 		self.round_wind = east_wind
 		self.active_player = None
+		self.move_id = 0
+		self.last_innterruption = 0
 		logging.info("New round")
 		logging.info("Dora indicator: " + str(self.dora_indicators[0]))
 		logging.info("Round wind: " + str(self.round_wind))
@@ -92,6 +97,10 @@ class Round:
 	def is_draw(self):
 		return self.get_remaining_turns() < 1
 
+	def on_riichi(self, player):
+		for p in self.players:
+			p.player_played_riichi(player)
+
 	def get_remaining_turns_for_player(self, player):
 		players = self.players
 		i = (4 + players.index(player) - players.index(self.active_player) - 1) % 4
@@ -100,12 +109,29 @@ class Round:
 	def hidden_tiles_for_player(self, player):
 		return player.left_player.hand + player.right_player.hand + player.across_player.hand + self.wall
 
+	def move_interrputed(self):
+		self.last_innterruption = self.move_id
+
+	def player_on_move(self, player):
+		self.move_id += 1
+
 	def end_of_round(self, winner, looser, wintype):
-		payment, scores, minipoints  = compute_score(winner.hand, winner.open_sets, wintype, self.doras, False, self.round_wind, winner.wind)
+		payment, scores, minipoints  = compute_score(winner.hand, winner.open_sets, wintype, 
+			self.doras, winner.get_specials_yaku(), self.round_wind, winner.wind)
 		diffs = self.payment_diffs(payment, wintype, winner, looser)
+
+		looser_riichi = 0
+		for player in winner.other_players():
+			if player.riichi:
+				looser_riichi += 1000
+
+		diffs[winner] += looser_riichi
 		
 		for player in diffs:
 			player.score += diffs[player]		
+
+		if winner.riichi:
+			winner.score += 1000 # Return riichi bet
 
 		logging.info("Payment: " + str(payment))
 		logging.info("Scores: " + str(scores))
@@ -120,7 +146,7 @@ class Round:
 			payment_name = payment[0] + " " + str(payment[1])
 			
 		for player in self.players:
-			player.round_end(winner, looser, wintype, payment_name, scores, minipoints, diffs)
+			player.round_end(winner, looser, wintype, payment_name, scores, minipoints, diffs, looser_riichi)
 
 	def end_of_round_draw(self):
 		winners = [ player for player in self.players if player.is_tenpai() ]
@@ -168,14 +194,14 @@ class Round:
 
 class DebugRound(Round):
 	
-	def __init__(self, players):
+	def __init__(self, players, random):
 		def tiles(strs):
 			return map(Tile, strs)
 
 		hands = [
 			#[ "WW", "DG", "DG", "DG", "DR", "DR", "DR", "DW", "DW", "DW", "B8", "B7", "B6" ],
 			[ "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "DW", "DW" ],
-			[ "C8", "C7", "C5", "C2", "C4", "DR", "DR", "DR", "DW", "DW", "DW", "B7", "B7" ],
+			[ "C8", "C7", "C5", "C2", "C4", "DR", "DR", "DR", "DW", "B7", "B6", "B7", "B7" ],
 			[ "C8", "C9", "C5", "C6", "C4", "C2", "C3", "C1", "DW", "DW", "DW", "B7", "B7" ],
 			#[ "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "DW", "DW" ],
 			[ "C1", "B1", "B9", "C2", "WW", "WW", "WN", "WS", "DR", "DG", "DW", "C7", "C8" ],
@@ -184,11 +210,11 @@ class DebugRound(Round):
 			[ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C9" ],
 		]
 
-		r = [ "DR", "WW", "WN", "P9", "DR", "C2", "C9" ]
+		r = [ "DR", "WW", "WN", "P9", "DW", "DW", "C9", "P1","DW","DW","DW" ]
 	
 		self.hands = map(tiles, hands) 
 		self.rnd = tiles(r)
-		Round.__init__(self, players)
+		Round.__init__(self, players, random)
 
 		for h in self.hands:
 			for t in h:

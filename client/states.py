@@ -162,6 +162,12 @@ class RoundState(State):
 			self.mahjong.set_state(state)
 			return
 
+		if name == "RIICHI":
+			self.mahjong.set_riichi(message["player"])
+			shoutbox = self.mahjong.create_shoutbox(message["player"], "Riichi!")
+			self.mahjong.gui.add_widget_with_timeout(shoutbox, 2500)
+			return
+
 		if name == "STOLEN_TILE":
 			self.process_stolen_tile(message)
 			return
@@ -223,7 +229,9 @@ class MyMoveState(RoundState):
 		RoundState.enter_state(self)
 
 		table = self.mahjong.table
-		table.set_hand_callback(self.drop_hand_tile)		
+
+		if not self.mahjong.riichi:
+			table.set_hand_callback(self.drop_hand_tile)		
 		
 		if self.picked_tile_name:
 			tile = table.new_tile(self.picked_tile_name, table.picked_tile_position())
@@ -232,6 +240,9 @@ class MyMoveState(RoundState):
 
 		self.mahjong.select_my_box()
 		self.add_buttons(self.actions, self.on_action_click)
+
+		if self.mahjong.riichi and not self.actions:
+			self.drop_picked_tile(self.picked_tile)
 
 	def drop_picked_tile(self, tile):
 		self.mahjong.table.set_hand_callback(None)		
@@ -258,10 +269,16 @@ class MyMoveState(RoundState):
 
 	def on_action_click(self, button):
 		self.remove_widgets()
-		self.action_tsumo()
+		if button.label == "Tsumo":
+			self.action_tsumo()
+		if button.label == "Riichi":
+			self.action_riichi()
 
 	def action_tsumo(self):
 		self.protocol.send_message(message = "TSUMO")
+
+	def action_riichi(self):
+		self.protocol.send_message(message = "RIICHI")
 
 
 class OtherMoveState(RoundState):
@@ -350,7 +367,8 @@ class ScoreState(RoundPreparingState):
 		payment = self.message["payment"]
 		player_name = self.mahjong.get_player_name(self.message["player"])
 		total = str(total_fans) + " (minipoints: " + str(minipoints) + ")"
-		table = ScoreTable(score_items , total, payment, player_name)
+		looser_riichi = self.message["looser_riichi"]
+		table = ScoreTable(score_items , total, payment, player_name, looser_riichi)
 		button = Button( (400,560), (300, 25), "Show payments", self.show_payments)
 		self.setup_widgets([table, button])
 
@@ -379,7 +397,11 @@ class TestState(State):
 		State.__init__(self, mahjong)
 		self.mahjong.table.set_new_hand(["DW", "DW", "C2","C3","C4", "WW", "WW", "WW", "B8", "B6", "B7"])
 		self.mahjong.table.set_new_hand(["DW", "DW", "C2","C3","C4", "WW", "WW", "WW"])
+		self.mahjong.my_wind = "WE"
 		#self.mahjong.table.set_new_hand(["DW", "DW", ])
+
+		for w in winds:
+			self.mahjong.set_riichi(w)
 
 		for x in xrange(4):
 			self.mahjong.table.add_open_set(x, [ "C2", "DR", "DR", "DR" ], [2,3])

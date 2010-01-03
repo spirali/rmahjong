@@ -19,7 +19,7 @@ import unittest
 from unittest import TestCase
 
 from tile import Tile, Chi, Pon, all_tiles
-from eval import count_of_tiles_yaku, compute_payment, hand_in_tenpai, compute_score, find_tiles_yaku
+from eval import count_of_tiles_yaku, compute_payment, hand_in_tenpai, compute_score, find_tiles_yaku, riichi_test
 from botengine import BotEngine
 
 
@@ -79,21 +79,21 @@ class EvalHandTestCase(TestCase):
 	def test_yaku_count(self):
 		for hand_id, h in enumerate(test_hands):
 			hand, open_sets, r = h
-			score = count_of_tiles_yaku(tiles(hand), open_sets, Tile("XX"), Tile("XX"))
-			yaku = find_tiles_yaku(tiles(hand), open_sets, Tile("XX"), Tile("XX"))
+			score = count_of_tiles_yaku(tiles(hand), open_sets, [], Tile("XX"), Tile("XX"))
+			yaku = find_tiles_yaku(tiles(hand), open_sets, [], Tile("XX"), Tile("XX"))
 			self.assert_(score == r, "Hand %i returned score %i %s" % (hand_id, score, yaku))
 
 		hand = [ "WE", "C2", "C2", "C2", "WN", "WN", "WN", "DR", "B9", "DR", "B8", "B7", "WE", "WE" ]
 		open_sets = []
-		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, Tile("WE"), Tile("WN")), 2)
-		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, Tile("WE"), Tile("WE")), 2)
-		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, Tile("WE"), Tile("WS")), 1)
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, [], Tile("WE"), Tile("WN")), 2)
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, [], Tile("WE"), Tile("WE")), 2)
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, [], Tile("WE"), Tile("WS")), 1)
 		hand = [ "WE", "DW", "DW", "DW", "C4", "C2", "C3", "DR", "B9", "DR", "B8", "B7", "WE", "WE" ]
-		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, Tile("WE"), Tile("WS")), 2)
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, [], Tile("WE"), Tile("WS")), 2)
 
 		hand = [ "WN", "B9", "B6", "WN", "B4", "B8", "B5", "B7"]
 		open_sets = [chi("B1"), chi("P5")]
-		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, Tile("WE"), Tile("WW")), 1)
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, [], Tile("WE"), Tile("WW")), 1)
 
 	def test_basic_payment(self):
 		self.assert_(compute_payment(2, 40, "Ron", Tile("WN")) == ("", 2600))
@@ -129,13 +129,20 @@ class EvalHandTestCase(TestCase):
 						([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P3", "P1", "WN"], [], False),
 						([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "WN"], [ pon("P1") ], True))
 		for h, open_sets, tenpai in hands:
-			hand = tiles(h)
-			self.assertEquals(hand_in_tenpai(hand, open_sets), tenpai)
+			self.assertEquals(hand_in_tenpai(tiles(h), open_sets), tenpai)
+
+	def test_riichi(self):
+		hands = (([ "P5", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P1", "WN"], True),
+					([ "B3", "B3", "B2", "B2", "C9", "C9", "WW", "WW", "DR", "DR", "P1", "P1", "WN", "WN"], True),
+					([ "B3", "B3", "B2", "B2", "C9", "C9", "WW", "WW", "DR", "DR", "P1", "P7", "WN", "DR"], False),
+					([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P3", "P1", "WN", "DG"], False))
+		for h, riichi in hands:
+			self.assertEquals(riichi_test(tiles(h)), riichi)
 
 	def test_score(self):
 		hand = [ "WN", "B9", "B6", "WN", "B4", "B8", "B5", "B7"]
 		open_sets = [chi("B1"), chi("P5")]
-		payment, scores, minipoints = compute_score(tiles(hand), open_sets, "Ron", [], False, Tile("WE"), Tile("WW"))
+		payment, scores, minipoints = compute_score(tiles(hand), open_sets, "Ron", [], [], Tile("WE"), Tile("WW"))
 		self.assertEquals(minipoints, 30)
 
 class BotEngineTestCase(TestCase):

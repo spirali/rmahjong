@@ -20,19 +20,19 @@ from tile import red_dragon, white_dragon, green_dragon
 from tile import bamboos, chars, pins, all_tiles
 from copy import copy
 
-def find_tiles_yaku(hand, open_sets, round_wind, player_wind):
+def find_tiles_yaku(hand, open_sets, specials, round_wind, player_wind):
 	if not open_sets and all((hand.count(tile) == 2 for tile in hand)):
-		return score_special_chii_toitsu(hand)
+		return score_special_chii_toitsu(hand) + specials
 
 	for pair, rest in detect_pairs(hand):
 		sets = find_sets(rest, open_sets)
 		if sets:
-			return eval_sets(pair, sets, round_wind, player_wind)
+			return eval_sets(pair, sets, round_wind, player_wind) + specials
 	return []
 
 
-def count_of_tiles_yaku(hand, open_sets, round_wind, player_wind):
-	score = find_tiles_yaku(hand, open_sets, round_wind, player_wind)
+def count_of_tiles_yaku(hand, open_sets, specials, round_wind, player_wind):
+	score = find_tiles_yaku(hand, open_sets, specials, round_wind, player_wind)
 	return sum(map(lambda r: r[1], score))
 
 
@@ -140,8 +140,8 @@ def compute_minipoints(hand, open_sets, wintype, round_wind, player_wind):
 	return round_to_base(points, 10)
 
 
-def compute_score(hand, open_sets, wintype, doras, riichi, round_wind, player_wind):
-	yaku = find_tiles_yaku(hand, open_sets, round_wind, player_wind)
+def compute_score(hand, open_sets, wintype, doras, specials, round_wind, player_wind):
+	yaku = find_tiles_yaku(hand, open_sets, specials, round_wind, player_wind)
 
 	dora_yaku = 0
 	for dora in doras:
@@ -389,6 +389,14 @@ def tile_counts(hand):
 	for tile in hand:
 		d[hand.count(tile)].add(tile)
 	return d
+
+def riichi_test(hand):
+	for tile in set(hand):
+		h = copy(hand)
+		h.remove(tile)
+		if hand_in_tenpai(h, []):
+			return True
+	return False
 
 def hand_in_tenpai(hand, open_sets):
 	""" Function work with 13 tiles hand """
