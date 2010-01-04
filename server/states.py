@@ -161,6 +161,11 @@ class StealTileState(GenericGameState):
 
 			s_player, s_action, s_chichoose = self.ready_players[0]
 			if s_action == "Ron":
+
+				# Cancel riichi it was played this turn
+				if self.player.riichi and self.player.ippatsu_move_id == self.server.round.move_id:
+					self.player.riichi = False
+
 				s_player.new_hand_tile(self.droped_tile)
 				self.server.declare_win(s_player, self.player, "Ron")
 			elif self.server.round.is_draw():

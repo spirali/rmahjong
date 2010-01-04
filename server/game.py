@@ -91,11 +91,11 @@ class Round:
 	def get_hand(self):
 		return [ self.pick_random_tile() for i in xrange(13) ]
 
-	def get_remaining_turns(self):
+	def get_remaining_tiles_in_wall(self):
 		return len(self.wall) - 14 + len(self.dora_indicators)
 
 	def is_draw(self):
-		return self.get_remaining_turns() < 1
+		return self.get_remaining_tiles_in_wall() < 1
 
 	def on_riichi(self, player):
 		for p in self.players:
@@ -104,7 +104,7 @@ class Round:
 	def get_remaining_turns_for_player(self, player):
 		players = self.players
 		i = (4 + players.index(player) - players.index(self.active_player) - 1) % 4
-		return (self.get_remaining_turns() - i) / 4
+		return (self.get_remaining_tiles_in_wall() - i) / 4
 
 	def hidden_tiles_for_player(self, player):
 		return player.left_player.hand + player.right_player.hand + player.across_player.hand + self.wall

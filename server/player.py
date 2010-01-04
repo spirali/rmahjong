@@ -90,7 +90,8 @@ class Player:
 		if count_of_tiles_yaku(self.hand, self.open_sets, self.get_specials_yaku(), self.round.round_wind, self.wind) > 0:
 			options.append("Tsumo")
 
-		if not self.riichi and self.score >= 1000 and not self.open_sets and riichi_test(self.hand):
+		if (not self.riichi and self.server.round.get_remaining_tiles_in_wall() >= 4 and 
+				self.score >= 1000 and not self.open_sets and riichi_test(self.hand)):
 			options.append("Riichi")
 		
 		return options
@@ -104,10 +105,10 @@ class Player:
 
 	def steal_actions(self, player, tile):
 		options = []
-		if self.hand.count(tile) >= 2:
+		if self.hand.count(tile) >= 2 and not self.riichi:
 			options.append("Pon")
 
-		if player == self.left_player:
+		if player == self.left_player and not self.riichi:
 			if find_potential_chi(self.hand, tile):
 				options.append("Chi")
 
@@ -125,7 +126,7 @@ class Player:
 
 	def stolen_tile(self, player, from_player, action, opened_set, tile):
 		if self.ippatsu_move_id:
-			self.ippatsu_move_id = 0 # Round is interrupeted
+			self.ippatsu_move_id = -100 # Round is interrupeted
 
 		if player == self:
 			my_set = copy(opened_set)
