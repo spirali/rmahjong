@@ -145,6 +145,9 @@ class Player:
 		self.drop_zone.append(tile)
 		self.server.state.drop_tile(self, tile)
 
+	def riichi_played_this_turn(self):
+		return self.riichi and self.ippatsu_move_id - 4  == self.server.round.move_id
+
 	def play_riichi(self):
 		self.riichi = True
 		self.ippatsu_move_id = self.round.move_id + 4
