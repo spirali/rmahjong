@@ -45,10 +45,10 @@ void init_tiles(int *tiles, int count, tile_id *out);
 int tiles_count(tile_id *tile);
 float probability_of_get_missing(tile_id *tile, tile_id *wall, int wall_size, int turns);
 int compute_yaku_of_hand(tile_id *hand, TileSet *open_sets, int open_sets_count, int round_wind, int player_wind);
-int drop_candidates(GameContext *gc, tile_id *candidates);
+int drop_candidates(GameContext *gc, tile_id *candidates, tile_id *target);
 
 void find_best(SearchContext *context, TileSet *sets);
-int choose_drop_tile(GameContext *gc);
+int choose_drop_tile(GameContext *gc, tile_id *target);
 int steal_chance(GameContext *gc, TileSet *sets, int sets_count, int tile);
 
 

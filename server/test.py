@@ -135,6 +135,7 @@ class EvalHandTestCase(TestCase):
 		hands = (([ "P5", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P1", "WN"], True),
 					([ "B3", "B3", "B2", "B2", "C9", "C9", "WW", "WW", "DR", "DR", "P1", "P1", "WN", "WN"], True),
 					([ "B3", "B3", "B2", "B2", "C9", "C9", "WW", "WW", "DR", "DR", "P1", "P7", "WN", "DR"], False),
+					([ "P7", "P8", "P9", "P1", "P2", "P3", "WS", "WS", "B8", "B7", "P2", "C7", "C8", "DR"], False), 
 					([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P3", "P1", "WN", "DG"], False))
 		for h, riichi in hands:
 			self.assertEquals(riichi_test(tiles(h)), riichi)

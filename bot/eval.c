@@ -303,20 +303,24 @@ TileSet * all_tilesets_for_hand(tile_id *hand)
 	return sets;
 }
 
-int drop_candidates(GameContext *gc, tile_id *candidates)
+int drop_candidates(GameContext *gc, tile_id *candidates, tile_id *target)
 {
 	SearchContext context;
 	context.gc = *gc;
 	TileSet *all = all_tilesets_for_hand(gc->hand);
 	find_best(&context, all);
 	free(all);
+	if (target) {
+		copy_tiles(context.best_target, target);
+	}
 	return unnecessary_tiles(gc->hand, context.best_target, candidates);
+
 }
 
-int choose_drop_tile(GameContext *gc)
+int choose_drop_tile(GameContext *gc, tile_id *target)
 {
 	tile_id unn[TILES_COUNT];
-	int unn_count = drop_candidates(gc, unn);
+	int unn_count = drop_candidates(gc, unn, target);
 	int id = rand() % unn_count;
 	return pick_tile(unn, id);
 }

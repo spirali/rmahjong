@@ -57,20 +57,20 @@ class BotEngine():
 		#self._write("QUIT\n")
 		#self.join()
 
-	def get_tile(self):
-		if self._is_next_line():
+	def get_tile(self, blocking = False):
+		if self._is_next_line() or blocking:
 			return Tile(self._read_line().strip())
 		else:
 			return None
 
-	def get_tiles(self):
-		if self._is_next_line():
+	def get_tiles(self, blocking = False):
+		if self._is_next_line() or blocking:
 			return map(Tile, (self._read_line().strip().split()))
 		else:
 			return None
 
-	def get_int(self):
-		if self._is_next_line():
+	def get_int(self, blocking = False):
+		if self._is_next_line() or blocking:
 			return int(self._read_line().strip())
 		else:
 			return None
@@ -121,6 +121,9 @@ class BotEngine():
 
 	def question_discard(self):
 		self._write("DISCARD\n")
+
+	def question_discard_and_target(self):
+		self._write("DISCARD_AND_TARGET\n")
 
 	def question_discard_tiles(self):
 		self._write("DISCARD_TILES\n")

@@ -84,14 +84,16 @@ class Player:
 
 	def round_is_ready(self):
 		logging.info("Player '%s' intial hand: %s" % (self.name, self.hand))
+	
+	def other_condition_for_riichi(self):
+		return not self.riichi and self.server.round.get_remaining_tiles_in_wall() >= 4 and self.score >= 1000 and not self.open_sets
 
 	def hand_actions(self):
 		options = []
 		if count_of_tiles_yaku(self.hand, self.open_sets, self.get_specials_yaku(), self.round.round_wind, self.wind) > 0:
 			options.append("Tsumo")
 
-		if (not self.riichi and self.server.round.get_remaining_tiles_in_wall() >= 4 and 
-				self.score >= 1000 and not self.open_sets and riichi_test(self.hand)):
+		if self.other_condition_for_riichi() and riichi_test(self.hand):
 			options.append("Riichi")
 		
 		return options
@@ -357,15 +359,27 @@ class BotPlayer(Player):
 		if "Tsumo" in actions:
 			self.server.declare_win(self, None, "Tsumo")
 			return
-
-		self._set_basic_state()
-		self.engine.question_discard()
-		self.action = self.action_discard
+		elif self.riichi:
+			self.drop_tile(tile)
+		else:
+			self._set_basic_state()
+			self.engine.question_discard_and_target()
+			self.action = self.action_discard
 
 	def action_discard(self):
 		tile = self.engine.get_tile()
 		if tile:
+			target = self.engine.get_tiles(True)
 			self.action = None
+			if self.riichi_allowed and self.other_condition_for_riichi():
+				h = copy(self.hand)
+				h.remove(tile)
+				for t in h:
+					if t in target:
+						target.remove(t)
+				if len(target) == 1 and self.round.hidden_tiles_for_player(self).count(target[0]) > 1 and hand_in_tenpai(h, []): 
+					# If target is 1 tile away and this tile is more then 1 in "game"
+					self.play_riichi()
 			self.drop_tile(tile)
 
 	def action_steal(self):
@@ -414,13 +428,15 @@ class BotPlayer(Player):
 		self.engine.set_doras(self.round.doras)
 		self.engine.set_round_wind(self.round.round_wind)
 		self.engine.set_player_wind(self.wind)
+		self.riichi_allowed = self.round.roll_dice(2) == 1
+		logging.info("Bot.riichi_allowed for %s: %s", self.name, self.riichi_allowed)
 
 	def stolen_tile(self, player, from_player, action, set, tile):
 		Player.stolen_tile(self, player, from_player, action, set, tile)
 
 		if self == player:
 			self._set_basic_state()
-			self.engine.question_discard()
+			self.engine.question_discard_and_target()
 			self.action = self.action_discard
 
 	def player_played_riichi(self, player):

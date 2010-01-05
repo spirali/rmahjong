@@ -191,6 +191,9 @@ class Round:
 			d[winner] = s
 			return d
 
+	def roll_dice(self, dice_size):
+		return self.random.randint(1,dice_size)
+
 
 class DebugRound(Round):
 	

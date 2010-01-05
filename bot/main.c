@@ -71,14 +71,22 @@ void process_commands(FILE *file, FILE *fileout, GameContext *gc)
 		}
 
 		if (!strcmp(line, "DISCARD")) {
-			int tile = choose_drop_tile(gc);
+			int tile = choose_drop_tile(gc, NULL);
 			fprintf(fileout, "%s\n", tile_name[tile]);
+			continue;
+		}
+
+		if (!strcmp(line, "DISCARD_AND_TARGET")) {
+			tile_id target[TILES_COUNT];
+			int tile = choose_drop_tile(gc, target);
+			fprintf(fileout, "%s\n", tile_name[tile]);
+			print_tiles(fileout, target);
 			continue;
 		}
 
 		if (!strcmp(line, "DISCARD_TILES")) {
 			tile_id tiles[TILES_COUNT];
-			drop_candidates(gc, tiles);
+			drop_candidates(gc, tiles, NULL);
 			print_tiles(fileout, tiles);
 			continue;
 		}
