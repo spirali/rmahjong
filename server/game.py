@@ -27,6 +27,9 @@ class Game:
 		self.random = Random(seed)
 		self.players = copy(players)
 		self.random.shuffle(self.players)
+		#self.rotate_players() # DEBUG
+		#self.rotate_players() # DEBUG
+		#self.rotate_players() # DEBUG
 		logging.info("Players order: " + str(self.players))
 		self.round_id = 0
 
@@ -112,11 +115,16 @@ class Round:
 	def move_interrputed(self):
 		self.last_innterruption = self.move_id
 
+	def closed_kan_played(self, player, kan):
+		player.closed_kan_played_by_me(kan, self.pick_random_tile()) 
+		for p in player.other_players():
+			p.closed_kan_played_by_other(player, kan)
+
 	def player_on_move(self, player):
 		self.move_id += 1
 
 	def end_of_round(self, winner, looser, wintype):
-		payment, scores, minipoints  = compute_score(winner.hand, winner.open_sets, wintype, 
+		payment, scores, minipoints  = compute_score(winner.hand, winner.sets, wintype, 
 			self.doras, winner.get_specials_yaku(), self.round_wind, winner.wind)
 		diffs = self.payment_diffs(payment, wintype, winner, looser)
 
@@ -203,7 +211,7 @@ class DebugRound(Round):
 
 		hands = [
 			#[ "WW", "DG", "DG", "DG", "DR", "DR", "DR", "DW", "DW", "DW", "B8", "B7", "B6" ],
-			[ "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "DW", "DW" ],
+			[ "C9", "C5", "C8", "C5", "C5", "C5", "B5", "B5", "B5", "B5", "B1", "DW", "DW" ],
 			[ "C8", "C7", "C5", "C2", "C4", "DR", "DR", "DR", "DW", "B7", "B6", "B7", "B7" ],
 			[ "C8", "C9", "C5", "C6", "C4", "C2", "C3", "C1", "DW", "DW", "DW", "B7", "B7" ],
 			#[ "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "C9", "DW", "DW" ],

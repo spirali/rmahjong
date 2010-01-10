@@ -75,6 +75,9 @@ class TableTile:
 	def get_face_size(self):
 		return (self.get_face_size_x(), self.get_face_size_y())
 
+	def __repr__(self):
+		return "<TableTile %s>" % self.name
+
 class DropZone:
 	
 	def __init__(self, table, initial_position, direction, row_size):
@@ -171,7 +174,7 @@ class Table:
 			self.hand.remove(tile)
 		self.tiles.remove(tile)
 
-	def remove_hand_tile(self, tile_name):
+	def remove_hand_tile_by_name(self, tile_name):
 		for tile in self.hand:
 			if tile.name == tile_name:
 				tile.remove()

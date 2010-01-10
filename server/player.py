@@ -18,7 +18,7 @@ import logging
 from copy import copy
 
 from connection import ConnectionClosed
-from tile import Tile, Pon, Chi
+from tile import Tile, Pon, Chi, Kan
 from eval import count_of_tiles_yaku, find_potential_chi, hand_in_tenpai, riichi_test
 from botengine import BotEngine
 
@@ -30,13 +30,15 @@ class Player:
 		self.score = 25000
 		self.can_drop_tile = False
 		self.drop_zone = []
-		self.open_sets = []
+		self.sets = []
+		self.closed_kans = []
 		self.riichi = False
 		self.ippatsu_move_id = 0
 
 	def player_round_reset(self):
 		self.drop_zone = []
-		self.open_sets = []
+		self.sets = []
+		self.closed_kans = []
 		self.can_drop_tile = False
 		self.riichi = False
 		self.ippatsu_move_id = 0
@@ -77,25 +79,34 @@ class Player:
 		""" Returns potential special yaku """
 		specials = []
 		if self.riichi:
-			if self.ippatsu_move_id >= self.server.round.move_id:
+			if self.ippatsu_move_id >= self.round.move_id:
 				specials.append(('Ippatsu', 1)) 
 			specials.append(('Riichi', 1)) 
 		return specials
 
 	def round_is_ready(self):
 		logging.info("Player '%s' intial hand: %s" % (self.name, self.hand))
+
+	def is_hand_open(self):
+		for set in self.sets:
+			if not set.closed:
+				return True
+		return False
 	
 	def other_condition_for_riichi(self):
-		return not self.riichi and self.server.round.get_remaining_tiles_in_wall() >= 4 and self.score >= 1000 and not self.open_sets
+		return not self.riichi and self.round.get_remaining_tiles_in_wall() >= 4 and self.score >= 1000 and not self.is_hand_open()
 
 	def hand_actions(self):
 		options = []
-		if count_of_tiles_yaku(self.hand, self.open_sets, self.get_specials_yaku(), self.round.round_wind, self.wind) > 0:
+		if count_of_tiles_yaku(self.hand, self.sets, self.get_specials_yaku(), self.round.round_wind, self.wind) > 0:
 			options.append("Tsumo")
 
 		if self.other_condition_for_riichi() and riichi_test(self.hand):
 			options.append("Riichi")
-		
+
+		for tile in set(self.hand):			
+			if self.hand.count(tile) == 4:
+				options.append("Kan " + tile.name)
 		return options
 
 	def is_furiten(self):
@@ -103,7 +114,7 @@ class Player:
 		return False
 
 	def is_tenpai(self):
-		return hand_in_tenpai(self.hand, self.open_sets)
+		return hand_in_tenpai(self.hand, self.sets)
 
 	def steal_actions(self, player, tile):
 		options = []
@@ -114,7 +125,7 @@ class Player:
 			if find_potential_chi(self.hand, tile):
 				options.append("Chi")
 
-		if count_of_tiles_yaku(self.hand + [ tile ], self.open_sets, self.get_specials_yaku(), self.round.round_wind, 
+		if count_of_tiles_yaku(self.hand + [ tile ], self.sets, self.get_specials_yaku(), self.round.round_wind, 
 				self.wind) > 0 and not self.is_furiten():
 			options.append("Ron")
 
@@ -125,6 +136,9 @@ class Player:
 
 	def round_end_draw(self, winners, loosers, payment_diffs):
 		pass
+
+	def closed_kan_played_by_me(self, kan, new_tile):
+		self.new_hand_tile(new_tile)
 
 	def stolen_tile(self, player, from_player, action, opened_set, tile):
 		if self.ippatsu_move_id:
@@ -139,7 +153,7 @@ class Player:
 			for t in tiles:
 				self.hand.remove(t)
 	
-			self.open_sets.append(my_set)
+			self.sets.append(my_set)
 			self.can_drop_tile = True
 
 	def drop_tile(self, tile):
@@ -148,13 +162,13 @@ class Player:
 		self.server.state.drop_tile(self, tile)
 
 	def riichi_played_this_turn(self):
-		return self.riichi and self.ippatsu_move_id - 4  == self.server.round.move_id
+		return self.riichi and self.ippatsu_move_id - 4  == self.round.move_id
 
 	def play_riichi(self):
 		self.riichi = True
 		self.ippatsu_move_id = self.round.move_id + 4
 		self.score -= 1000
-		self.server.round.on_riichi(self)
+		self.round.on_riichi(self)
 
 	def __str__(self):
 		return self.name
@@ -202,7 +216,7 @@ class NetworkPlayer(Player):
 
 	def move(self, tile):
 		Player.move(self, tile)
-		actions = " ".join(self.hand_actions())
+		actions = ";".join(self.hand_actions())
 		self.connection.send_message(message = "MOVE", tile = tile.name, actions = actions)
 
 	def other_move(self, player):
@@ -255,10 +269,32 @@ class NetworkPlayer(Player):
 			self.play_riichi()
 			return
 
+		if name == "CLOSED_KAN":
+			tile = Tile(message["tile"])
+			kan = Kan(tile)
+			for t in kan.tiles():
+				self.hand.remove(t)
+			self.closed_kans.append(kan)
+			self.round.closed_kan_played(self, kan)
+			return
+
 
 		s = "Unknown message " + str(message) + " from player: " + self.name
 		print s
 		logging.error(s)
+
+	def closed_kan_played_by_me(self, kan, new_tile):
+		Player.closed_kan_played_by_me(self, kan, new_tile)
+		msg = {}
+		msg["message"] = "CLOSED_KAN"
+		msg["tile"] = kan.tile.name
+		msg["player"] = self.wind.name
+		msg["new_tile"] = new_tile.name
+		msg["actions"] = ";".join(self.hand_actions())
+		self.connection.send_dict(msg)
+
+	def closed_kan_played_by_other(self, player, kan):
+		self.connection.send_message(message = "CLOSED_KAN", tile = kan.tile.name, player = player.wind.name)
 
 	def player_dropped_tile(self, player, tile):
 		if self != player:
@@ -273,10 +309,10 @@ class NetworkPlayer(Player):
 			if "Chi" in actions:
 				self.potential_chi = find_potential_chi(self.hand, tile)
 				choose_tiles = [ t.name for set, t in self.potential_chi ]
-				chi_choose = " ".join(choose_tiles)
+				chi_choose = ";".join(choose_tiles)
 			actions.append("Pass")
 
-		msg_actions = " ".join(actions)
+		msg_actions = ";".join(actions)
 		msg = { "message" : "DROPPED", 
 				"wind" : player.wind.name, 
 				"tile" : tile.name, 
@@ -355,7 +391,7 @@ class BotPlayer(Player):
 	def move(self, tile):
 		Player.move(self, tile)
 
-		actions = " ".join(self.hand_actions())
+		actions = self.hand_actions()
 		if "Tsumo" in actions:
 			self.server.declare_win(self, None, "Tsumo")
 			return
@@ -394,7 +430,7 @@ class BotPlayer(Player):
 	def _set_basic_state(self):
 		self.engine.set_hand(self.hand)
 		self.engine.set_wall(self.round.hidden_tiles_for_player(self))
-		self.engine.set_sets(self.open_sets)
+		self.engine.set_sets(self.sets)
 		self.engine.set_turns(self.round.get_remaining_turns_for_player(self))
 
 	def player_dropped_tile(self, player, tile):
@@ -440,4 +476,10 @@ class BotPlayer(Player):
 			self.action = self.action_discard
 
 	def player_played_riichi(self, player):
+		pass
+
+	def closed_kan_played_by_me(self, kan, new_tile):
+		Player.closed_kan_played_by_me(self, kan, new_tile)
+
+	def closed_kan_played_by_other(self, player, kan):
 		pass

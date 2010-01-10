@@ -226,7 +226,7 @@ class ScoreState(WaitingForReadyPlayersState):
 		logging.info("Score: winner=%s; looser=%s; wintype=%s" % (self.player, self.looser, self.win_type))
 
 		for player in [ self.player ] + self.player.other_players():
-			logging.info("Player %s %s %s: " % (player.name, player.hand, player.open_sets))		
+			logging.info("Player %s %s %s: " % (player.name, player.hand, player.sets))		
 
 		self.server.round.end_of_round(self.player, self.looser, self.win_type)
 
@@ -248,10 +248,10 @@ class DrawState(WaitingForReadyPlayersState):
 
 		logging.info("Draw:")
 		for player in winners:
-			logging.info("Winner %s %s %s: " % (player.name, player.hand, player.open_sets))		
+			logging.info("Winner %s %s %s: " % (player.name, player.hand, player.sets))		
 
 		for player in loosers:
-			logging.info("Looser %s %s %s: " % (player.name, player.hand, player.open_sets))		
+			logging.info("Looser %s %s %s: " % (player.name, player.hand, player.sets))		
 
 	def all_players_are_ready(self):
 		rotate_players = self.server.round.get_dealer() not in self.winners

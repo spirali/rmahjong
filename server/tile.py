@@ -194,6 +194,65 @@ class Pon(TileSet):
 	def as_pins(self):
 		return Pon(self.tile.as_pins())
 
+class Kan(TileSet):
+	
+	def __init__(self, tile, closed = True):
+		TileSet.__init__(self, closed)
+		self.tile = tile
+	
+	def get_name(self):
+		return "Kan"
+
+	def get_tile_for_engine(self):
+		return self.tile
+
+	def tiles(self):
+		return [ self.tile, self.tile, self.tile, self.tile ]
+	
+	def is_pon_or_kan(self):
+		return True
+
+	def is_kan(self):
+		return True
+
+	def all_tiles(self, fn):
+		return fn(self.tile)
+
+	def any_tiles(self, fn):
+		return fn(self.tile)
+
+	def count_of_tile(self, tile):
+		if self.tile == tile:
+			return 4
+		return 0
+
+	def all_tiles_is(self, tile):
+		return self.tile == tile
+	
+	def __repr__(self):
+		return "Kan: " + str(self.tile)
+
+	def __eq__(self, x):
+		return isinstance(x, TileSet) and x.is_kan() and self.tile == x.tile
+
+	def is_bamboo(self):
+		return self.tile.is_bamboo()
+
+	def is_char(self):
+		return self.tile.is_char()
+
+	def is_pins(self):
+		return self.tile.is_pins()
+
+	def as_char(self):
+		return Kan(self.tile.as_char())
+
+	def as_bamboo(self):
+		return Kan(self.tile.as_bamboo())
+
+	def as_pins(self):
+		return Kan(self.tile.as_pins())
+
 
 class Chi(TileSet):
 	

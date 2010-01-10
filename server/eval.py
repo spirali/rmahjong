@@ -20,19 +20,25 @@ from tile import red_dragon, white_dragon, green_dragon
 from tile import bamboos, chars, pins, all_tiles
 from copy import copy
 
-def find_tiles_yaku(hand, open_sets, specials, round_wind, player_wind):
-	if not open_sets and all((hand.count(tile) == 2 for tile in hand)):
+def is_hand_open(sets):
+	for set in sets:
+		if not set.closed:
+			return True
+	return False
+
+def find_tiles_yaku(hand, sets, specials, round_wind, player_wind):
+	if not sets and all((hand.count(tile) == 2 for tile in hand)):
 		return score_special_chii_toitsu(hand) + specials
 
 	for pair, rest in detect_pairs(hand):
-		sets = find_sets(rest, open_sets)
-		if sets:
-			return eval_sets(pair, sets, round_wind, player_wind) + specials
+		founded_sets = find_sets(rest, sets)
+		if founded_sets:
+			return eval_sets(pair, founded_sets, round_wind, player_wind) + specials
 	return []
 
 
-def count_of_tiles_yaku(hand, open_sets, specials, round_wind, player_wind):
-	score = find_tiles_yaku(hand, open_sets, specials, round_wind, player_wind)
+def count_of_tiles_yaku(hand, sets, specials, round_wind, player_wind):
+	score = find_tiles_yaku(hand, sets, specials, round_wind, player_wind)
 	return sum(map(lambda r: r[1], score))
 
 
@@ -112,8 +118,8 @@ def points_sum(tiles, nontermial_points):
 			s += nontermial_points * 2
 	return s
 
-def compute_minipoints(hand, open_sets, wintype, round_wind, player_wind):
-	if not open_sets and wintype == "Ron":
+def compute_minipoints(hand, sets, wintype, round_wind, player_wind):
+	if not is_hand_open(sets) and wintype == "Ron":
 		points = 30
 	else:
 		points = 20
@@ -121,8 +127,9 @@ def compute_minipoints(hand, open_sets, wintype, round_wind, player_wind):
 	pons, kans = quick_pons_and_kans(hand)
 	points += points_sum(pons, 4)
 	points += points_sum(kans, 16)
-	points += points_sum([set.tile for set in open_sets if set.is_pon()], 2)
-	points += points_sum([set.tile for set in open_sets if set.is_kan()], 4)
+	points += points_sum([set.tile for set in sets if set.is_pon()], 2)
+	points += points_sum([set.tile for set in sets if set.is_kan() and set.closed ], 8)
+	points += points_sum([set.tile for set in sets if set.is_kan() and not set.closed ], 16)
 
 	for tile in [ red_dragon, white_dragon, green_dragon, round_wind, player_wind ]:
 		if hand.count(tile) == 2:
@@ -140,19 +147,19 @@ def compute_minipoints(hand, open_sets, wintype, round_wind, player_wind):
 	return round_to_base(points, 10)
 
 
-def compute_score(hand, open_sets, wintype, doras, specials, round_wind, player_wind):
-	yaku = find_tiles_yaku(hand, open_sets, specials, round_wind, player_wind)
+def compute_score(hand, sets, wintype, doras, specials, round_wind, player_wind):
+	yaku = find_tiles_yaku(hand, sets, specials, round_wind, player_wind)
 
 	dora_yaku = 0
 	for dora in doras:
 		dora_yaku += hand.count(dora)
-		for set in open_sets:
+		for set in sets:
 			dora_yaku += set.count_of_tile(dora)
 	
 	if dora_yaku > 0:
 		yaku.append(("Dora", dora_yaku))
 
-	minipoints = compute_minipoints(hand, open_sets, wintype, round_wind, player_wind)
+	minipoints = compute_minipoints(hand, sets, wintype, round_wind, player_wind)
 	fans = sum(map(lambda r: r[1], yaku))
 	
 	# TODO: Riichi
@@ -175,9 +182,9 @@ def detect_pairs(hand):
 	return result
 
 
-def find_sets(hand, open_sets):
+def find_sets(hand, sets):
 	""" Hand has to be sorted """
-	founded = copy(open_sets)
+	founded = copy(sets)
 
 	def check_triples(hand, level):			
 			if level == 5:				
@@ -211,7 +218,7 @@ def find_sets(hand, open_sets):
 						return r;
 					founded.remove(set)
 			return None
-	return check_triples(hand, 1 + len(open_sets))
+	return check_triples(hand, 1 + len(sets))
 
 
 def eval_sets(pair, sets, round_wind, player_wind):
@@ -257,10 +264,7 @@ def for_any_sets(sets, fn):
 	return False
 
 def is_sets_closed(sets):
-	for set in sets:
-		if not set.closed:
-			return False
-	return True
+	return not is_hand_open(sets)
 
 def score_yaku_pai(pair_tile, sets):
 	def dragon_pon_or_kan(set):
@@ -398,11 +402,11 @@ def riichi_test(hand):
 			return True
 	return False
 
-def hand_in_tenpai(hand, open_sets):
+def hand_in_tenpai(hand, sets):
 	""" Function work with 13 tiles hand """
 	# TODO: Special hands
 
-	if not open_sets:
+	if not sets:
 		# Seven pairs
 		counts = tile_counts(hand)
 		if len(counts[1]) == 1 and len(counts[2]) == 6:
@@ -410,8 +414,7 @@ def hand_in_tenpai(hand, open_sets):
 
 	for tile in all_tiles:
 		for pair, rest in detect_pairs(hand + [tile]):
-			sets = find_sets(rest, open_sets)
-			if sets:
+			if find_sets(rest, sets):
 				return True
 
 	return False

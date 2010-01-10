@@ -18,7 +18,7 @@
 import unittest
 from unittest import TestCase
 
-from tile import Tile, Chi, Pon, all_tiles
+from tile import Tile, Chi, Pon, Kan, all_tiles
 from eval import count_of_tiles_yaku, compute_payment, hand_in_tenpai, compute_score, find_tiles_yaku, riichi_test
 from botengine import BotEngine
 
@@ -40,6 +40,12 @@ def pon(tile_name):
 	return pon
 
 
+def ckan(tile_name):
+	kan =  Kan(Tile(tile_name))
+	kan.closed = True
+	return kan
+
+
 test_hands = [
 	([ "WW", "C4", "C4", "C4", "C4", "C2", "C3", "DR", "B9", "DR", "B8", "B7", "DR", "WW" ], [], 1), #0, Yaku-Pai
 	([ "DR", "DR", "C1", "C1", "C4", "C2", "C3", "B8", "B9", "WN", "WN", "B7", "DR", "WN" ], [], 1), #1, Yaku-Pai
@@ -48,29 +54,40 @@ test_hands = [
 	([ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C2", "C2" ], [], 1), #4, Tan-Yao
 	([ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C9", "C9" ], [], 0), #5, Nothing
 	([ "WW", "C1", "C1", "C1", "B9", "B8", "B7", "WW" ], [ pon("DR"), chi("C2")], 1), #6, Yaku-Pai
-	([ "WW", "C1", "C1", "C1", "B6", "B8", "B7", "WW" ], [ pon("DR"), pon("DG")], 2), #7, 2x Yaku-Pai
-	([ "C2", "C3", "C4", "C2", "C3", "C4", "P8", "P8", "P8", "P5", "P6", "P7", "C9", "C9" ], [], 1), #8, Ipeikou
-	([ "C2", "C3", "C4", "C2", "C3", "C4", "P8", "P8", "P8", "C9", "C9" ], [ chi("P5") ], 0), #9, Nothing
-	([ "C6", "C7", "C8", "B6", "B7", "B8", "P6", "P7", "P8", "C9", "C9", "B1", "B1", "B1" ], [], 2), #10, Sanshoku doujun (closed)
-	([ "B6", "B7", "B8", "P6", "P7", "P8", "C9", "C9" ], [ pon("B2"), chi("C6") ], 1 ), #11, Sanshoku doujun (opened)
-	([ "C6", "C7", "C8", "B6", "B7", "B8", "P6", "P7", "P8", "C2", "C2", "B6", "B7", "B8" ], [], 4), #12, Sanshoku doujun (closed), Ipeikou, Tan-Yao
-	([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P1", "WN", "WN" ], [], 2), #13, Itsu (closed)
-	([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "WE", "WE" ], [ chi("P7") ], 1), #14, Itsu (opened)
-	([ "C5", "P3", "P8", "C1", "C4", "P6", "DG", "B9", "WS", "B5", "B5", "P5", "B6", "C6"], [], 0), #15, Nothing
-	([ "WN", "B9", "B6", "WN", "B4", "B8", "B5", "B7"], [chi("B1"), chi("P5")], 1), #16, Itsu (opened)
-	([ "WW", "C9", "C8", "C7", "C1", "C2", "C3", "B1", "B1", "B1", "B1", "B2", "B3", "WW" ], [], 2), #17, Chanta
-	([ "C6", "C9", "C8", "C7", "C1", "C2", "C3", "B1", "B1", "B1", "B1", "B2", "B3", "C6" ], [], 0), #18, Nothing 
-	([ "DR", "C9", "C8", "C7", "C1", "C2", "C3", "B1", "B1", "B1", "B4", "B2", "B3", "DR" ], [], 0), #19, Nothing 
-	([ "WW", "C9", "C8", "C7", "C1", "C2", "C3", "DR", "DR", "DR", "B1", "B2", "B3", "WW" ], [], 3), #20, Chanta, Yaku-pai
-	([ "B9", "C9", "C8", "C7", "C1", "C2", "C3", "B1", "B1", "B1", "B1", "B2", "B3", "B9" ], [], 3), #21, Junchan
-	([ "WW", "C1", "C2", "C3", "B7", "B8", "B9", "WW" ], [ pon("B9"), chi("P1") ], 1), #22, Chanta, (open)
-	([ "B9", "C1", "C2", "C3", "B1", "B1", "B1", "B9" ], [ pon("P1"), chi("C7") ], 2), #23, Junchan
-	([ "WN", "P2", "P3", "P1", "WN", "C3", "C2", "C1" ], [ pon("WE"), chi("C7") ], 1), #24, Chanta (open)
-	([ "P2", "P2", "P2", "P2", "P3", "P4", "P9", "P9" ], [ pon("B2"), pon("C2") ], 2), #25, Sanshoku douko
-	([ "WN", "WN", "P9", "P9", "P9", "C9", "C9", "C9","C3","C4","C5", "B9","B9", "B9"], [], 2), #26, Sanshoku douko
-	([ "WS", "WS", "P9", "P9", "P9", "P9", "P1", "P1","DR","DR","B3", "B3","B4", "B4"], [], 0), #27, Nothing 
-	([ "WE", "WE", "P9", "P9", "C9", "C9", "P1", "P1","DR","DR","B3", "B3","B4", "B4"], [], 2), #28, Chii toitsu
-	([ "C3", "C3", "P8", "P8", "C7", "C7", "P5", "P5","P6","P6","B3", "B3","B4", "B4"], [], 3), #29, Chii toitsu, tanyao
+	([ "WW", "C1", "C1", "C1", "B9", "B8", "B7", "WW" ], [ ckan("DR"), chi("C3")], 1), #7, Yaku-Pai
+	([ "WW", "C1", "C1", "C1", "B6", "B8", "B7", "WW" ], [ pon("DR"), pon("DG")], 2), #8, 2x Yaku-Pai
+	([ "WW", "C1", "C1", "C1", "B6", "B8", "B7", "WW" ], [ ckan("DR"), ckan("DG")], 2), #9, 2x Yaku-Pai
+	([ "C2", "C3", "C4", "C2", "C3", "C4", "P8", "P8", "P8", "P5", "P6", "P7", "C9", "C9" ], [], 1), #10, Ipeikou
+	([ "C2", "C3", "C4", "C2", "C3", "C4", "P8", "P8", "P8", "C9", "C9" ], [ chi("P5") ], 0), #11, Nothing
+	([ "C6", "C7", "C8", "B6", "B7", "B8", "P6", "P7", "P8", "C9", "C9", "B1", "B1", "B1" ], [], 2), #12, Sanshoku doujun (closed)
+	([ "C6", "C7", "C8", "B6", "B7", "B8", "P6", "P7", "P8", "C9", "C9" ], [ ckan("C8") ], 2), #13, Sanshoku doujun (closed)
+	([ "B6", "B7", "B8", "P6", "P7", "P8", "C9", "C9" ], [ pon("B2"), chi("C6") ], 1 ), #14, Sanshoku doujun (opened)
+	([ "B6", "B7", "B8", "P6", "P7", "P8", "C9", "C9" ], [ ckan("B2"), chi("C6") ], 1 ), #15, Sanshoku doujun (opened)
+	([ "C6", "C7", "C8", "B6", "B7", "B8", "P6", "P7", "P8", "C2", "C2", "B6", "B7", "B8" ], [], 4), #16, Sanshoku doujun (closed), Ipeikou, Tan-Yao
+	([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P1", "WN", "WN" ], [], 2), #17, Itsu (closed)
+	([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "WN", "WN" ], [ ckan("P1") ], 2), #18, Itsu (closed)
+	([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "WE", "WE" ], [ chi("P7") ], 1), #19, Itsu (opened)
+	([ "C5", "P3", "P8", "C1", "C4", "P6", "DG", "B9", "WS", "B5", "B5", "P5", "B6", "C6"], [], 0), #20, Nothing
+	([ "C5", "P3", "P8", "C1", "C4", "P6", "DG", "B9", "WS", "B6", "C6"], [ ckan("B5") ], 0), #21, Nothing
+	([ "WN", "B9", "B6", "WN", "B4", "B8", "B5", "B7"], [chi("B1"), chi("P5")], 1), #22, Itsu (opened)
+	([ "WW", "C9", "C8", "C7", "C1", "C2", "C3", "B1", "B1", "B1", "B1", "B2", "B3", "WW" ], [], 2), #23, Chanta
+	([ "C6", "C9", "C8", "C7", "C1", "C2", "C3", "B1", "B1", "B1", "B1", "B2", "B3", "C6" ], [], 0), #24, Nothing 
+	([ "DR", "C9", "C8", "C7", "C1", "C2", "C3", "B1", "B1", "B1", "B4", "B2", "B3", "DR" ], [], 0), #25, Nothing 
+	([ "WW", "C9", "C8", "C7", "C1", "C2", "C3", "DR", "DR", "DR", "B1", "B2", "B3", "WW" ], [], 3), #26, Chanta, Yaku-pai
+	([ "B9", "C9", "C8", "C7", "C1", "C2", "C3", "B1", "B1", "B1", "B1", "B2", "B3", "B9" ], [], 3), #27, Junchan
+	([ "WW", "C1", "C2", "C3", "B7", "B8", "B9", "WW" ], [ pon("B9"), chi("P1") ], 1), #28, Chanta, (open)
+	([ "B9", "C1", "C2", "C3", "B1", "B1", "B1", "B9" ], [ pon("P1"), chi("C7") ], 2), #29, Junchan
+	([ "WN", "P2", "P3", "P1", "WN", "C3", "C2", "C1" ], [ pon("WE"), chi("C7") ], 1), #30, Chanta (open)
+	([ "P2", "P2", "P2", "P2", "P3", "P4", "P9", "P9" ], [ pon("B2"), pon("C2") ], 2), #31, Sanshoku douko
+	([ "WW", "C1", "C2", "C3", "B7", "B8", "B9", "WW" ], [ ckan("B9"), chi("P1") ], 1), #32, Chanta, (open)
+	([ "B9", "C1", "C2", "C3", "B1", "B1", "B1", "B9" ], [ ckan("P1"), chi("C7") ], 2), #33, Junchan
+	([ "WN", "P2", "P3", "P1", "WN", "C3", "C2", "C1" ], [ ckan("WE"), chi("C7") ], 1), #34, Chanta (open)
+	([ "P2", "P2", "P2", "P2", "P3", "P4", "P9", "P9" ], [ ckan("B2"), ckan("C2") ], 2), #35, Sanshoku douko
+	([ "WN", "WN", "P9", "P9", "P9", "C9", "C9", "C9","C3","C4","C5", "B9","B9", "B9"], [], 2), #36, Sanshoku douko
+	([ "WS", "WS", "P9", "P9", "P9", "P9", "P1", "P1","DR","DR","B3", "B3","B4", "B4"], [], 0), #37, Nothing 
+	([ "WS", "WS", "P1", "P1","DR","DR","B3", "B3","B4", "B4"], [ ckan("P9") ], 0), #37, Nothing 
+	([ "WE", "WE", "P9", "P9", "C9", "C9", "P1", "P1","DR","DR","B3", "B3","B4", "B4"], [], 2), #38, Chii toitsu
+	([ "C3", "C3", "P8", "P8", "C7", "C7", "P5", "P5","P6","P6","B3", "B3","B4", "B4"], [], 3), #39, Chii toitsu, tanyao
 ]
 
 
@@ -78,22 +95,22 @@ class EvalHandTestCase(TestCase):
 
 	def test_yaku_count(self):
 		for hand_id, h in enumerate(test_hands):
-			hand, open_sets, r = h
-			score = count_of_tiles_yaku(tiles(hand), open_sets, [], Tile("XX"), Tile("XX"))
-			yaku = find_tiles_yaku(tiles(hand), open_sets, [], Tile("XX"), Tile("XX"))
+			hand, sets, r = h
+			score = count_of_tiles_yaku(tiles(hand), sets, [], Tile("XX"), Tile("XX"))
+			yaku = find_tiles_yaku(tiles(hand), sets, [], Tile("XX"), Tile("XX"))
 			self.assert_(score == r, "Hand %i returned score %i %s" % (hand_id, score, yaku))
 
 		hand = [ "WE", "C2", "C2", "C2", "WN", "WN", "WN", "DR", "B9", "DR", "B8", "B7", "WE", "WE" ]
-		open_sets = []
-		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, [], Tile("WE"), Tile("WN")), 2)
-		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, [], Tile("WE"), Tile("WE")), 2)
-		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, [], Tile("WE"), Tile("WS")), 1)
+		sets = []
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WN")), 2)
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WE")), 2)
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WS")), 1)
 		hand = [ "WE", "DW", "DW", "DW", "C4", "C2", "C3", "DR", "B9", "DR", "B8", "B7", "WE", "WE" ]
-		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, [], Tile("WE"), Tile("WS")), 2)
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WS")), 2)
 
 		hand = [ "WN", "B9", "B6", "WN", "B4", "B8", "B5", "B7"]
-		open_sets = [chi("B1"), chi("P5")]
-		self.assertEquals(count_of_tiles_yaku(tiles(hand), open_sets, [], Tile("WE"), Tile("WW")), 1)
+		sets = [chi("B1"), chi("P5")]
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WW")), 1)
 
 	def test_basic_payment(self):
 		self.assert_(compute_payment(2, 40, "Ron", Tile("WN")) == ("", 2600))
@@ -128,8 +145,8 @@ class EvalHandTestCase(TestCase):
 						([ "B3", "B3", "B2", "B2", "C9", "C9", "WW", "WW", "DR", "DR", "P1", "P7", "WN"], [], False),
 						([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P3", "P1", "WN"], [], False),
 						([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "WN"], [ pon("P1") ], True))
-		for h, open_sets, tenpai in hands:
-			self.assertEquals(hand_in_tenpai(tiles(h), open_sets), tenpai)
+		for h, sets, tenpai in hands:
+			self.assertEquals(hand_in_tenpai(tiles(h), sets), tenpai)
 
 	def test_riichi(self):
 		hands = (([ "P5", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P1", "WN"], True),
@@ -142,8 +159,8 @@ class EvalHandTestCase(TestCase):
 
 	def test_score(self):
 		hand = [ "WN", "B9", "B6", "WN", "B4", "B8", "B5", "B7"]
-		open_sets = [chi("B1"), chi("P5")]
-		payment, scores, minipoints = compute_score(tiles(hand), open_sets, "Ron", [], [], Tile("WE"), Tile("WW"))
+		sets = [chi("B1"), chi("P5")]
+		payment, scores, minipoints = compute_score(tiles(hand), sets, "Ron", [], [], Tile("WE"), Tile("WW"))
 		self.assertEquals(minipoints, 30)
 
 class BotEngineTestCase(TestCase):
@@ -184,9 +201,11 @@ class BotEngineTestCase(TestCase):
 			e.set_blocking()
 			# Remove last 2 tests (Hand: seven pairs), bot "question_yaku" detect only "normal sets"
 			for hand_id, h in enumerate(test_hands[:-2]): 
-				hand, open_sets, r = h
+				hand, sets, r = h
+				if [ s for s in sets if s.is_kan() ]: # Bot dont support kans yet
+					continue
 				e.set_hand(tiles(hand))
-				e.set_sets(open_sets)
+				e.set_sets(sets)
 				e.question_yaku()
 				score = e.get_int() 
 				self.assert_(score == r, "Hand %i returned score %i" % (hand_id, score))
