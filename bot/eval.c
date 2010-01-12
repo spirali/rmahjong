@@ -235,7 +235,7 @@ void find_best(SearchContext *context, TileSet *all_sets)
 	context->best_value = 0;
 	zero_tiles(context->best_target);
 
-	if (context->gc.open_sets_count == 0) {
+	if (context->gc.open_sets_count == 0 && context->gc.closed_kans_count == 0) {
 		check_seven_pairs(context);
 	}
 
@@ -243,10 +243,14 @@ void find_best(SearchContext *context, TileSet *all_sets)
 		context->sets[3 - t] = &context->gc.open_sets[t];
 	}
 
+	for (t = 0; t < context->gc.closed_kans_count; t++)  {
+		context->sets[3 - context->gc.open_sets_count - t] = &context->gc.closed_kans[t];
+	}
+
 	for (t = 0; t < TILES_COUNT; t ++) {
 		context->pair = t;
 		sets_tiles[t] += 2;
-		compute_best(all_sets, 4 - context->gc.open_sets_count, sets_tiles, context);
+		compute_best(all_sets, 4 - (context->gc.open_sets_count + context->gc.closed_kans_count), sets_tiles, context);
 		sets_tiles[t] -= 2;
 	}
 }
@@ -321,6 +325,15 @@ int choose_drop_tile(GameContext *gc, tile_id *target)
 {
 	tile_id unn[TILES_COUNT];
 	int unn_count = drop_candidates(gc, unn, target);
+
+	int t;
+	for(t = 0; t < TILES_COUNT; t++) {
+		// KAN!
+		if (gc->hand[t] == 4 && unn[t] == 1) {
+			return -(t + 1);
+		}
+	}
+
 	int id = rand() % unn_count;
 	return pick_tile(unn, id);
 }
@@ -370,7 +383,7 @@ int detect_sets(tile_id *hand, tile_id *original_hand, int pair,  TileSet **sets
 	return 0;
 }
 
-int compute_yaku_of_hand(tile_id *hand, TileSet *open_sets, int open_sets_count, int round_wind, int player_wind)
+int compute_yaku_of_hand(tile_id *hand, TileSet *open_sets, int open_sets_count, TileSet *closed_kans, int closed_kans_count, int round_wind, int player_wind)
 {
 	tile_id h[TILES_COUNT];
 	copy_tiles(hand, h);
@@ -382,10 +395,15 @@ int compute_yaku_of_hand(tile_id *hand, TileSet *open_sets, int open_sets_count,
 		sets[t] = &open_sets[t];
 	}
 
+	for (t = 0; t < closed_kans_count; t++) {
+		sets[t + open_sets_count] = &closed_kans[t];
+	}
+
 	for (t = 0; t < TILES_COUNT; t++) {
 		if (h[t] >= 2) {
 			h[t] -= 2;
-			int r = detect_sets(h, hand, t, sets, open_sets_count, 0, open_sets_count, round_wind, player_wind);
+			int r = detect_sets(h, hand, t, sets, open_sets_count  + closed_kans_count, 0, open_sets_count, 
+				round_wind, player_wind);
 			h[t] += 2;
 			if (r) {
 				return r;

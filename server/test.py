@@ -175,6 +175,8 @@ class BotEngineTestCase(TestCase):
 			e.set_sets([])
 			e.set_wall(4 * all_tiles)
 			e.question_discard()
+			action = e.get_string()
+			self.assert_(action == "Discard")
 			tile = e.get_tile()
 			self.assert_(tile in h)
 		finally:
@@ -190,6 +192,8 @@ class BotEngineTestCase(TestCase):
 			e.set_sets([chi("C1"), pon("DR")])
 			e.set_wall(4 * all_tiles)
 			e.question_discard()
+			action = e.get_string()
+			self.assert_(action == "Discard")
 			tile = e.get_tile()
 			self.assert_(tile in h)
 		finally:
@@ -202,8 +206,6 @@ class BotEngineTestCase(TestCase):
 			# Remove last 2 tests (Hand: seven pairs), bot "question_yaku" detect only "normal sets"
 			for hand_id, h in enumerate(test_hands[:-2]): 
 				hand, sets, r = h
-				if [ s for s in sets if s.is_kan() ]: # Bot dont support kans yet
-					continue
 				e.set_hand(tiles(hand))
 				e.set_sets(sets)
 				e.question_yaku()
@@ -269,7 +271,34 @@ class BotEngineTestCase(TestCase):
 			self.assertEquals(tile_list, [Tile("P1")])
 		finally:
 			e.shutdown()
-	
+
+	def test_kan(self):
+		e = BotEngine()
+		try:
+			e.set_blocking()
+			e.set_turns(3)
+			e.set_sets([])
+			wall = 3 * all_tiles
+			e.set_wall(wall)
+			h = tiles([ "C1", "C2", "C3", "P9", "P9", "P9", "P9", "B1", "B1", "B1", "P1", "P3", "DR", "DR" ])
+			e.set_hand(h)
+			e.question_discard()
+
+			action = e.get_string()
+			self.assert_(action == "Kan")
+			tile = e.get_tile()
+			self.assertEquals(tile, Tile("P9"))
+
+			h = tiles([ "C1", "C2", "C3", "P9", "P9", "P9", "P9", "P7", "P8",  "P1", "P3", "DR", "DR", "C5" ])
+			e.set_hand(h)
+			e.question_discard()
+			action = e.get_string()
+			self.assert_(action == "Discard")
+			tile = e.get_tile()
+			self.assertEquals(tile, Tile("C5"))
+
+		finally:
+			e.shutdown()
 
 
 if __name__ == '__main__':

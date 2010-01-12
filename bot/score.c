@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include "score.h"
+#include "io.h"
 
 static int suit_value(tile_id id)
 {
@@ -82,7 +83,6 @@ int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count, i
 	TileSet *chi[4], *pon[4];
 	int chi_count = 0;
 	int pon_count = 0;
-
 
 	/* Yaku-pai */
 	for (t = 0; t < 4; t++) {

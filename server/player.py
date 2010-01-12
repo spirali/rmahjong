@@ -31,14 +31,12 @@ class Player:
 		self.can_drop_tile = False
 		self.drop_zone = []
 		self.sets = []
-		self.closed_kans = []
 		self.riichi = False
 		self.ippatsu_move_id = 0
 
 	def player_round_reset(self):
 		self.drop_zone = []
 		self.sets = []
-		self.closed_kans = []
 		self.can_drop_tile = False
 		self.riichi = False
 		self.ippatsu_move_id = 0
@@ -170,6 +168,14 @@ class Player:
 		self.score -= 1000
 		self.round.on_riichi(self)
 
+	def play_closed_kan(self, tile):
+		kan = Kan(tile)
+		kan.closed = True
+		for t in kan.tiles():
+			self.hand.remove(t)
+		self.sets.append(kan)
+		self.round.closed_kan_played(self, kan)
+
 	def __str__(self):
 		return self.name
 
@@ -271,11 +277,7 @@ class NetworkPlayer(Player):
 
 		if name == "CLOSED_KAN":
 			tile = Tile(message["tile"])
-			kan = Kan(tile)
-			for t in kan.tiles():
-				self.hand.remove(t)
-			self.closed_kans.append(kan)
-			self.round.closed_kan_played(self, kan)
+			self.play_closed_kan(tile)
 			return
 
 
@@ -403,20 +405,25 @@ class BotPlayer(Player):
 			self.action = self.action_discard
 
 	def action_discard(self):
-		tile = self.engine.get_tile()
-		if tile:
-			target = self.engine.get_tiles(True)
+		action = self.engine.get_string()
+		if action:
 			self.action = None
-			if self.riichi_allowed and self.other_condition_for_riichi():
-				h = copy(self.hand)
-				h.remove(tile)
-				for t in h:
-					if t in target:
-						target.remove(t)
-				if len(target) == 1 and self.round.hidden_tiles_for_player(self).count(target[0]) > 1 and hand_in_tenpai(h, []): 
-					# If target is 1 tile away and this tile is more then 1 in "game"
-					self.play_riichi()
-			self.drop_tile(tile)
+			tile = self.engine.get_tile(True)
+			target = self.engine.get_tiles(True)
+			
+			if action == "Kan":
+				self.play_closed_kan(tile)
+			else:
+				if self.riichi_allowed and self.other_condition_for_riichi():
+					h = copy(self.hand)
+					h.remove(tile)
+					for t in h:
+						if t in target:
+							target.remove(t)
+					if len(target) == 1 and self.round.hidden_tiles_for_player(self).count(target[0]) > 1 and hand_in_tenpai(h, []): 
+						# If target is 1 tile away and this tile is more then 1 in "game"
+						self.play_riichi()
+				self.drop_tile(tile)
 
 	def action_steal(self):
 		set_or_pass = self.engine.get_set_or_pass()
@@ -480,6 +487,9 @@ class BotPlayer(Player):
 
 	def closed_kan_played_by_me(self, kan, new_tile):
 		Player.closed_kan_played_by_me(self, kan, new_tile)
+		self._set_basic_state()
+		self.engine.question_discard_and_target()
+		self.action = self.action_discard
 
 	def closed_kan_played_by_other(self, player, kan):
 		pass

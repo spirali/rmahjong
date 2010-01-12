@@ -29,7 +29,9 @@ struct GameContext {
 	int open_sets_count;
 	int round_wind;
 	int player_wind;
+	int closed_kans_count;
 	TileSet open_sets[4];
+	TileSet closed_kans[4];
 	tile_id wall[TILES_COUNT];
 	tile_id hand[TILES_COUNT];
 };

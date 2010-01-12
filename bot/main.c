@@ -72,14 +72,22 @@ void process_commands(FILE *file, FILE *fileout, GameContext *gc)
 
 		if (!strcmp(line, "DISCARD")) {
 			int tile = choose_drop_tile(gc, NULL);
-			fprintf(fileout, "%s\n", tile_name[tile]);
+			if (tile < 0) {
+				fprintf(fileout, "Kan\n%s\n", tile_name[ (-tile) - 1]);
+			} else {
+				fprintf(fileout, "Discard\n%s\n", tile_name[tile]);
+			}
 			continue;
 		}
 
 		if (!strcmp(line, "DISCARD_AND_TARGET")) {
 			tile_id target[TILES_COUNT];
 			int tile = choose_drop_tile(gc, target);
-			fprintf(fileout, "%s\n", tile_name[tile]);
+			if (tile < 0) {
+				fprintf(fileout, "Kan\n%s\n", tile_name[ (-tile) - 1]);
+			} else {
+				fprintf(fileout, "Discard\n%s\n", tile_name[tile]);
+			}
 			print_tiles(fileout, target);
 			continue;
 		}
@@ -98,7 +106,7 @@ void process_commands(FILE *file, FILE *fileout, GameContext *gc)
 			continue;
 		}
 
-		if (!strcmp(line, "SETS")) {
+		if (!strcmp(line, "OPEN_SETS")) {
 			if (!read_sets(file, gc->open_sets, 4, &gc->open_sets_count)) {
 				fprintf(fileout, "Error: Invalid format (%s)\n", line);
 			}	
@@ -123,7 +131,8 @@ void process_commands(FILE *file, FILE *fileout, GameContext *gc)
 		}
 
 		if (!strcmp(line, "YAKU")) {
-			int yaku = compute_yaku_of_hand(gc->hand, gc->open_sets, gc->open_sets_count, gc->round_wind, gc->player_wind);
+			int yaku = compute_yaku_of_hand(gc->hand, gc->open_sets, gc->open_sets_count, gc->closed_kans, 
+				gc->closed_kans_count,gc->round_wind, gc->player_wind);
 			fprintf(fileout, "%i\n", yaku);
 			continue;
 		}
@@ -135,6 +144,28 @@ void process_commands(FILE *file, FILE *fileout, GameContext *gc)
 				continue;
 			}
 			// TODO: Process DORA
+			free(array);
+			continue;
+		}
+
+		if (!strcmp(line, "CLOSED_KANS")) {
+			tile_id *array = read_tiles_array(file);
+			if (array == NULL) {
+				fprintf(fileout, "Error: Invalid format (%s)\n", line);
+				continue;
+			}
+			tile_id *a = array;
+			gc->closed_kans_count = 0;
+			while ((*a) != TILE_NONE) {
+				if (gc->closed_kans_count >= 4) {
+					fprintf(fileout, "Error: Too many closed kans\n");
+					break;
+				}
+				gc->closed_kans[gc->closed_kans_count].type = PON;
+				gc->closed_kans[gc->closed_kans_count].tile = *a;
+				gc->closed_kans_count++;
+				a++;
+			}
 			free(array);
 			continue;
 		}

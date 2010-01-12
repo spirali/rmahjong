@@ -43,7 +43,7 @@ class BotEngineThread(Thread):
 class BotEngine():
 
 	def __init__(self):
-		self.queue = Queue(2)
+		self.queue = Queue(3)
 		self.process = Popen([ BOT_PATH ], bufsize = 0, stdin = PIPE, stdout = PIPE)
 		self.nonblocking = True
 		self.process_out = self.process.stdout
@@ -60,6 +60,12 @@ class BotEngine():
 	def get_tile(self, blocking = False):
 		if self._is_next_line() or blocking:
 			return Tile(self._read_line().strip())
+		else:
+			return None
+
+	def get_string(self, blocking = False):
+		if self._is_next_line() or blocking:
+			return self._read_line().strip()
 		else:
 			return None
 
@@ -90,7 +96,6 @@ class BotEngine():
 		else:
 			return None
 
-
 	def set_blocking(self):
 		self.nonblocking = False
 	
@@ -109,15 +114,23 @@ class BotEngine():
 		self._write("DORAS\n")
 		self._set_tiles(doras)
 
+	def set_closed_kans(self, closed_kans):
+		self._write("CLOSED_KANS\n")
+		self._set_tiles([ kan.tile for kan in closed_kans ])
+
 	def set_round_wind(self, tile):
 		self._write("ROUND_WIND\n" + tile.name + "\n")
 
 	def set_player_wind(self, tile):
 		self._write("PLAYER_WIND\n" + tile.name + "\n")
 
-	def set_sets(self, sets):
-		self._write("SETS\n")
+	def set_open_sets(self, sets):
+		self._write("OPEN_SETS\n")
 		self._write_sets(sets)
+
+	def set_sets(self, sets):
+		self.set_open_sets( [ set for set in sets if not set.closed ] )
+		self.set_closed_kans( [ set for set in sets if set.closed ] )
 
 	def question_discard(self):
 		self._write("DISCARD\n")
