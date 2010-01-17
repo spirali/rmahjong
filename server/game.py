@@ -81,7 +81,12 @@ class Round:
 			player.set_round(self, self.get_hand())
 			player.set_wind(winds[i])
 			player.round_is_ready()
+
+		self.original_score = {}
+		for player in players:
+			self.original_score[player] = player.score
 		self.players = players
+
 
 	def pick_random_tile(self):
 		tile = self.random.choice(self.wall)
@@ -128,18 +133,22 @@ class Round:
 			self.doras, winner.get_specials_yaku(), self.round_wind, winner.wind)
 		diffs = self.payment_diffs(payment, wintype, winner, looser)
 
+
+		for player in diffs:
+			player.score += diffs[player]		
+
 		looser_riichi = 0
 		for player in winner.other_players():
 			if player.riichi:
 				looser_riichi += 1000
 
-		diffs[winner] += looser_riichi
-		
-		for player in diffs:
-			player.score += diffs[player]		
-
+		winner.score += looser_riichi
 		if winner.riichi:
 			winner.score += 1000 # Return riichi bet
+
+		real_diffs = {}
+		for player in self.players:
+			real_diffs[player] = player.score - self.original_score[player]
 
 		logging.info("Payment: " + str(payment))
 		logging.info("Scores: " + str(scores))
@@ -154,7 +163,7 @@ class Round:
 			payment_name = payment[0] + " " + str(payment[1])
 			
 		for player in self.players:
-			player.round_end(winner, looser, wintype, payment_name, scores, minipoints, diffs, looser_riichi)
+			player.round_end(winner, looser, wintype, payment_name, scores, minipoints, real_diffs, looser_riichi)
 
 	def end_of_round_draw(self):
 		winners = [ player for player in self.players if player.is_tenpai() ]

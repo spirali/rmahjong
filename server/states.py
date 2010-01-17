@@ -165,6 +165,7 @@ class StealTileState(GenericGameState):
 				# Cancel riichi it was played this turn
 				if self.player.riichi_played_this_turn():
 					self.player.riichi = False
+					self.player.score += 1000
 
 				s_player.new_hand_tile(self.droped_tile)
 				self.server.declare_win(s_player, self.player, "Ron")
