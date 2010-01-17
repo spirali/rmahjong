@@ -92,6 +92,9 @@ class Tile(object):
 	def is_pins(self):
 		return self.name[0] == "P"
 
+	def is_same_type(self, tile):
+		return self.name[0] == tile.name[0]
+
 
 red_dragon = Tile("DR")
 white_dragon = Tile("DW")
@@ -144,7 +147,7 @@ class Pon(TileSet):
 	def get_name(self):
 		return "Pon"
 
-	def get_tile_for_engine(self):
+	def get_representative_tile(self):
 		return self.tile
 
 	def tiles(self):
@@ -176,6 +179,9 @@ class Pon(TileSet):
 	def __eq__(self, x):
 		return isinstance(x, TileSet) and x.is_pon() and self.tile == x.tile
 
+	def is_suit(self):
+		return self.tile.is_suit()
+
 	def is_bamboo(self):
 		return self.tile.is_bamboo()
 
@@ -203,7 +209,7 @@ class Kan(TileSet):
 	def get_name(self):
 		return "Kan"
 
-	def get_tile_for_engine(self):
+	def get_representative_tile(self):
 		return self.tile
 
 	def tiles(self):
@@ -235,6 +241,9 @@ class Kan(TileSet):
 	def __eq__(self, x):
 		return isinstance(x, TileSet) and x.is_kan() and self.tile == x.tile
 
+	def is_suit(self):
+		return self.tile.is_suit()
+
 	def is_bamboo(self):
 		return self.tile.is_bamboo()
 
@@ -265,7 +274,7 @@ class Chi(TileSet):
 	def get_name(self):
 		return "Chi"
 
-	def get_tile_for_engine(self):
+	def get_representative_tile(self):
 		return self.tile1
 
 	def tiles(self):
@@ -294,6 +303,9 @@ class Chi(TileSet):
 
 	def is_bamboo(self):
 		return self.tile1.is_bamboo()
+
+	def is_suit(self):
+		return self.tile1.is_suit()
 
 	def as_char(self):
 		return Chi(self.tile1.as_char(), self.tile2.as_char(), self.tile3.as_char())

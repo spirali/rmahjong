@@ -17,7 +17,7 @@
 import collections 
 from tile import Pon, Chi
 from tile import red_dragon, white_dragon, green_dragon
-from tile import bamboos, chars, pins, all_tiles
+from tile import bamboos, chars, pins, all_tiles, honors
 from copy import copy
 
 def is_hand_open(sets):
@@ -353,11 +353,54 @@ def score_junchan(pair_tile, sets):
 	else:
 		return 2
 
+
+def score_honitsu(pair_tile, sets):
+	if score_chinitsu(pair_tile, sets) > 0:
+		return 0
+
+	for suits in [ pins, chars, bamboos ]:
+		if pair_tile not in suits and pair_tile not in honors:
+			continue
+		for set in sets:
+			tile = set.get_representative_tile()
+			if tile not in suits and tile not in honors:
+				break
+		else:
+			if is_sets_closed(sets):
+				return 3
+			else:
+				return 2
+	return 0
+
+
+def score_chinitsu(pair_tile, sets):
+	if not pair_tile.is_suit():
+		return 0
+	
+	for set in sets:
+		if not set.all_tiles(lambda t: pair_tile.is_same_type(t)):
+			return 0
+
+	if is_sets_closed(sets):
+		return 6
+	else:
+		return 5
+
 def score_special_chii_toitsu(hand):
 	yaku = [ ("Chii toitsu", 2) ]
 	if all((tile.is_nonterminal() for tile in hand)):
 		yaku.append(("Tan-Yao", 1))
+
+	for suits in [ pins, chars, bamboos ]:
+		if all((tile in suits for tile in hand)):
+			yaku.append(("Chinitsu", 6))
+			break
+		if all((tile in suits or tile in honors for tile in hand)):
+			yaku.append(("Honitsu", 3))
+			break
+
 	return yaku
+
 		
 score_functions = [ 
 	("Yaku-Pai", score_yaku_pai),
@@ -368,6 +411,8 @@ score_functions = [
 	("Chanta", score_chanta),
 	("Junchan taiyai", score_junchan),
 	("Sanshoku douko", score_sanshoku_douko),
+	("Honitsu", score_honitsu),
+	("Chinitsu", score_chinitsu),
 ]
 
 

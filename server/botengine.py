@@ -158,7 +158,7 @@ class BotEngine():
 
 	def _write_sets(self, sets):
 		for set in sets:
-			self._write("%s %s " % (set.get_name(), set.get_tile_for_engine().name))
+			self._write("%s %s " % (set.get_name(), set.get_representative_tile().name))
 		self._write("\n")
 
 	def _read_line(self):

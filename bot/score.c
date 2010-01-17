@@ -209,6 +209,41 @@ int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count, i
 				fan += 2;
 			}
 		}
+
+	}
+
+	/* Chinitsu & Honitsu */
+	for (t = 0; t < 3; t++) {
+		int start_tile = TILE_SUIT_FIRST + 9 * t;
+		int end_tile = start_tile + 8;
+		if ((pair < start_tile || pair > end_tile) && !IS_HONOR(pair))
+			continue;
+		for (s = 0; s < 4; s++) {
+			if ((sets[s]->tile < start_tile || sets[s]->tile > end_tile) && !IS_HONOR(sets[s]->tile)) {
+				break;	
+			} 
+		}
+		if (s == 4) {
+			for (s = 0; s < 4; s++) {
+				if (IS_HONOR(sets[s]->tile)) {
+					break;	
+				}
+			} 
+			if (s == 4 && !IS_HONOR(pair)) { // Chinitsu
+				if (open_sets_count) {
+					fan += 5;
+				} else {
+					fan += 6;
+				}
+			} else {
+				if (open_sets_count) { // Honitsu
+					fan += 2;
+				} else {
+					fan += 3;
+				}
+			}
+			break;
+		}
 	}
 	return fan;
 }
