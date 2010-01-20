@@ -121,9 +121,14 @@ class Round:
 		self.last_innterruption = self.move_id
 
 	def closed_kan_played(self, player, kan):
-		player.closed_kan_played_by_me(kan, self.pick_random_tile()) 
+		dora_indicator = self.pick_random_tile()
+		dora = dora_from_indicator(dora_indicator)
+		self.dora_indicators.append(dora_indicator)
+		self.doras.append(dora)
+		
+		player.closed_kan_played_by_me(kan, self.pick_random_tile(), dora_indicator) 
 		for p in player.other_players():
-			p.closed_kan_played_by_other(player, kan)
+			p.closed_kan_played_by_other(player, kan, dora_indicator)
 
 	def player_on_move(self, player):
 		self.move_id += 1

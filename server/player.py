@@ -135,7 +135,7 @@ class Player:
 	def round_end_draw(self, winners, loosers, payment_diffs):
 		pass
 
-	def closed_kan_played_by_me(self, kan, new_tile):
+	def closed_kan_played_by_me(self, kan, new_tile, dora_indicator):
 		self.new_hand_tile(new_tile)
 
 	def stolen_tile(self, player, from_player, action, opened_set, tile):
@@ -285,18 +285,24 @@ class NetworkPlayer(Player):
 		print s
 		logging.error(s)
 
-	def closed_kan_played_by_me(self, kan, new_tile):
-		Player.closed_kan_played_by_me(self, kan, new_tile)
+	def closed_kan_played_by_me(self, kan, new_tile, dora_indicator):
+		Player.closed_kan_played_by_me(self, kan, new_tile, dora_indicator)
 		msg = {}
 		msg["message"] = "CLOSED_KAN"
 		msg["tile"] = kan.tile.name
 		msg["player"] = self.wind.name
 		msg["new_tile"] = new_tile.name
+		msg["dora_indicator"] = dora_indicator.name
 		msg["actions"] = ";".join(self.hand_actions())
 		self.connection.send_dict(msg)
 
-	def closed_kan_played_by_other(self, player, kan):
-		self.connection.send_message(message = "CLOSED_KAN", tile = kan.tile.name, player = player.wind.name)
+	def closed_kan_played_by_other(self, player, kan, dora_indicator):
+		msg = {}
+		msg["message"] = "CLOSED_KAN"
+		msg["player"] = player.wind.name
+		msg["tile"] = tile.kan.tile.name
+		msg["dora_indicator"] = dora_indicator.name
+		self.connection.send_dict(msg)
 
 	def player_dropped_tile(self, player, tile):
 		if self != player:
@@ -485,11 +491,11 @@ class BotPlayer(Player):
 	def player_played_riichi(self, player):
 		pass
 
-	def closed_kan_played_by_me(self, kan, new_tile):
-		Player.closed_kan_played_by_me(self, kan, new_tile)
+	def closed_kan_played_by_me(self, kan, new_tile, dora_indicator):
+		Player.closed_kan_played_by_me(self, kan, new_tile, dora_indicator)
 		self._set_basic_state()
 		self.engine.question_discard_and_target()
 		self.action = self.action_discard
 
-	def closed_kan_played_by_other(self, player, kan):
+	def closed_kan_played_by_other(self, player, kan, dora_indicator):
 		pass

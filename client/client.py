@@ -163,8 +163,11 @@ class Mahjong:
 		player_winds = [ wnames[ (wid + t) % 4 ] for t in xrange(4) ]
 		self.init_player_boxes(names, player_winds, scores)
 		self.table.set_new_hand(message["hand"].split())
-		self.table.add_dora_indicator(message["dora_indicator"])
+		self.add_dora_indicator(message["dora_indicator"])
 		self.round_wind = message["round_wind"]
+
+	def add_dora_indicator(self, tile_name):
+		self.table.add_dora_indicator(tile_name)
 
 
 def main_init():

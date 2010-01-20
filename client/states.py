@@ -225,6 +225,7 @@ class RoundState(State):
 			self.mahjong.set_state(OtherMoveState(self.mahjong, player))
 
 	def process_closed_kan(self, message):
+		self.mahjong.add_dora_indicator(message["dora_indicator"])
 		tile_name = message["tile"]
 		player = message["player"]
 		player_id = self.mahjong.player_id_by_wind(player)
