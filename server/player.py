@@ -129,7 +129,7 @@ class Player:
 
 		return options
 
-	def round_end(self, player, looser, win_type, payment_name, scores, minipints, diffs, looser_riichi):
+	def round_end(self, player, looser, win_type, payment_name, scores, minipints, diffs, looser_riichi, ura_dora_indicators):
 		pass
 
 	def round_end_draw(self, winners, loosers, payment_diffs):
@@ -335,7 +335,7 @@ class NetworkPlayer(Player):
 	def player_played_riichi(self, player):
 		self.connection.send_message(message = "RIICHI", player = player.wind.name)
 
-	def round_end(self, player, looser, win_type, payment_name, scores, minipoints, payment_diffs, looser_riichi):
+	def round_end(self, player, looser, win_type, payment_name, scores, minipoints, payment_diffs, looser_riichi, ura_dora_indicators):
 		msg = {}
 		msg["message"] = "ROUND_END"
 		msg["payment"] = payment_name
@@ -345,6 +345,7 @@ class NetworkPlayer(Player):
 		msg["minipoints"] = minipoints
 		msg["looser_riichi"] = looser_riichi
 		msg["score_items"] = ";".join(map(lambda sc: "%s %s" % (sc[0], sc[1]), scores))
+		msg["ura_dora_indicators"] = " ".join([ tile.name for tile in ura_dora_indicators ])
 
 		for player in self.server.players:
 			msg[player.wind.name + "_score"] = player.score 
@@ -466,7 +467,7 @@ class BotPlayer(Player):
 				self.server.player_is_ready(self)
 
 
-	def round_end(self, player, looser, win_type, payment_name, scores, minipints, diffs, looser_riichi):
+	def round_end(self, player, looser, win_type, payment_name, scores, minipints, diffs, looser_riichi, ura_doras_indicators):
 		self.server.player_is_ready(self)
 
 	def round_end_draw(self, winners, loosers, diffs):

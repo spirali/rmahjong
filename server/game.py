@@ -134,8 +134,15 @@ class Round:
 		self.move_id += 1
 
 	def end_of_round(self, winner, looser, wintype):
+		if winner.riichi:
+			ura_dora_indicators = [ self.pick_random_tile() for t in self.doras ]
+			ura_doras = [ dora_from_indicator(t) for t in ura_dora_indicators ]
+		else:
+			ura_dora_indicators = []
+			ura_doras = []
+
 		payment, scores, minipoints  = compute_score(winner.hand, winner.sets, wintype, 
-			self.doras, winner.get_specials_yaku(), self.round_wind, winner.wind)
+			(self.doras, ura_doras), winner.get_specials_yaku(), self.round_wind, winner.wind)
 		diffs = self.payment_diffs(payment, wintype, winner, looser)
 
 
@@ -158,6 +165,7 @@ class Round:
 		logging.info("Payment: " + str(payment))
 		logging.info("Scores: " + str(scores))
 		logging.info("Minipoints: " + str(minipoints))
+		logging.info("Ura doras: " + str(ura_doras))
 
 		if wintype == "Tsumo":
 			if payment[1][1] != 0:
@@ -168,7 +176,7 @@ class Round:
 			payment_name = payment[0] + " " + str(payment[1])
 			
 		for player in self.players:
-			player.round_end(winner, looser, wintype, payment_name, scores, minipoints, real_diffs, looser_riichi)
+			player.round_end(winner, looser, wintype, payment_name, scores, minipoints, real_diffs, looser_riichi, ura_dora_indicators)
 
 	def end_of_round_draw(self):
 		winners = [ player for player in self.players if player.is_tenpai() ]

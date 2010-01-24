@@ -120,7 +120,8 @@ class Table:
 	def reset_all(self):
 		self.tiles = []
 		self.hand = []
-		self.dora_indcators = []
+		self.dora_indicators = []
+		self.ura_dora_indicators = []
 
 		self.open_set_positions = [ 
 			((1005,690), direction_up, 0), 
@@ -187,10 +188,18 @@ class Table:
 		return (px, py)
 
 	def add_dora_indicator(self, tile_name):
-		self.dora_indcators.append(self.new_tile(tile_name))
+		self.dora_indicators.append(self.new_tile(tile_name))
 		px, py = 500, 300
-		px -= self.get_face_size_x() * len(self.dora_indcators) / 2
-		for tile in self.dora_indcators:
+		px -= self.get_face_size_x() * len(self.dora_indicators) / 2
+		for tile in self.dora_indicators:
+			tile.position = (px, py)
+			px += self.get_face_size_x()
+
+	def add_ura_dora_indicator(self, tile_name):
+		self.ura_dora_indicators.append(self.new_tile(tile_name))
+		px, py = 500, 300 + self.get_face_size_y() + 10
+		px -= self.get_face_size_x() * len(self.ura_dora_indicators) / 2
+		for tile in self.ura_dora_indicators:
 			tile.position = (px, py)
 			px += self.get_face_size_x()
 

@@ -126,6 +126,7 @@ class Mahjong:
 		for i in xrange(4):
 			if winds[(my_id + i) % 4] == wind:
 				return i
+		raise Exception("Unknown player: " + wind)
 
 	def create_shoutbox(self, wind, text):
 		return self.player_boxes[self.player_id_by_wind(wind)].create_shoutbox(text)

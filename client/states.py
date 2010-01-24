@@ -384,6 +384,8 @@ class ScoreState(RoundPreparingState):
 			button = Button( (475,380), (120, 30), "Show score", self.show_score_clicked)
 			shoutbox = self.mahjong.create_shoutbox(self.message["player"], self.message["wintype"] + "!")
 			self.setup_widgets([ button, shoutbox ])
+			for tile_name in self.message["ura_dora_indicators"].split():
+				self.mahjong.table.add_ura_dora_indicator(tile_name)
 		else:
 			# Draw
 			if self.message["tenpai"]:
@@ -450,9 +452,6 @@ class TestState(State):
 		self.mahjong.my_wind = "WE"
 		#self.mahjong.table.set_new_hand(["DW", "DW", ])
 
-		for w in winds:
-			self.mahjong.set_riichi(w)
-
 		for x in xrange(4):
 			self.mahjong.table.add_open_set(x, [ "C2", "DR", "DR", "DR" ], [2,3])
 			self.mahjong.table.add_open_set(x, [ "C2", "C1", "C2", "C3" ], [1])
@@ -471,8 +470,17 @@ class TestState(State):
 		self.mahjong.table.steal_from_dropzone(0)
 		self.mahjong.table.new_tile_to_dropzone(0, "DW")
 
-		
+
+		for tile in [ "C1","DR", "WW", "P5", "B3" ]:
+			self.mahjong.table.add_dora_indicator(tile)
+
+		for tile in [ "C2","DG", "WE", "P6", "B4" ]:
+			self.mahjong.table.add_ura_dora_indicator(tile)
+
 		self.mahjong.init_player_boxes(["A","B", "C", "D"], ["east", "south", "west", "north"], (1000, 2000, 25000, 30000))
+
+		for w in winds:
+			self.mahjong.set_riichi(w)
 
 	def tick(self):
 		pass

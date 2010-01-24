@@ -170,7 +170,8 @@ class EvalHandTestCase(TestCase):
 	def test_score(self):
 		hand = [ "WN", "B9", "B6", "WN", "B4", "B8", "B5", "B7"]
 		sets = [chi("B1"), chi("P5")]
-		payment, scores, minipoints = compute_score(tiles(hand), sets, "Ron", [], [], Tile("WE"), Tile("WW"))
+		payment, scores, minipoints = compute_score(tiles(hand), sets, "Ron", ([], [ Tile("B7") ]), [], Tile("WE"), Tile("WW"))
+		self.assertEquals(payment, ('', 2000))
 		self.assertEquals(minipoints, 30)
 
 class BotEngineTestCase(TestCase):
