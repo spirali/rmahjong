@@ -300,7 +300,7 @@ class NetworkPlayer(Player):
 		msg = {}
 		msg["message"] = "CLOSED_KAN"
 		msg["player"] = player.wind.name
-		msg["tile"] = tile.kan.tile.name
+		msg["tile"] = kan.tile.name
 		msg["dora_indicator"] = dora_indicator.name
 		self.connection.send_dict(msg)
 
