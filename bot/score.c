@@ -75,6 +75,7 @@ static int score_san_shoku_dokou(int tile_1, int tile_2, int tile_3)
 	return 0;
 }
 
+/* !! Open sets has to be at the end of array of sets */
 int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count, int round_wind, int player_wind)
 {
 	int fan = 0;
@@ -116,8 +117,19 @@ int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count, i
 		}
 	}
 
-	/* San shoku dokou */
+	/* San shoku dokou & San-anko */
 	if (pon_count >= 3) {
+		int closed_pons = 0;
+		for (t = 0; t < 4 - open_sets_count; t++) { 
+			// open sets are placed at the end of the array
+			if (sets[t]->type == PON) {
+				closed_pons++;
+			}
+		}
+		if (closed_pons >= 3) {
+			fan += 2; // San-anko
+		}
+
 		fan += score_san_shoku_dokou(pon[0]->tile, pon[1]->tile, pon[2]->tile);
 		if (pon_count == 4) {
 			fan += score_san_shoku_dokou(pon[3]->tile, pon[0]->tile, pon[1]->tile);
@@ -140,7 +152,7 @@ int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count, i
 	}
 
 	/* Chanta and Junchan */
-	if (chi_count > 1 && !IS_NONTERMINAL(pair)) {
+	if (chi_count >= 1 && !IS_NONTERMINAL(pair)) {
 		for (t = 0; t < 4; t++) {
 			if (nonterminals_only(sets[t]))
 				break;

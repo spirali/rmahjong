@@ -393,6 +393,14 @@ def score_chinitsu(pair_tile, sets):
 	else:
 		return 5
 
+
+def score_sananko(pair_tile, sets):
+	s = [ set for set in sets if set.closed and set.is_pon_or_kan() ]
+	if len(s) >= 3:
+		return 2
+	return 0
+
+
 def score_special_chii_toitsu(hand):
 	yaku = [ ("Chii toitsu", 2) ]
 	if all((tile.is_nonterminal() for tile in hand)):
@@ -420,6 +428,7 @@ score_functions = [
 	("Sanshoku douko", score_sanshoku_douko),
 	("Honitsu", score_honitsu),
 	("Chinitsu", score_chinitsu),
+	("San-anko", score_sananko),
 ]
 
 

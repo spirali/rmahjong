@@ -338,10 +338,12 @@ int choose_drop_tile(GameContext *gc, tile_id *target)
 	return pick_tile(unn, id);
 }
 
-int detect_sets(tile_id *hand, tile_id *original_hand, int pair,  TileSet **sets, int set_id, int h, int open_sets_count, int round_wind, int player_wind)
+int detect_sets(tile_id *hand, tile_id *original_hand, int pair, TileSet **sets, int set_id, int h, int open_sets_count, int round_wind, int player_wind)
 {
 	if (set_id >= 4) {
-		return count_of_fan(original_hand, pair, sets, open_sets_count, round_wind, player_wind);
+		TileSet *s[4];
+		s[0] = sets[3]; s[1] = sets[2]; s[2] = sets[1]; s[3] = sets[0]; // Revers of sets
+		return count_of_fan(original_hand, pair, s, open_sets_count, round_wind, player_wind);
 	}
 	
 	if (hand[h] == 0) {

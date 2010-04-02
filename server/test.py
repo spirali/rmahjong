@@ -50,13 +50,13 @@ test_hands = [
 	([ "WW", "C4", "C4", "C4", "C4", "C2", "C3", "DR", "B9", "DR", "B8", "B7", "DR", "WW" ], [], 1), #0, Yaku-Pai
 	([ "DR", "DR", "C1", "C1", "C4", "C2", "C3", "B8", "B9", "WN", "WN", "B7", "DR", "WN" ], [], 1), #1, Yaku-Pai
 	([ "C1", "B1", "B9", "C2", "WW", "WW", "WN", "WS", "DR", "DG", "DW", "C5", "P7", "P9" ], [], 0), #2, Nothing
-	([ "DG", "DG", "DR", "DW", "DG", "DW", "DW", "DR", "B1", "P2", "P2", "P2", "B1", "DR" ], [], 3), #3, 3x Yaku-Pai
+	([ "DG", "DG", "DR", "DW", "DG", "DW", "DW", "DR", "B1", "P2", "P2", "P2", "B1", "DR" ], [], 5), #3, 3x Yaku-Pai, San-anko
 	([ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C2", "C2" ], [], 1), #4, Tan-Yao
-	([ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C9", "C9" ], [], 0), #5, Nothing
+	([ "C2", "C3", "C4", "B3", "B3", "B4", "P8", "P8", "P8", "P5", "P6", "P7", "C9", "C9" ], [], 0), #5, Nothing
 	([ "WW", "C1", "C1", "C1", "B9", "B8", "B7", "WW" ], [ pon("DR"), chi("C2")], 1), #6, Yaku-Pai
 	([ "WW", "C1", "C1", "C1", "B9", "B8", "B7", "WW" ], [ ckan("DR"), chi("C3")], 1), #7, Yaku-Pai
 	([ "WW", "C1", "C1", "C1", "B6", "B8", "B7", "WW" ], [ pon("DR"), pon("DG")], 2), #8, 2x Yaku-Pai
-	([ "WW", "C1", "C1", "C1", "B6", "B8", "B7", "WW" ], [ ckan("DR"), ckan("DG")], 2), #9, 2x Yaku-Pai
+	([ "WW", "C1", "C1", "C1", "B6", "B8", "B7", "WW" ], [ ckan("DR"), ckan("DG")], 4), #9, 2x Yaku-Pai, San-anko
 	([ "C2", "C3", "C4", "C2", "C3", "C4", "P8", "P8", "P8", "P5", "P6", "P7", "C9", "C9" ], [], 1), #10, Ipeikou
 	([ "C2", "C3", "C4", "C2", "C3", "C4", "P8", "P8", "P8", "C9", "C9" ], [ chi("P5") ], 0), #11, Nothing
 	([ "C6", "C7", "C8", "B6", "B7", "B8", "P6", "P7", "P8", "C9", "C9", "B1", "B1", "B1" ], [], 2), #12, Sanshoku doujun (closed)
@@ -82,8 +82,8 @@ test_hands = [
 	([ "WW", "C1", "C2", "C3", "B7", "B8", "B9", "WW" ], [ ckan("B9"), chi("P1") ], 1), #32, Chanta, (open)
 	([ "B9", "C1", "C2", "C3", "B1", "B1", "B1", "B9" ], [ ckan("P1"), chi("C7") ], 2), #33, Junchan
 	([ "WN", "P2", "P3", "P1", "WN", "C3", "C2", "C1" ], [ ckan("WE"), chi("C7") ], 1), #34, Chanta (open)
-	([ "P2", "P2", "P2", "P2", "P3", "P4", "P9", "P9" ], [ ckan("B2"), ckan("C2") ], 2), #35, Sanshoku douko
-	([ "WN", "WN", "P9", "P9", "P9", "C9", "C9", "C9","C3","C4","C5", "B9","B9", "B9"], [], 2), #36, Sanshoku douko
+	([ "P2", "P2", "P2", "P2", "P3", "P4", "P9", "P9" ], [ ckan("B2"), ckan("C2") ], 4), #35, Sanshoku douko, San-anko
+	([ "WN", "WN", "P9", "P9", "P9", "C9", "C9", "C9","C3","C4","C5", "B9","B9", "B9"], [], 4), #36, Sanshoku douko, San-anko
 	([ "WS", "WS", "P9", "P9", "P9", "P9", "P1", "P1","DR","DR","B3", "B3","B4", "B4"], [], 0), #37, Nothing 
 	([ "WS", "WS", "P1", "P1","DR","DR","B3", "B3","B4", "B4"], [ ckan("P9") ], 0), #38, Nothing 
 	([ "DR", "DR", "P1", "P2", "P3","WE","WE","WE"], [ ckan("P9"), chi("P2") ], 2), #39, Honitsu 
@@ -98,6 +98,7 @@ test_hands = [
 	([ "C3", "C3", "P8", "P8", "C7", "C7", "P5", "P5", "P6", "P6", "B3", "B3", "B4", "B4"], [], 3), #48, Chii toitsu, tanyao
 	([ "WE", "WE", "P9", "P9", "P8", "P8", "P1", "P1", "DR", "DR", "P3", "P3", "P4", "P4"], [], 5), #49, Chii toitsu, honitsu
 	([ "B1", "B1", "B8", "B8", "B7", "B7", "B5", "B5", "B6", "B6", "B3", "B3", "B4", "B4"], [], 8), #50, Chii toitsu, chinitsu
+	([ "WW", "C1", "C2", "C3", "WW" ], [ pon("B9"), pon("P1"), pon("C2") ], 0), #51, Nothing 
 ]
 
 
@@ -110,7 +111,7 @@ class EvalHandTestCase(TestCase):
 			yaku = find_tiles_yaku(tiles(hand), sets, [], Tile("XX"), Tile("XX"))
 			self.assert_(score == r, "Hand %i returned score %i %s hand=%s" % (hand_id, score, yaku, hand))
 
-		hand = [ "WE", "C2", "C2", "C2", "WN", "WN", "WN", "DR", "B9", "DR", "B8", "B7", "WE", "WE" ]
+		hand = [ "WE", "C2", "C3", "C4", "WN", "WN", "WN", "DR", "B9", "DR", "B8", "B7", "WE", "WE" ]
 		sets = []
 		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WN")), 2)
 		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WE")), 2)
@@ -230,7 +231,7 @@ class BotEngineTestCase(TestCase):
 		e = BotEngine()
 		try:
 			e.set_blocking()
-			hand = [ "WE", "C1", "C1", "C1", "DR", "B9", "DR", "B8", "B7", "WE", "WE" ]
+			hand = [ "WE", "C2", "C3", "C4", "DR", "B9", "DR", "B8", "B7", "WE", "WE" ]
 			e.set_hand(tiles(hand))
 			e.set_sets([ pon("WN") ])
 
