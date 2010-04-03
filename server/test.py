@@ -50,7 +50,7 @@ test_hands = [
 	([ "WW", "C4", "C4", "C4", "C4", "C2", "C3", "DR", "B9", "DR", "B8", "B7", "DR", "WW" ], [], 1), #0, Yaku-Pai
 	([ "DR", "DR", "C1", "C1", "C4", "C2", "C3", "B8", "B9", "WN", "WN", "B7", "DR", "WN" ], [], 1), #1, Yaku-Pai
 	([ "C1", "B1", "B9", "C2", "WW", "WW", "WN", "WS", "DR", "DG", "DW", "C5", "P7", "P9" ], [], 0), #2, Nothing
-	([ "DG", "DG", "DR", "DW", "DG", "DW", "DW", "DR", "B1", "P2", "P2", "P2", "B1", "DR" ], [], 5), #3, 3x Yaku-Pai, San-anko
+	([ "DG", "DG", "DR", "DW", "DG", "DW", "DW", "DR", "B1", "P2", "P2", "P2", "B1", "DR" ], [], 7), #3, 3x Yaku-Pai, San-anko, Toitoiho
 	([ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C2", "C2" ], [], 1), #4, Tan-Yao
 	([ "C2", "C3", "C4", "B3", "B3", "B4", "P8", "P8", "P8", "P5", "P6", "P7", "C9", "C9" ], [], 0), #5, Nothing
 	([ "WW", "C1", "C1", "C1", "B9", "B8", "B7", "WW" ], [ pon("DR"), chi("C2")], 1), #6, Yaku-Pai
@@ -94,11 +94,16 @@ test_hands = [
 	([ "P2", "P2", "P8", "P8", "P8", "P3", "P3", "P3", "P6","P7","P8", "P3","P4", "P5"], [], 7), #44, Chinitsu, tanyao
 	([ "P1", "P1", "P1", "P2", "P3", "P9","P7","P8", "P9","P9", "P9"], [ ckan("DR") ], 6), #45, Honitsu, Chanta, Yaku-pai
 	([ "WS", "WS", "P9","P7","P8", "P9","P9", "P9"], [ pon("P1"), ckan("DR") ], 4), #46, Honitsu, Chanta, Yaku-pai
-	([ "WE", "WE", "P9", "P9", "C9", "C9", "P1", "P1", "DR", "DR", "B3", "B3", "B4", "B4"], [], 2), #47, Chii toitsu
-	([ "C3", "C3", "P8", "P8", "C7", "C7", "P5", "P5", "P6", "P6", "B3", "B3", "B4", "B4"], [], 3), #48, Chii toitsu, tanyao
-	([ "WE", "WE", "P9", "P9", "P8", "P8", "P1", "P1", "DR", "DR", "P3", "P3", "P4", "P4"], [], 5), #49, Chii toitsu, honitsu
-	([ "B1", "B1", "B8", "B8", "B7", "B7", "B5", "B5", "B6", "B6", "B3", "B3", "B4", "B4"], [], 8), #50, Chii toitsu, chinitsu
-	([ "WW", "C1", "C2", "C3", "WW" ], [ pon("B9"), pon("P1"), pon("C2") ], 0), #51, Nothing 
+	([ "WW", "C1", "C2", "C3", "WW" ], [ pon("B9"), pon("P1"), pon("C2") ], 0), #47, Nothing 
+	([ "B2", "B2" ], [ pon("B9"), pon("P1"), ckan("C2"), ckan("B5") ], 2), #48, Toitoi 
+	([ "B2", "B2" ], [ ckan("B8"), pon("P1"), ckan("C2"), ckan("B5") ], 4), #49, Toitoi, San-anko
+	([ "P2", "P2", "P2", "B1", "B1", "B1", "P9", "P9" ], [ ckan("B2"), ckan("C2") ], 6), #50, Sanshoku douko, San-anko, Toitoi
+
+	# -----Special hands --------- Ignored by bot eval
+	([ "WE", "WE", "P9", "P9", "C9", "C9", "P1", "P1", "DR", "DR", "B3", "B3", "B4", "B4"], [], 2), #X, Chii toitsu
+	([ "C3", "C3", "P8", "P8", "C7", "C7", "P5", "P5", "P6", "P6", "B3", "B3", "B4", "B4"], [], 3), #X, Chii toitsu, tanyao
+	([ "WE", "WE", "P9", "P9", "P8", "P8", "P1", "P1", "DR", "DR", "P3", "P3", "P4", "P4"], [], 5), #X, Chii toitsu, honitsu
+	([ "B1", "B1", "B8", "B8", "B7", "B7", "B5", "B5", "B6", "B6", "B3", "B3", "B4", "B4"], [], 8), #X, Chii toitsu, chinitsu
 ]
 
 
@@ -215,8 +220,8 @@ class BotEngineTestCase(TestCase):
 		e = BotEngine()
 		try:
 			e.set_blocking()
-			# Remove last 2 tests (Hand: seven pairs), bot "question_yaku" detect only "normal sets"
-			for hand_id, h in enumerate(test_hands[:-5]): 
+			# Remove last 4 tests (Hand: seven pairs), bot "question_yaku" detect only "normal sets"
+			for hand_id, h in enumerate(test_hands[:-4]): 
 				hand, sets, r = h
 				e.set_hand(tiles(hand))
 				e.set_sets(sets)

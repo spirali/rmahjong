@@ -117,7 +117,7 @@ int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count, i
 		}
 	}
 
-	/* San shoku dokou & San-anko */
+	/* San shoku dokou & San-anko & Toitoi */
 	if (pon_count >= 3) {
 		int closed_pons = 0;
 		for (t = 0; t < 4 - open_sets_count; t++) { 
@@ -132,6 +132,7 @@ int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count, i
 
 		fan += score_san_shoku_dokou(pon[0]->tile, pon[1]->tile, pon[2]->tile);
 		if (pon_count == 4) {
+			fan += 2; // Toitoi
 			fan += score_san_shoku_dokou(pon[3]->tile, pon[0]->tile, pon[1]->tile);
 			fan += score_san_shoku_dokou(pon[3]->tile, pon[0]->tile, pon[2]->tile);
 			fan += score_san_shoku_dokou(pon[3]->tile, pon[1]->tile, pon[2]->tile);
