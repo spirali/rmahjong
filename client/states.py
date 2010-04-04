@@ -330,7 +330,6 @@ class MyMoveState(RoundState):
 		self.add_buttons(actions, self.on_action_click)
 
 
-
 class OtherMoveState(RoundState):
 
 	def __init__(self, mahjong, wind):
@@ -368,6 +367,7 @@ class OtherMoveState(RoundState):
 		for tile in self.highlight_tiles:
 			tile.highlight = False
 			tile.callback = None
+
 
 class ScoreState(RoundPreparingState):
 	
@@ -450,6 +450,7 @@ class TestState(State):
 		self.mahjong.table.set_new_hand(["DW", "DW", "C2","C3","C4", "WW", "WW", "WW", "B8", "B6", "B7"])
 		self.mahjong.table.set_new_hand(["DW", "DW", "C2","C3","C4", "WW", "WW", "WW"])
 		self.mahjong.my_wind = "WE"
+		self.mahjong.set_round_wind("WS")
 		#self.mahjong.table.set_new_hand(["DW", "DW", ])
 
 		for x in xrange(4):

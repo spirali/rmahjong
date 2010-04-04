@@ -20,7 +20,7 @@ import logging
 
 from graphics import init_fonts
 from table import Table, winds
-from gui import GuiManager, PlayerBox, RiichiStick
+from gui import GuiManager, PlayerBox, RiichiStick, TextWidget
 from directions import direction_up, direction_down, direction_left, direction_right
 from states import ConnectingState, TestState
 
@@ -38,6 +38,7 @@ class Mahjong:
 		self.my_wind = None
 		self.round_wind = None
 		self.riichi = False
+		self.round_label = None
 
 		self.riichi_sticks = [ 
 			RiichiStick((420,440),(160,12)),
@@ -51,6 +52,9 @@ class Mahjong:
 			self.gui.remove_widget(stick)
 		for box in self.player_boxes:
 			self.gui.remove_widget(box)
+		if self.round_label:
+			self.gui.remove_widget(self.round_label)
+			self.round_label = None
 		self.player_boxes = []
 		self.table.reset_all()
 		self.riichi = False
@@ -165,10 +169,17 @@ class Mahjong:
 		self.init_player_boxes(names, player_winds, scores)
 		self.table.set_new_hand(message["hand"].split())
 		self.add_dora_indicator(message["dora_indicator"])
-		self.round_wind = message["round_wind"]
+		self.set_round_wind(message["round_wind"])
 
 	def add_dora_indicator(self, tile_name):
 		self.table.add_dora_indicator(tile_name)
+
+	def set_round_wind(self, wind):
+		wtiles_to_names = { "WE" : "east", "WS" : "south", "WN" : "north", "WW" : "west" }
+		if self.round_label:
+			self.gui.remove_widget(self.round_label)
+		self.round_label = TextWidget((500,270), "Round: " + wtiles_to_names[wind])
+		self.gui.add_widget(self.round_label)
 
 
 def main_init():

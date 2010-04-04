@@ -131,6 +131,16 @@ class Label(Widget):
 		self.blit_to_center(textsurface)
 
 
+class TextWidget(Widget):
+	
+	def __init__(self, position, text, color = (255,255,255)):
+		textsurface = graphics.font.render(text, True, color)
+		w = textsurface.get_width()
+		h = textsurface.get_height()		
+		Widget.__init__(self, (position[0] - w/2 , position[1] - h/2), (w, h))
+		self.surface = textsurface
+
+
 class PlayerBox(Widget):
 	
 	def __init__(self, position, player_name, wind, score, direction, shout_vector):
