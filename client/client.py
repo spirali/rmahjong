@@ -178,7 +178,7 @@ class Mahjong:
 		wtiles_to_names = { "WE" : "east", "WS" : "south", "WN" : "north", "WW" : "west" }
 		if self.round_label:
 			self.gui.remove_widget(self.round_label)
-		self.round_label = TextWidget((500,270), "Round: " + wtiles_to_names[wind])
+		self.round_label = TextWidget((500,270), "Round: " + wtiles_to_names[wind], (175,175,175))
 		self.gui.add_widget(self.round_label)
 
 

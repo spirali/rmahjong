@@ -30,6 +30,8 @@ class Game:
 		#self.rotate_players() # DEBUG
 		#self.rotate_players() # DEBUG
 		#self.rotate_players() # DEBUG
+		self.first_east_player = self.players[0]
+		self.round_wind = east_wind
 		logging.info("Players order: " + str(self.players))
 		self.round_id = 0
 
@@ -44,14 +46,20 @@ class Game:
 		# Rotate players
 		if rotate_players:
 			self.rotate_players()
+			if self.players[0] == self.first_east_player:
+				self.next_round_wind()
 
-		return Round(self.players, self.random)
+		return Round(self.players, self.random, self.round_wind)
+
+	def next_round_wind(self):
+		self.round_wind = winds[(1 + winds.index(self.round_wind)) % 4]
 
 
 class Round:
 
-	def __init__(self, players, random):
+	def __init__(self, players, random, round_wind):
 		self.random = random
+		self.round_wind = round_wind
 		self.init_round()
 		self.init_players(players)
 		logging.info("Round is ready")
@@ -63,7 +71,6 @@ class Round:
 		self.wall = 4 * all_tiles
 		self.dora_indicators = [ self.pick_random_tile() ]
 		self.doras = [ dora_from_indicator(self.dora_indicators[0]) ]
-		self.round_wind = east_wind
 		self.active_player = None
 		self.move_id = 0
 		self.last_innterruption = 0
