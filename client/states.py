@@ -485,3 +485,15 @@ class TestState(State):
 
 	def tick(self):
 		pass
+
+class TestTableState(State):
+
+	def __init__(self, mahjong):
+		State.__init__(self, mahjong)
+		
+		#table = ScoreTable(["ABC 100", "XYZ 200"], "8000", "2000/300", "Player_name", "2000")
+		table = PaymentTable([("ABC", 1000, 2000), ("CDE", 200000, -15000), ("EFG", 0, 123456), ("XYZ", 15000, 0)])
+		mahjong.gui.add_widget(table)
+
+	def tick(self):
+		pass

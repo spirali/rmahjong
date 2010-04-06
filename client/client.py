@@ -22,7 +22,7 @@ from graphics import init_fonts
 from table import Table, winds
 from gui import GuiManager, PlayerBox, RiichiStick, TextWidget
 from directions import direction_up, direction_down, direction_left, direction_right
-from states import ConnectingState, TestState
+from states import ConnectingState, TestState, TestTableState
 
 
 class Mahjong:
@@ -194,5 +194,6 @@ main_init()
 mahjong = Mahjong()
 mahjong.set_state(ConnectingState(mahjong))
 #mahjong.set_state(TestState(mahjong))
+#mahjong.set_state(TestTableState(mahjong))
 mahjong.run()
 pygame.quit()
