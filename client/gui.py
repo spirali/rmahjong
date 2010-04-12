@@ -222,6 +222,12 @@ class Table(Widget):
 		if row_change:
 			self.row += row_change
 
+	def text_center(self, text, row_change, color = (255,255,255)):
+		textsurface = graphics.font.render(text, True, color)
+		self.surface.blit(textsurface, ((self.size[0] - textsurface.get_width()) / 2, self.row))
+		if row_change:
+			self.row += row_change
+
 	def line(self, row_change, color = (255,255,255)):
 		pygame.draw.line(self.surface, color, (0, self.row), (self.size[0], self.row))
 		self.row += row_change
@@ -280,3 +286,18 @@ class PaymentTable(Table):
 			return "+" + str(payment)
 		else:
 			return str(payment)
+
+
+class FinalTable(Table):
+
+	def __init__(self, results):
+		Table.__init__(self, (350,150), (380,400))
+		self.set_row(30)
+
+		self.text_center("Game results", 30)
+		self.line(10)
+		for name, score in results:
+			self.text_center(name, 30)
+			self.text_center(str(score), 30)
+			self.line(15)
+

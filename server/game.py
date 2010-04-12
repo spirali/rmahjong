@@ -49,17 +49,21 @@ class Game:
 			if self.players[0] == self.first_east_player:
 				self.next_round_wind()
 
-		return Round(self.players, self.random, self.round_wind)
+		return Round(self.players, self.random, self.round_wind, self.is_potential_last_round())
 
 	def next_round_wind(self):
 		self.round_wind = winds[(1 + winds.index(self.round_wind)) % 4]
 
+	def is_potential_last_round(self):
+		return self.round_wind == winds[1] and self.players[0].right_player == self.first_east_player
+
 
 class Round:
 
-	def __init__(self, players, random, round_wind):
+	def __init__(self, players, random, round_wind, potential_last):
 		self.random = random
 		self.round_wind = round_wind
+		self.potential_last = potential_last
 		self.init_round()
 		self.init_players(players)
 		logging.info("Round is ready")
@@ -140,6 +144,9 @@ class Round:
 	def player_on_move(self, player):
 		self.move_id += 1
 
+	def is_last_round(self, winners):
+		return self.potential_last and not self.players[0] in winners
+
 	def end_of_round(self, winner, looser, wintype):
 		if winner.riichi:
 			ura_dora_indicators = [ self.pick_random_tile() for t in self.doras ]
@@ -183,7 +190,7 @@ class Round:
 			payment_name = payment[0] + " " + str(payment[1])
 			
 		for player in self.players:
-			player.round_end(winner, looser, wintype, payment_name, scores, minipoints, real_diffs, looser_riichi, ura_dora_indicators)
+			player.round_end(winner, looser, wintype, payment_name, scores, minipoints, real_diffs, looser_riichi, ura_dora_indicators, self.is_last_round([winner]))
 
 	def end_of_round_draw(self):
 		winners = [ player for player in self.players if player.is_tenpai() ]
@@ -205,8 +212,7 @@ class Round:
 				diffs[player] = 0
 
 		for player in self.players:
-			player.round_end_draw(winners, loosers, diffs)
-		
+			player.round_end_draw(winners, loosers, diffs, self.is_last_round(winners))
 		return winners, loosers
 
 	def payment_diffs(self, payment, wintype, winner, looser):

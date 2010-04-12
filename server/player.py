@@ -129,10 +129,10 @@ class Player:
 
 		return options
 
-	def round_end(self, player, looser, win_type, payment_name, scores, minipints, diffs, looser_riichi, ura_dora_indicators):
+	def round_end(self, player, looser, win_type, payment_name, scores, minipints, diffs, looser_riichi, ura_dora_indicators, end_of_game):
 		pass
 
-	def round_end_draw(self, winners, loosers, payment_diffs):
+	def round_end_draw(self, winners, loosers, payment_diffs, end_of_game):
 		pass
 
 	def closed_kan_played_by_me(self, kan, new_tile, dora_indicator):
@@ -335,7 +335,7 @@ class NetworkPlayer(Player):
 	def player_played_riichi(self, player):
 		self.connection.send_message(message = "RIICHI", player = player.wind.name)
 
-	def round_end(self, player, looser, win_type, payment_name, scores, minipoints, payment_diffs, looser_riichi, ura_dora_indicators):
+	def round_end(self, player, looser, win_type, payment_name, scores, minipoints, payment_diffs, looser_riichi, ura_dora_indicators, end_of_game):
 		msg = {}
 		msg["message"] = "ROUND_END"
 		msg["payment"] = payment_name
@@ -346,6 +346,7 @@ class NetworkPlayer(Player):
 		msg["looser_riichi"] = looser_riichi
 		msg["score_items"] = ";".join(map(lambda sc: "%s %s" % (sc[0], sc[1]), scores))
 		msg["ura_dora_indicators"] = " ".join([ tile.name for tile in ura_dora_indicators ])
+		msg["end_of_game"] = end_of_game
 
 		for player in self.server.players:
 			msg[player.wind.name + "_score"] = player.score 
@@ -353,11 +354,12 @@ class NetworkPlayer(Player):
 	
 		self.connection.send_dict(msg)
 
-	def round_end_draw(self, winners, loosers, payment_diffs):
+	def round_end_draw(self, winners, loosers, payment_diffs, end_of_game):
 		msg = {}
 		msg["message"] = "DRAW"
 		msg["tenpai"] = " ".join((player.wind.name for player in winners))
 		msg["not_tenpai"] = " ".join((player.wind.name for player in loosers))
+		msg["end_of_game"] = end_of_game
 
 		for player in self.server.players:
 			msg[player.wind.name + "_score"] = player.score 
@@ -467,10 +469,10 @@ class BotPlayer(Player):
 				self.server.player_is_ready(self)
 
 
-	def round_end(self, player, looser, win_type, payment_name, scores, minipints, diffs, looser_riichi, ura_doras_indicators):
+	def round_end(self, player, looser, win_type, payment_name, scores, minipints, diffs, looser_riichi, ura_doras_indicators, end_of_game):
 		self.server.player_is_ready(self)
 
-	def round_end_draw(self, winners, loosers, diffs):
+	def round_end_draw(self, winners, loosers, diffs, end_of_game):
 		self.server.player_is_ready(self)
 
 	def round_is_ready(self):

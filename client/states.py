@@ -17,7 +17,7 @@
 
 from connection import Connection
 from dictprotocol import DictProtocol
-from gui import Button, Label, ScoreTable, PaymentTable
+from gui import Button, Label, ScoreTable, PaymentTable, FinalTable
 from table import winds
 from copy import copy
 
@@ -29,6 +29,7 @@ class State:
 	def __init__(self, mahjong):
 		self.mahjong = mahjong
 		self.protocol = mahjong.protocol
+		self.widgets = []
 		
 	def tick(self):
 		pass
@@ -37,7 +38,7 @@ class State:
 		pass
 
 	def leave_state(self):
-		pass
+		self.remove_widgets()
 
 	def tick(self):
 		if self.protocol:
@@ -47,6 +48,17 @@ class State:
 
 	def process_message(self, message):
 		self.mahjong.process_network_message(message)
+
+	def setup_widgets(self, widgets):
+		self.remove_widgets()
+		self.widgets = widgets
+		for widget in self.widgets:
+			self.mahjong.gui.add_widget(widget)
+
+	def remove_widgets(self):
+		for widget in self.widgets:
+			self.mahjong.gui.remove_widget(widget)
+		self.widgets = []
 
 
 class RoundPreparingState(State):
@@ -135,8 +147,6 @@ class RoundState(State):
 	def __init__(self, mahjong):
 		State.__init__(self, mahjong)
 		self.protocol = mahjong.protocol
-		self.widgets = []
-
 
 	def process_message(self, message):
 		name = message["message"]
@@ -181,17 +191,6 @@ class RoundState(State):
 
 		State.process_message(self, message)		
 
-	def enter_state(self):
-		pass
-
-	def remove_widgets(self):
-		for widget in self.widgets:
-			self.mahjong.gui.remove_widget(widget)
-		self.widgets = []
-
-	def leave_state(self):
-		self.remove_widgets()
-
 	def add_buttons(self, button_labels, callback):
 		pos = self.mahjong.table.picked_tile_position()
 		px, py = pos[0],640
@@ -234,7 +233,6 @@ class RoundState(State):
 		self.mahjong.table.add_open_set(player_id, [tile_name] * 4, [])
 		if player_id == 0:
 			self.process_self_kan(message)
-
 
 	def process_self_kan(self, message):
 		raise Exception("Invalid state for self_kan")
@@ -374,7 +372,6 @@ class ScoreState(RoundPreparingState):
 	def __init__(self, mahjong, round_end_message):
 		RoundPreparingState.__init__(self, mahjong)
 		self.message = round_end_message
-		self.widgets = []
 
 	def enter_state(self):
 		State.enter_state(self)
@@ -398,20 +395,6 @@ class ScoreState(RoundPreparingState):
 			button = Button( (475,410), (120, 30), "Show score", self.show_payments)
 			self.setup_widgets([ button, label ])
 
-	def setup_widgets(self, widgets):
-		self.remove_widgets()
-		self.widgets = widgets
-		for widget in self.widgets:
-			self.mahjong.gui.add_widget(widget)
-
-	def remove_widgets(self):
-		for widget in self.widgets:
-			self.mahjong.gui.remove_widget(widget)
-
-	def leave_state(self):
-		State.leave_state(self)
-		self.remove_widgets()
-
 	def show_score_clicked(self, button):
 		score_items = self.message["score_items"].split(";")
 		total_fans = self.message["total_fans"]
@@ -424,8 +407,7 @@ class ScoreState(RoundPreparingState):
 		button = Button( (400,560), (300, 25), "Show payments", self.show_payments)
 		self.setup_widgets([table, button])
 
-	def show_payments(self, button):
-		button = Button( (400,560), (300, 25), "I am ready for next round", self.send_ready)
+	def get_results(self):
 		results = []
 		for wind in winds:
 			name = (self.mahjong.get_player_name(wind))
@@ -433,6 +415,15 @@ class ScoreState(RoundPreparingState):
 			payment = (int(self.message[wind + "_payment"]))
 			results.append((name, score, payment))
 		results.sort(key = lambda r: r[1], reverse = True)
+		return results
+
+	def show_payments(self, button):
+		print self.message["end_of_game"]
+		if self.message["end_of_game"] == "True":
+			button = Button( (400,560), (300, 25), "Show final score", self.final_score)
+		else:
+			button = Button( (400,560), (300, 25), "I am ready for next round", self.send_ready)
+		results = self.get_results()
 		table = PaymentTable(results)
 		self.setup_widgets([table, button])
 
@@ -442,6 +433,29 @@ class ScoreState(RoundPreparingState):
 		self.setup_widgets(widgets)
 		self.protocol.send_message(message="READY")
 
+	def final_score(self, button):
+		results = self.get_results()
+		results = map(lambda r: r[:2], results) # Remove payment
+		state = FinalState(self.mahjong, results)
+		self.mahjong.set_state(state)
+
+
+class FinalState(State):
+	
+	def __init__(self, mahjong, results):
+		State.__init__(self, mahjong)
+		self.results = results
+
+	def enter_state(self):
+		State.enter_state(self)
+
+		table = FinalTable(self.results)
+		button = Button( (400,560), (300, 25), "Return to menu", self.return_to_menu_clicked)
+		self.setup_widgets([table, button])
+
+	def return_to_menu_clicked(self, button):
+		pass
+		
 
 class TestState(State):
 
@@ -492,7 +506,8 @@ class TestTableState(State):
 		State.__init__(self, mahjong)
 		
 		#table = ScoreTable(["ABC 100", "XYZ 200"], "8000", "2000/300", "Player_name", "2000")
-		table = PaymentTable([("ABC", 1000, 2000), ("CDE", 200000, -15000), ("EFG", 0, 123456), ("XYZ", 15000, 0)])
+		#table = PaymentTable([("ABC", 1000, 2000), ("CDE", 200000, -15000), ("EFG", 0, 123456), ("XYZ", 15000, 0)])
+		table = FinalTable([("ABC", 1000), ("CDE", 200000), ("EFG", 0), ("XYZ", 15000)])
 		mahjong.gui.add_widget(table)
 
 	def tick(self):
