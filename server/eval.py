@@ -462,11 +462,14 @@ def tile_counts(hand):
 		d[hand.count(tile)].add(tile)
 	return d
 
-def riichi_test(hand):
+def riichi_test(hand, sets):
+	if any([ not s.closed for s in sets ]):
+		return False
+
 	for tile in set(hand):
 		h = copy(hand)
 		h.remove(tile)
-		if hand_in_tenpai(h, []):
+		if hand_in_tenpai(h, sets):
 			return True
 	return False
 

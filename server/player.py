@@ -99,7 +99,7 @@ class Player:
 		if count_of_tiles_yaku(self.hand, self.sets, self.get_specials_yaku(), self.round.round_wind, self.wind) > 0:
 			options.append("Tsumo")
 
-		if self.other_condition_for_riichi() and riichi_test(self.hand):
+		if self.other_condition_for_riichi() and riichi_test(self.hand, self.sets):
 			options.append("Riichi")
 
 		for tile in set(self.hand):			

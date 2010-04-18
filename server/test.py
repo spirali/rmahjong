@@ -98,6 +98,7 @@ test_hands = [
 	([ "B2", "B2" ], [ pon("B9"), pon("P1"), ckan("C2"), ckan("B5") ], 2), #48, Toitoi 
 	([ "B2", "B2" ], [ ckan("B8"), pon("P1"), ckan("C2"), ckan("B5") ], 4), #49, Toitoi, San-anko
 	([ "P2", "P2", "P2", "B1", "B1", "B1", "P9", "P9" ], [ ckan("B2"), ckan("C2") ], 6), #50, Sanshoku douko, San-anko, Toitoi
+	([ "P4", "P4", "C6", "P3", "C5", "B7", "B6", "P1", "B8", "B8" ], [ ckan("WE") ], 0), #51, Nothing
 
 	# -----Special hands --------- Ignored by bot eval
 	([ "WE", "WE", "P9", "P9", "C9", "C9", "P1", "P1", "DR", "DR", "B3", "B3", "B4", "B4"], [], 2), #X, Chii toitsu
@@ -165,13 +166,15 @@ class EvalHandTestCase(TestCase):
 			self.assertEquals(hand_in_tenpai(tiles(h), sets), tenpai)
 
 	def test_riichi(self):
-		hands = (([ "P5", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P1", "WN"], True),
-					([ "B3", "B3", "B2", "B2", "C9", "C9", "WW", "WW", "DR", "DR", "P1", "P1", "WN", "WN"], True),
-					([ "B3", "B3", "B2", "B2", "C9", "C9", "WW", "WW", "DR", "DR", "P1", "P7", "WN", "DR"], False),
-					([ "P7", "P8", "P9", "P1", "P2", "P3", "WS", "WS", "B8", "B7", "P2", "C7", "C8", "DR"], False), 
-					([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P3", "P1", "WN", "DG"], False))
-		for h, riichi in hands:
-			self.assertEquals(riichi_test(tiles(h)), riichi)
+		hands = (([ "P5", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P1", "WN"], [], True),
+					([ "B3", "B3", "B2", "B2", "C9", "C9", "WW", "WW", "DR", "DR", "P1", "P1", "WN", "WN"], [], True),
+					([ "B3", "B3", "B2", "B2", "C9", "C9", "WW", "WW", "DR", "DR", "P1", "P7", "WN", "DR"], [], False),
+					([ "P7", "P8", "P9", "P1", "P2", "P3", "WS", "WS", "B8", "B7", "P2", "C7", "C8", "DR"], [], False), 
+					([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P3", "P1", "WN", "DG"], [], False),
+					([ "P4", "P4", "P4", "C6", "C4", "C5", "B7", "B6", "B8", "B8", "DR" ], [ ckan("WE") ], True),	
+					([ "P4", "P4", "C6", "P3", "C5", "B7", "B6", "P1", "DR", "B8", "DR" ], [ ckan("WE") ], False))
+		for h, sets, riichi in hands:
+			self.assertEquals(riichi_test(tiles(h), sets), riichi, [h,sets])
 
 	def test_score(self):
 		hand = [ "WN", "B9", "B6", "WN", "B4", "B8", "B5", "B7"]

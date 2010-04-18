@@ -110,7 +110,7 @@ class PlayerMoveState(GenericGameState):
 		self.player = player
 
 	def enter_state(self):
-		logging.debug("PlayerMoveState: %s %s" % (self.player.name, self.player.hand))
+		logging.debug("PlayerMoveState: %s %s %s" % (self.player.name, self.player.hand, self.player.sets))
 		self.server.round.player_on_move(self.player)
 		self.server.round.set_active_player(self.player)
 

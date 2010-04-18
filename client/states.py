@@ -435,7 +435,6 @@ class ScoreState(RoundPreparingState):
 		return results
 
 	def show_payments(self, button):
-		print self.message["end_of_game"]
 		if self.message["end_of_game"] == "True":
 			button = Button( (400,560), (300, 25), "Show final score", self.final_score)
 		else:
