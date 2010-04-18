@@ -23,7 +23,7 @@ from table import Table, winds
 from gui import GuiManager, PlayerBox, RiichiStick, TextWidget
 from directions import direction_up, direction_down, direction_left, direction_right
 from states import ConnectingState, TestState, TestTableState
-
+from menu import MainMenuState
 
 class Mahjong:
 
@@ -39,6 +39,8 @@ class Mahjong:
 		self.round_wind = None
 		self.riichi = False
 		self.round_label = None
+
+		self.username = "Mahjong player"
 
 		self.riichi_sticks = [ 
 			RiichiStick((420,440),(160,12)),
@@ -79,6 +81,9 @@ class Mahjong:
 					self.table.on_left_button_down(ev.pos)
 			if ev.type == pygame.MOUSEBUTTONUP:
 				self.gui.button_up(ev.button, ev.pos)
+
+			if ev.type == pygame.KEYDOWN:
+				self.state.on_key_down(ev)
 		return True
 
 	def draw_all(self):
@@ -141,15 +146,14 @@ class Mahjong:
 	def set_protocol(self, protocol):
 		self.protocol = protocol
 
+	def set_username(self, name):
+		self.username = name
+
 	def get_username(self):
-		import sys
-		if len(sys.argv) >= 2:
-			return sys.argv[1]
-		else:
-			return "Mahjong player"
+		return self.username
 
 	def get_version_string(self):
-		return "0.0"
+		return "0.1"
 
 	def process_network_message(self, message):
 		print "Unknown message (%s): %s" % (self.state.__class__.__name__, repr(message))
@@ -181,6 +185,9 @@ class Mahjong:
 		self.round_label = TextWidget((500,270), "Round: " + wtiles_to_names[wind], (175,175,175))
 		self.gui.add_widget(self.round_label)
 
+	def open_main_menu(self):
+		mahjong.set_state(MainMenuState(self))
+
 
 def main_init():
 	logging.basicConfig(filename = "client.log", format = "%(asctime)s - %(levelname)s - %(message)s", level = logging.DEBUG)
@@ -189,10 +196,11 @@ def main_init():
 	init_fonts()
 	pygame.display.set_mode((1024,768), pygame.DOUBLEBUF, 32)
 	pygame.display.set_caption("RMahjong")
+	pygame.key.set_repeat(100, 30)
 
 main_init()
 mahjong = Mahjong()
-mahjong.set_state(ConnectingState(mahjong))
+mahjong.open_main_menu()
 #mahjong.set_state(TestState(mahjong))
 #mahjong.set_state(TestTableState(mahjong))
 mahjong.run()

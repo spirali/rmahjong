@@ -118,23 +118,30 @@ class Button(Widget):
 			self.pressed = False
 			self.prepare_surface()
 			self.callback(self)
-	
+
 
 class Label(Widget):
 	
 	def __init__(self, position, size, text, color = (255,255,255), bg_color = (0,0,0,90)):
 		Widget.__init__(self, position, size)
-		surface = pygame.Surface(size, pygame.SRCALPHA, pygame.display.get_surface())
-		surface.fill(bg_color)
-		textsurface = graphics.font.render(text, True, color)
+		self.color = color
+		self.bg_color = bg_color
+		self.update_text(text)
+
+	def update_text(self, text):
+		surface = self.create_bg_surface()
+		surface.fill(self.bg_color)
+		textsurface = graphics.font.render(text, True, self.color)
 		self.surface = surface
 		self.blit_to_center(textsurface)
 
 
 class TextWidget(Widget):
 	
-	def __init__(self, position, text, color = (255,255,255)):
-		textsurface = graphics.font.render(text, True, color)
+	def __init__(self, position, text, color = (255,255,255), font = None):
+		if font is None:
+			font = graphics.font
+		textsurface = font.render(text, True, color)
 		w = textsurface.get_width()
 		h = textsurface.get_height()		
 		Widget.__init__(self, (position[0] - w/2 , position[1] - h/2), (w, h))

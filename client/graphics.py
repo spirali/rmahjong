@@ -26,11 +26,13 @@ import rsvg
 
 font = None
 font_small = None
+font_large = None
 
 def init_fonts():
-	global font, font_small
+	global font, font_small, font_large
 	font = pygame.font.Font("data/fonts/finalnew.ttf", 18)
 	font_small = pygame.font.Font("data/fonts/finalnew.ttf", 14)
+	font_large = pygame.font.Font("data/fonts/finalnew.ttf", 32)
 
 def draw_text(text, position, color):
 	display.get_surface().blit(font.render(text, True, color), position)

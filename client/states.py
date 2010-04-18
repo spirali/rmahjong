@@ -49,6 +49,10 @@ class State:
 	def process_message(self, message):
 		self.mahjong.process_network_message(message)
 
+	def add_widget(self, widget):
+		self.widgets.append(widget)
+		self.mahjong.gui.add_widget(widget)
+
 	def setup_widgets(self, widgets):
 		self.remove_widgets()
 		self.widgets = widgets
@@ -59,6 +63,18 @@ class State:
 		for widget in self.widgets:
 			self.mahjong.gui.remove_widget(widget)
 		self.widgets = []
+
+	def on_key_down(self, event):
+		pass
+
+
+class OfflineState(State):
+
+	def tick(self):
+		pass
+	
+	def process_message(self, message):
+		raise Exception("Bug!")
 
 
 class RoundPreparingState(State):
@@ -82,9 +98,10 @@ class RoundPreparingState(State):
 
 class ConnectingState(RoundPreparingState):
 
-	def __init__(self, mahjong):
+	def __init__(self, mahjong, server_adress):
 		RoundPreparingState.__init__(self, mahjong)
 		self.protocol = None
+		self.server_adress = server_adress
 
 	def enter_state(self):
 		self.label = Label( (350, 350), (350,45), "Connecting ... ")
@@ -92,9 +109,9 @@ class ConnectingState(RoundPreparingState):
 		self.button = None
 		self.mahjong.draw_all()
 		connection = Connection()
-		self.button = Button( (475,420), (100, 30), "Cancel", lambda b: self.mahjong.quit())
+		self.button = Button( (475,420), (100, 30), "Cancel", lambda b: self.mahjong.open_main_menu())
 		self.mahjong.gui.add_widget(self.button)
-		if connection.connect("localhost", 4500):
+		if connection.connect(self.server_adress, 4500):
 			self.set_label("Intitializing ... ")
 			self.protocol = DictProtocol(connection)
 			self.mahjong.protocol = self.protocol
@@ -131,7 +148,7 @@ class ErrorState(State):
 	def enter_state(self):
 		self.label = Label( (350, 350), (350,45), self.error_msg, bg_color = (250, 20, 20, 90))
 		self.mahjong.gui.add_widget(self.label)
-		self.button = Button( (475,420), (100, 30), "Ok", lambda b: self.mahjong.quit())
+		self.button = Button( (475,420), (100, 30), "Ok", lambda b: self.mahjong.open_main_menu())
 		self.mahjong.gui.add_widget(self.button)
 
 	def leave_state(self):
