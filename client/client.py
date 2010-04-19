@@ -39,6 +39,7 @@ class Mahjong:
 		self.round_wind = None
 		self.riichi = False
 		self.round_label = None
+		self.fullscreen = False
 
 		self.username = "Mahjong player"
 
@@ -188,17 +189,26 @@ class Mahjong:
 	def open_main_menu(self):
 		mahjong.set_state(MainMenuState(self))
 
+	def toggle_fullscreen(self):
+		self.fullscreen = not self.fullscreen
+		video_init(self.fullscreen)
+
+def video_init(fullscreen):
+	flags = pygame.DOUBLEBUF
+	if fullscreen:
+		flags |= pygame.FULLSCREEN
+	pygame.display.set_mode((1024,768), flags, 32)
+	pygame.display.set_caption("RMahjong")
 
 def main_init():
 	logging.basicConfig(filename = "client.log", format = "%(asctime)s - %(levelname)s - %(message)s", level = logging.DEBUG)
 	pygame.display.init()
 	pygame.font.init()
 	init_fonts()
-	pygame.display.set_mode((1024,768), pygame.DOUBLEBUF, 32)
-	pygame.display.set_caption("RMahjong")
 	pygame.key.set_repeat(100, 30)
 
 main_init()
+video_init(False)
 mahjong = Mahjong()
 mahjong.open_main_menu()
 #mahjong.set_state(TestState(mahjong))

@@ -105,7 +105,7 @@ class MainMenuState(MenuState):
 	def __init__(self, mahjong):
 		items = [ ("New game", self.on_new_game),
 					("Join to network game", self.on_join_game),
-					("Options", None),
+					("Options", self.on_options),
 					("Quit", self.on_quit) ]
 		MenuState.__init__(self, mahjong, "RMahjong", items)
 
@@ -121,3 +121,20 @@ class MainMenuState(MenuState):
 
 	def on_quit(self, button):
 		self.mahjong.quit()
+
+	def on_options(self, button):
+		self.mahjong.set_state(OptionsState(self.mahjong))
+
+
+class OptionsState(MenuState):
+
+	def __init__(self, mahjong):
+		items = [ ("Toggle fullscreen", self.on_fullscreen),
+					("Back to main menu", self.on_back) ]
+		MenuState.__init__(self, mahjong, "Options", items)
+
+	def on_back(self, button):
+		self.mahjong.open_main_menu()
+
+	def on_fullscreen(self, button):
+		self.mahjong.toggle_fullscreen()
