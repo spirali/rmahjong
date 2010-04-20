@@ -157,6 +157,7 @@ class StartServerState(OfflineState):
 		self.setup_widgets([label])
 		self.mahjong.draw_all()
 		
+		process = None
 		try:
 			process = subprocess.Popen([ "../server/run_server.sh", str(self.number_of_players) ], bufsize = 0, stdout = subprocess.PIPE)
 			process_out = process.stdout
@@ -171,7 +172,8 @@ class StartServerState(OfflineState):
 				self.mahjong.set_state(ConnectingState(self.mahjong, "localhost"))
 		except OSError, e:
 			self.show_error("Server: " + str(e))
-			process.terminate()
+			if process:
+				process.terminate()
 
 	def tick(self):
 		pass
