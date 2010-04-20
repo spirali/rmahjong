@@ -15,7 +15,6 @@
 # <http://www.gnu.org/licenses/>.
 
 
-from graphics import load_svg
 import pygame
 
 class TilePainter:

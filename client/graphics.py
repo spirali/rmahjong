@@ -21,7 +21,7 @@ import array
 import math
 import cairo
 import pygame
-import rsvg
+#import rsvg
 
 
 font = None
@@ -37,6 +37,7 @@ def init_fonts():
 def draw_text(text, position, color):
 	display.get_surface().blit(font.render(text, True, color), position)
 
+"""
 def load_svg(filename, size = None, width = None):
 	svg = rsvg.Handle(file=filename)
 	dim = svg.get_dimension_data()
@@ -54,4 +55,4 @@ def load_svg(filename, size = None, width = None):
 	# Dirty hack:
 	surface.write_to_png("tmp.png")
 	return pygame.image.load("tmp.png")
-
+"""
