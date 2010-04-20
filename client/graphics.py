@@ -17,16 +17,13 @@
 
 import pygame
 from pygame import display, event
-import array
-import math
-import cairo
 import pygame
-#import rsvg
 
 
 font = None
 font_small = None
 font_large = None
+
 
 def init_fonts():
 	global font, font_small, font_large
