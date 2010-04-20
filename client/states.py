@@ -20,6 +20,9 @@ from dictprotocol import DictProtocol
 from gui import Button, Label, ScoreTable, PaymentTable, FinalTable
 from table import winds
 from copy import copy
+import subprocess
+import logging
+
 
 def split_str(string, sep):
 	return [ i for i in string.split(sep) if i != "" ]
@@ -66,6 +69,9 @@ class State:
 
 	def on_key_down(self, event):
 		pass
+
+	def show_error(self, message):
+		self.mahjong.set_state(ErrorState(self.mahjong, message))
 
 
 class OfflineState(State):
@@ -119,7 +125,7 @@ class ConnectingState(RoundPreparingState):
 				user_name = self.mahjong.get_username(), 
 				version = self.mahjong.get_version_string())
 		else:
-			self.mahjong.set_state(ErrorState(self.mahjong, "Connection failed"))
+			self.show_error("Connection failed")
 
 	def set_label(self, text):
 		self.mahjong.gui.remove_widget(self.label)
@@ -139,6 +145,38 @@ class ConnectingState(RoundPreparingState):
 		RoundPreparingState.process_message(self, message)
 
 
+class StartServerState(OfflineState):
+
+	def __init__(self, mahjong, number_of_players):
+		OfflineState.__init__(self, mahjong)
+		self.number_of_players = number_of_players
+
+	def enter_state(self):
+		label = Label( (350, 350), (350,45), "Starting server ... ")
+		# button = Button( (475,420), (100, 30), "Cancel", lambda b: self.mahjong.open_main_menu())
+		self.setup_widgets([label])
+		self.mahjong.draw_all()
+		
+		try:
+			process = subprocess.Popen([ "../server/run_server.sh", str(self.number_of_players) ], bufsize = 0, stdout = subprocess.PIPE)
+			process_out = process.stdout
+			# TODO: Nonblocking server start
+			response = process_out.readline()
+			if response != "Init done\n":
+				self.show_error("Initialization of server failed")
+				logging.error("Server response: " + response)
+				process.terminate()
+			else:
+				self.mahjong.set_server_process(process)
+				self.mahjong.set_state(ConnectingState(self.mahjong, "localhost"))
+		except OSError, e:
+			self.show_error("Server: " + str(e))
+			process.terminate()
+
+	def tick(self):
+		pass
+
+
 class ErrorState(State):
 
 	def __init__(self, mahjong, error_msg):
@@ -146,6 +184,7 @@ class ErrorState(State):
 		self.error_msg = error_msg
 
 	def enter_state(self):
+		logging.error("ErrorState: " + self.error_msg)
 		self.label = Label( (350, 350), (350,45), self.error_msg, bg_color = (250, 20, 20, 90))
 		self.mahjong.gui.add_widget(self.label)
 		self.button = Button( (475,420), (100, 30), "Ok", lambda b: self.mahjong.open_main_menu())
@@ -470,7 +509,7 @@ class FinalState(State):
 		self.setup_widgets([table, button])
 
 	def return_to_menu_clicked(self, button):
-		pass
+		self.mahjong.open_main_menu()
 		
 
 class TestState(State):

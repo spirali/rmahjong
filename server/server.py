@@ -89,4 +89,6 @@ if len(sys.argv) == 1:
 else:
 	logging.basicConfig(filename = "server.log", format = "%(asctime)s - %(levelname)s - %(message)s", level = logging.DEBUG)
 	server = Server(4500, int(sys.argv[1]))
+	sys.stdout.write("Init done\n")
+	sys.stdout.flush()
 	server.run()

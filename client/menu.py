@@ -1,6 +1,6 @@
 
 
-from states import OfflineState, ConnectingState
+from states import OfflineState, ConnectingState, StartServerState
 from gui import Button, TextWidget, Label
 import graphics
 import pygame
@@ -88,16 +88,31 @@ class AddressEntryState(EntryState):
 class PlayersCountState(MenuState):
 
 	def __init__(self, mahjong):
-		items = [ ("Singleplayer (1 human + 3 bots)", None),
-					("Multiplayer (2 human + 2 bots)", None),
-					("Multiplayer (3 human + 1 bot)", None),
-					("Multiplayer (4 humans)", None),
+		items = [ ("Singleplayer (1 human + 3 bots)", self.on_run1),
+					("Multiplayer (2 human + 2 bots)", self.on_run2),
+					("Multiplayer (3 human + 1 bot)", self.on_run3),
+					("Multiplayer (4 humans)", self.on_run4),
 					("Back to main menu", self.on_main_menu),
 				]
 		MenuState.__init__(self, mahjong, "Game type", items)
 
 	def on_main_menu(self, button):
 		self.mahjong.open_main_menu()
+
+	def on_run1(self, button):
+		self.run_server(1)
+
+	def on_run2(self, button):
+		self.run_server(2)
+
+	def on_run3(self, button):
+		self.run_server(3)
+
+	def on_run4(self, button):
+		self.run_server(4)
+
+	def run_server(self, number_of_players):
+		self.mahjong.set_state(StartServerState(self.mahjong, number_of_players))
 
 
 class MainMenuState(MenuState):
@@ -114,7 +129,7 @@ class MainMenuState(MenuState):
 		self.add_widget(TextWidget((530, 275), "v" + self.mahjong.get_version_string(), font = graphics.font_small))
 
 	def on_new_game(self, button):
-		self.mahjong.set_state(PlayersCountState(self.mahjong))
+		self.mahjong.set_state(PlayerNameState(self.mahjong, lambda state: state.mahjong.set_state(PlayersCountState(state.mahjong))))
 
 	def on_join_game(self, button):
 		self.mahjong.set_state(PlayerNameState(self.mahjong, lambda state: state.mahjong.set_state(AddressEntryState(state.mahjong))))

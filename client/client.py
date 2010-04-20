@@ -41,6 +41,8 @@ class Mahjong:
 		self.round_label = None
 		self.fullscreen = False
 
+		self.server_process = None
+
 		self.username = "Mahjong player"
 
 		self.riichi_sticks = [ 
@@ -68,6 +70,9 @@ class Mahjong:
 		self.state = state
 		if state:
 			state.enter_state()
+
+	def set_server_process(self, process):
+		self.server_process = process
 
 	def quit(self):
 		self.quit_flag = True
@@ -187,11 +192,18 @@ class Mahjong:
 		self.gui.add_widget(self.round_label)
 
 	def open_main_menu(self):
+		if self.server_process:
+			self.server_process.terminate()
+			self.server_process = None
 		mahjong.set_state(MainMenuState(self))
 
 	def toggle_fullscreen(self):
 		self.fullscreen = not self.fullscreen
 		video_init(self.fullscreen)
+
+	def on_quit(self):
+		if self.server_process:
+			self.server_process.terminate()
 
 def video_init(fullscreen):
 	flags = pygame.DOUBLEBUF
@@ -210,8 +222,11 @@ def main_init():
 main_init()
 video_init(False)
 mahjong = Mahjong()
-mahjong.open_main_menu()
-#mahjong.set_state(TestState(mahjong))
-#mahjong.set_state(TestTableState(mahjong))
-mahjong.run()
-pygame.quit()
+try:
+	mahjong.open_main_menu()
+	#mahjong.set_state(TestState(mahjong))
+	#mahjong.set_state(TestTableState(mahjong))
+	mahjong.run()
+finally:
+	mahjong.on_quit()
+	pygame.quit()

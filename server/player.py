@@ -382,7 +382,7 @@ class NetworkPlayer(Player):
 		pass
 
 
-bot_names = (name for name in [ "Panda", "StormMaster", "Yogi" ])
+bot_names = (name for name in [ "Panda", "Saki", "Yogi" ])
 
 
 class BotPlayer(Player):
