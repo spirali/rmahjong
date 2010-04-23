@@ -87,8 +87,7 @@ class GenericGameState:
 		self.server = server
 
 	def player_leaved(self, player):
-		# TODO: Terminate game
-		pass
+		self.server.set_exit_flag()
 
 	def tick(self):
 		pass

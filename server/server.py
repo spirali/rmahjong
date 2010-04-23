@@ -32,6 +32,7 @@ class Server:
 			self.players.append(BotPlayer(self))
 			logging.info("Added bot " + self.players[-1].name)
 
+		self.exit_flag = False
 		self.game = None
 		self.round = None
 		self.state = LobbyState(self, port)
@@ -41,6 +42,9 @@ class Server:
 		self.state.leave_state()
 		self.state = state
 		self.state.enter_state()
+
+	def set_exit_flag(self):
+		self.exit_flag = True
 
 	def start_new_game(self):
 		self.game = Game(self.players, None)
@@ -64,7 +68,7 @@ class Server:
 
 	def run(self):
 		try:
-			while True:
+			while not self.exit_flag:
 				self.state.tick()
 				self.player_tick()
 				time.sleep(0.07)
