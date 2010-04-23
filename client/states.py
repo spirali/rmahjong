@@ -22,6 +22,7 @@ from table import winds
 from copy import copy
 import subprocess
 import logging
+import os.path
 
 
 def split_str(string, sep):
@@ -159,7 +160,7 @@ class StartServerState(OfflineState):
 		
 		process = None
 		try:
-			process = subprocess.Popen([ "../server/run_server.sh", str(self.number_of_players) ], bufsize = 0, stdout = subprocess.PIPE)
+			process = subprocess.Popen([ self.get_server_filename(), str(self.number_of_players) ], bufsize = 0, stdout = subprocess.PIPE)
 			process_out = process.stdout
 			# TODO: Nonblocking server start
 			response = process_out.readline()
@@ -174,6 +175,11 @@ class StartServerState(OfflineState):
 			self.show_error("Server: " + str(e))
 			if process:
 				process.terminate()
+
+	def get_server_filename(self):
+		for f in [ "../server/run_server.sh", "../server/server.exe" ]:
+			if os.path.isfile(f):
+				return f
 
 	def tick(self):
 		pass
