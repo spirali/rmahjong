@@ -17,27 +17,25 @@
 
 from connection import Connection
 from dictprotocol import DictProtocol
-from gui import Button, Label, ScoreTable, PaymentTable, FinalTable
+from gui import Button, Label, ScoreTable, PaymentTable, FinalTable, Frame
 from table import winds
 from copy import copy
 import subprocess
 import logging
 import os.path
+import pygame
 
 
 def split_str(string, sep):
 	return [ i for i in string.split(sep) if i != "" ]
 
-class State:
-	
+class StateBase:
+
 	def __init__(self, mahjong):
 		self.mahjong = mahjong
 		self.protocol = mahjong.protocol
 		self.widgets = []
 		
-	def tick(self):
-		pass
-
 	def enter_state(self):
 		pass
 
@@ -45,13 +43,7 @@ class State:
 		self.remove_widgets()
 
 	def tick(self):
-		if self.protocol:
-			message = self.protocol.read_message()
-			if message:
-				self.process_message(message)
-
-	def process_message(self, message):
-		self.mahjong.process_network_message(message)
+		pass
 
 	def add_widget(self, widget):
 		self.widgets.append(widget)
@@ -74,14 +66,26 @@ class State:
 	def show_error(self, message):
 		self.mahjong.set_state(ErrorState(self.mahjong, message))
 
-
-class OfflineState(State):
-
-	def tick(self):
-		pass
 	
+
+class State(StateBase):
+	
+	def __init__(self, mahjong):
+		StateBase.__init__(self, mahjong)
+		self.protocol = mahjong.protocol
+		
+	def tick(self):
+		if self.protocol:
+			message = self.protocol.read_message()
+			if message:
+				self.process_message(message)
+
 	def process_message(self, message):
-		raise Exception("Bug!")
+		self.mahjong.process_network_message(message)
+
+
+class OfflineState(StateBase):
+	pass
 
 
 class RoundPreparingState(State):
@@ -301,6 +305,15 @@ class RoundState(State):
 	def process_self_kan(self, message):
 		raise Exception("Invalid state for self_kan")
 
+	def on_key_down(self, event):
+		State.on_key_down(self, event)
+		if event.key == pygame.K_ESCAPE:
+			if self.mahjong.light_state:
+				self.mahjong.set_light_state(None)
+			else:
+				ingame_menu = IngameMenu(self.mahjong)
+				self.mahjong.set_light_state(ingame_menu)
+
 
 class MyMoveState(RoundState):
 
@@ -518,6 +531,33 @@ class FinalState(State):
 
 	def return_to_menu_clicked(self, button):
 		self.mahjong.open_main_menu()
+
+
+class LightState(StateBase):
+	pass
+	
+	
+class IngameMenu(LightState):
+
+	def __init__(self, mahjong):
+		LightState.__init__(self, mahjong)
+
+	def enter_state(self):
+		LightState.enter_state(self)
+		frame = Frame((300, 300), (400, 180))
+		button1 = Button((325, 320), (350, 35), "Return to game", self.on_return)
+		button2 = Button((325, 380), (350, 35), "Toggle fullscreen", self.on_fullscreen)
+		button3 = Button((325, 420), (350, 35), "Quit game", self.on_quit)
+		self.setup_widgets([frame, button1, button2, button3])
+
+	def on_quit(self, button):
+		self.mahjong.open_main_menu()
+
+	def on_fullscreen(self, button):
+		self.mahjong.toggle_fullscreen()
+
+	def on_return(self, button):
+		self.mahjong.set_light_state(None)
 		
 
 class TestState(State):

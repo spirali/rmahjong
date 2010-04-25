@@ -31,6 +31,7 @@ class Mahjong:
 		self.table = Table()
 		self.gui = GuiManager()
 		self.state = None
+		self.light_state = None
 		self.quit_flag = False
 		self.protocol = None
 
@@ -68,6 +69,13 @@ class Mahjong:
 		if self.state:
 			self.state.leave_state()
 		self.state = state
+		if state:
+			state.enter_state()
+
+	def set_light_state(self, state):
+		if self.light_state:
+			self.light_state.leave_state()
+		self.light_state = state
 		if state:
 			state.enter_state()
 
@@ -192,6 +200,8 @@ class Mahjong:
 		self.gui.add_widget(self.round_label)
 
 	def open_main_menu(self):
+		self.set_light_state(None)
+		self.reset_all()
 		if self.server_process:
 			self.server_process.terminate()
 			self.server_process = None

@@ -308,3 +308,11 @@ class FinalTable(Table):
 			self.text_center(str(score), 30)
 			self.line(15)
 
+
+class Frame(Widget):
+
+	def __init__(self, position, size):
+		Widget.__init__(self, position, size)
+		surface = self.create_bg_surface()
+		surface.fill((0,0,0,90))
+		self.surface = surface
