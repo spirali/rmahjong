@@ -17,7 +17,7 @@
 
 from connection import Connection
 from dictprotocol import DictProtocol
-from gui import Button, Label, ScoreTable, PaymentTable, FinalTable, Frame
+from gui import Button, Label, ScoreTable, PaymentTable, FinalTable, Frame, HandWidget
 from table import winds
 from copy import copy
 import subprocess
@@ -480,9 +480,14 @@ class ScoreState(RoundPreparingState):
 		player_name = self.mahjong.get_player_name(self.message["player"])
 		total = str(total_fans) + " (minipoints: " + str(minipoints) + ")"
 		looser_riichi = self.message["looser_riichi"]
+		winner_hand = self.message["winner_hand"].split()
+		winner_sets = [ s.split() for s in self.message["winner_sets"].split(";") ]
+
 		table = ScoreTable(score_items , total, payment, player_name, looser_riichi)
 		button = Button( (400,560), (300, 25), "Show payments", self.show_payments)
-		self.setup_widgets([table, button])
+		hand = HandWidget((10,10), winner_hand, winner_sets , self.mahjong.table.tp)
+		
+		self.setup_widgets([table, button, hand])
 
 	def get_results(self):
 		results = []
@@ -608,10 +613,14 @@ class TestTableState(State):
 	def __init__(self, mahjong):
 		State.__init__(self, mahjong)
 		
-		#table = ScoreTable(["ABC 100", "XYZ 200"], "8000", "2000/300", "Player_name", "2000")
+		table = ScoreTable(["ABC 100", "XYZ 200"], "8000", "2000/300", "Player_name", "2000")
 		#table = PaymentTable([("ABC", 1000, 2000), ("CDE", 200000, -15000), ("EFG", 0, 123456), ("XYZ", 15000, 0)])
-		table = FinalTable([("ABC", 1000), ("CDE", 200000), ("EFG", 0), ("XYZ", 15000)])
+		#table = FinalTable([("ABC", 1000), ("CDE", 200000), ("EFG", 0), ("XYZ", 15000)])
+		hand = HandWidget((10,10), ["DR","C1","C2","C3", "P5", "B5", "B5", "WE", "WE", "WE", "DR", "P6", "P7", "B5"], [] , self.mahjong.table.tp)
+	#	hand = HandWidget((10,10), ["DR","DR","C1","C2","C3", "B5", "B5", "B5", "WE", "WE", "WE"], [ ["WN", "WN", "WN"] ], self.mahjong.table.tp)
+	#	hand = HandWidget((10,10), ["DR","DR"], [ ["WN", "WN", "WN", "WE"], ["WN", "WN", "WN", "WE"], ["WN", "WN", "WN", "WE"], ["WN", "WN", "WN", "WE"] ], self.mahjong.table.tp)
 		mahjong.gui.add_widget(table)
+		mahjong.gui.add_widget(hand)
 
 	def tick(self):
 		pass

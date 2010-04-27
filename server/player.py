@@ -347,6 +347,8 @@ class NetworkPlayer(Player):
 		msg["score_items"] = ";".join(map(lambda sc: "%s %s" % (sc[0], sc[1]), scores))
 		msg["ura_dora_indicators"] = " ".join([ tile.name for tile in ura_dora_indicators ])
 		msg["end_of_game"] = end_of_game
+		msg["winner_hand"] = " ".join( [ tile.name for tile in player.hand ] )
+		msg["winner_sets"] = ";".join( [ set.tiles_as_string() for set in player.sets ] )
 
 		for player in self.server.players:
 			msg[player.wind.name + "_score"] = player.score 

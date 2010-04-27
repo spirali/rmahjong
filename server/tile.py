@@ -137,6 +137,9 @@ class TileSet(object):
 	def is_chi(self):
 		return False
 
+	def tiles_as_string(self, delimiter = " "):
+		return delimiter.join( [ tile.name for tile in self.tiles() ] )
+
 
 class Pon(TileSet):
 	

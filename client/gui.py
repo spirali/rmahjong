@@ -1,6 +1,7 @@
 import graphics
 import pygame
 from copy import copy
+from table import all_tile_names
 
 
 class GuiManager:
@@ -315,4 +316,23 @@ class Frame(Widget):
 		Widget.__init__(self, position, size)
 		surface = self.create_bg_surface()
 		surface.fill((0,0,0,90))
+		self.surface = surface
+
+
+class HandWidget(Widget):
+	""" Display tiles, tile XX means space """
+	
+	def __init__(self, position, tile_names, sets, tile_painter):
+		Widget.__init__(self, position, (1000, 100))
+		surface = self.create_bg_surface()
+		surface.fill((0,0,0,110))
+
+		names = list(tile_names[:-1])
+		names.sort(key=lambda x: all_tile_names.index(x))
+		names += [ "XX", tile_names[-1] ]
+		for set in sets:
+			names = names + [ "XX" ] + set
+
+		tile_painter.draw_tile_list(surface, (30,20), names, 1)
+		
 		self.surface = surface

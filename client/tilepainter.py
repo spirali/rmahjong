@@ -100,6 +100,15 @@ class TilePainter:
 			bg_id = 1
 		self._draw_tile(screen, tile.position, self.tile_images[tile.name][tile.image_id()], bg_id)
 
+	def draw_tile_image(self, screen, position, name):
+		if name != "XX":
+			self._draw_tile(screen, position, self.tile_images[name][0], 0)
+
+	def draw_tile_list(self, screen, position, tile_names, space = 0):
+		for i, tile_name in reversed(list(enumerate(tile_names))):
+			x = (self.face_size[0] + space) * i
+			self.draw_tile_image(screen, (x + position[0], position[1]), tile_name)
+	
 	def _draw_tile(self, screen, position, img, bg_id):
 		px = position[0] - self.face_offset[bg_id][0]
 		py = position[1] - self.face_offset[bg_id][1]

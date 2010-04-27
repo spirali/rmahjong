@@ -240,12 +240,12 @@ class Round:
 
 class DebugRound(Round):
 	
-	def __init__(self, players, random):
+	def __init__(self, players, random, round_wind, potential_last):
 		def tiles(strs):
 			return map(Tile, strs)
 
 		hands = [
-			#[ "WW", "DG", "DG", "DG", "DR", "DR", "DR", "DW", "DW", "DW", "B8", "B7", "B6" ],
+			[ "WW", "DG", "DG", "DG", "DR", "DR", "DR", "DW", "DW", "DW", "B8", "B7", "B6" ],
 			[ "C9", "C5", "C8", "C5", "C5", "C5", "B5", "B5", "B5", "B5", "B1", "DW", "DW" ],
 			[ "C8", "C7", "C5", "C2", "C4", "DR", "DR", "DR", "DW", "B7", "B6", "B7", "B7" ],
 			[ "C8", "C9", "C5", "C6", "C4", "C2", "C3", "C1", "DW", "DW", "DW", "B7", "B7" ],
@@ -260,7 +260,7 @@ class DebugRound(Round):
 	
 		self.hands = map(tiles, hands) 
 		self.rnd = tiles(r)
-		Round.__init__(self, players, random)
+		Round.__init__(self, players, random, round_wind, potential_last)
 
 		for h in self.hands:
 			for t in h:
