@@ -76,7 +76,7 @@ class RoundPreparingState(State):
 			return
 		if name == "OTHER_MOVE":
 			self.mahjong.table.remove_tile_from_wall()
-			state = OtherMoveState(self.mahjong, message["wind"])
+			state = OtherMoveState(self.mahjong, message["wind"], True)
 			self.mahjong.set_state(state)
 			return
 		State.process_message(self, message)		
@@ -170,7 +170,7 @@ class RoundState(State):
 
 		if name == "OTHER_MOVE":
 			self.mahjong.table.remove_tile_from_wall()
-			state = OtherMoveState(self.mahjong, message["wind"])
+			state = OtherMoveState(self.mahjong, message["wind"], True)
 			self.mahjong.set_state(state)
 			return
 
@@ -223,7 +223,8 @@ class RoundState(State):
 			self.mahjong.arrange_hand()
 			self.mahjong.set_state(MyMoveState(self.mahjong, None, []))
 		else:
-			self.mahjong.set_state(OtherMoveState(self.mahjong, player))
+			self.mahjong.table.remove_tiles_from_other_hand(player_id, len(tiles) - 1)
+			self.mahjong.set_state(OtherMoveState(self.mahjong, player, False))
 
 	def process_closed_kan(self, message):
 		self.mahjong.add_dora_indicator(message["dora_indicator"])
@@ -235,6 +236,13 @@ class RoundState(State):
 		self.mahjong.table.add_open_set(player_id, [tile_name] * 4, [])
 		if player_id == 0:
 			self.process_self_kan(message)
+		else:
+			if self.picked_tile:
+				self.mahjong.table.remove_tiles_from_other_hand(player_id, 3)			
+				self.picked_tile.remove()
+				self.picked_tile = None
+			else:
+				self.mahjong.table.remove_tiles_from_other_hand(player_id, 4)			
 
 	def process_self_kan(self, message):
 		raise Exception("Invalid state for self_kan")
@@ -332,18 +340,33 @@ class MyMoveState(RoundState):
 
 class OtherMoveState(RoundState):
 
-	def __init__(self, mahjong, wind):
+	def __init__(self, mahjong, wind, pick_tile):
 		RoundState.__init__(self, mahjong)
 		self.wind = wind
+		self.pick_tile = pick_tile
+		self.picked_tile = None
 		self.highlight_tiles = []
 
 	def enter_state(self):
 		RoundState.enter_state(self)
 		self.mahjong.select_box(self.wind)
+		if self.pick_tile:
+			player_id = self.mahjong.player_id_by_wind(self.wind)
+			self.picked_tile = self.mahjong.table.picked_other_hand_tile(player_id)
 
 	def leave_state(self):
 		RoundState.leave_state(self)
 		self.mahjong.select_none()
+
+	def process_message(self, message):
+		RoundState.process_message(self, message)
+		if message["message"] == "DROPPED":
+			if self.picked_tile:
+				self.picked_tile.remove()
+				self.picked_tile = None
+			else:
+				player_id = self.mahjong.player_id_by_wind(self.wind)
+				self.mahjong.table.remove_tiles_from_other_hand(player_id, 1)
 
 	def on_steal_action_click(self, button):
 		self.remove_widgets()

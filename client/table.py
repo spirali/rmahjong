@@ -436,16 +436,9 @@ class Table:
 
 		self.init_dropzones()
 
-
 		self.init_wall()
+		self.other_hands = []
 
-		z = 14 - 4
-		for x in xrange(z):
-			self.new_dummy_tile((22.5, x * 2.08 - 4, 0), (90, 0))
-
-		for x in xrange(14-z,14):
-			self.new_dummy_tile((-24.5, x * 2.08 - 3, 0), (-90, 0))
-			self.new_dummy_tile((x * 2.08 - 14, 36, 0), (180, 0))
 
 
 	def init_wall(self):
@@ -476,6 +469,32 @@ class Table:
 			tile.remove()
 		del w[:4 * 13]
 		self.wall = w
+
+		o1, o2, o3 = [], [], []
+
+		for x in xrange(13):
+			o1.append(self.new_other_hand_tile(1, x))
+			o2.append(self.new_other_hand_tile(2, x))
+			o3.append(self.new_other_hand_tile(3, x))
+
+		self.other_hands = [ o1, o2, o3 ]
+
+	def picked_other_hand_tile(self, player_id):
+		ln = len(self.other_hands[player_id - 1])
+		return self.new_other_hand_tile(player_id, ln + 0.3)
+
+	def new_other_hand_tile(self, player_id, x):
+		if player_id == 1:
+			return self.new_dummy_tile((22.5, x * 2.08 - 4, 0), (90, 0))
+		if player_id == 3:
+			return self.new_dummy_tile((-24.5, (14-x) * 2.08 - 3, 0), (-90, 0))
+		if player_id == 2:
+			return self.new_dummy_tile(((14-x) * 2.08 - 14, 36, 0), (180, 0))
+
+	def remove_tiles_from_other_hand(self, player_id, count):
+		for tile in self.other_hands[player_id-1][-count:]:
+			tile.remove()
+		del self.other_hands[player_id-1][-count:]
 
 	def remove_tile_from_wall(self):
 		self.wall[0].remove()
