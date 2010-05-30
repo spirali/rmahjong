@@ -188,8 +188,8 @@ def main_init():
 
 main_init()
 mahjong = Mahjong()
-#mahjong.set_state(ConnectingState(mahjong))
-mahjong.set_state(TestState(mahjong))
+mahjong.set_state(ConnectingState(mahjong))
+#mahjong.set_state(TestState(mahjong))
 #mahjong.set_state(TestTableState(mahjong))
 mahjong.run()
 pygame.quit()

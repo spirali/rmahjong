@@ -192,12 +192,10 @@ class RoundState(State):
 		State.process_message(self, message)		
 
 	def add_buttons(self, button_labels, callback):
-		pos = self.mahjong.table.picked_tile_position()
-		px, py = pos[0],640
-		button_labels.reverse()
+		px, py = 290,730
 		for label in button_labels:
 			button = Button((px, py), (75,25), label, callback)
-			py -= 27
+			px += 80
 			self.mahjong.gui.add_widget(button)
 			self.widgets.append(button)
 
@@ -264,7 +262,7 @@ class MyMoveState(RoundState):
 			self.drop_picked_tile(self.picked_tile)
 
 	def new_picked_tile(self, tile_name):
-		tile = self.mahjong.table.new_tile(tile_name, self.mahjong.table.picked_tile_position())
+		tile = self.mahjong.table.picked_tile(tile_name)
 		tile.callback = self.drop_picked_tile
 		self.picked_tile = tile
 

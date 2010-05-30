@@ -33,6 +33,8 @@ def init_fonts():
 	font = pygame.font.Font("data/fonts/finalnew.ttf", 18)
 	font_small = pygame.font.Font("data/fonts/finalnew.ttf", 14)
 
+def setup_perspective():
+	glu.gluPerspective(30, 1.0*1024/768, 0.1, 200.0)
 
 def init_opengl(width, height):
 	gl.glEnable(gl.GL_TEXTURE_2D)
@@ -47,7 +49,7 @@ def init_opengl(width, height):
 	gl.glViewport(0, 0, width, height)
 	gl.glMatrixMode(gl.GL_PROJECTION)
 	gl.glLoadIdentity()
-	glu.gluPerspective(45, 1.0*width/height, 0.1, 200.0)
+	setup_perspective()
 	gl.glMatrixMode(gl.GL_MODELVIEW)
 	gl.glLoadIdentity()
 

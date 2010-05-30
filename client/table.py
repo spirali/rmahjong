@@ -21,7 +21,7 @@ import OpenGL.GL as gl
 import OpenGL.GLU as glu
 from tilepainter import TilePainter
 from directions import direction_up, direction_down, direction_left, direction_right
-from graphics import Texture, RawTexture
+from graphics import Texture, RawTexture, setup_perspective
 
 all_tile_names = [ "C1","C2","C3","C4","C5","C6","C7","C8","C9","B1","B2","B3","B4","B5","B6","B7","B8",
 		"B9","P1","P2","P3","P4","P5","P6","P7","P8","P9","WE","WS","WW","WN","DR","DG","DW" ]
@@ -494,6 +494,11 @@ class Table:
 			tile.rotation = (0.0, -25.0)
 			px += 2.08
 
+	def picked_tile(self, tile_name):
+		px, py = -11.5, -15
+		px += len(self.hand) * 2.08 + 0.5
+		return self.new_tile(tile_name, (px, py, 0), (0.0, -25.0))
+
 	def add_tile(self, tile):
 		self.tiles.append(tile)
 
@@ -508,11 +513,6 @@ class Table:
 				tile.remove()
 				return
 		raise Exception("Tile is not in hand")
-
-	def picked_tile_position(self):
-		px, py = 320 + 10, 690
-		px += len(self.hand) * ( self.tp.face_size[0] + 1)
-		return (px, py)
 
 	def add_dora_indicator(self, tile_name):
 		self.dora_indicators.append(self.new_tile(tile_name))
@@ -543,8 +543,11 @@ class Table:
 		#gl.glTranslatef(1.0, -3.5, -50.0)
 		#gl.glRotatef(-45.0, 1.0, 0.0, 0.0)
 
-		gl.glTranslatef(2.0, -3.5, -51.0)
+	#	gl.glTranslatef(2.0, -3.5, -51.0)
+	#	gl.glRotatef(-45.0, 1.0, 0.0, 0.0)
+		gl.glTranslatef(2.0, -3.5, -76.0)
 		gl.glRotatef(-45.0, 1.0, 0.0, 0.0)
+
 
 	#	gl.glTranslatef(1.0, -3.5, -55.0)
 	#	gl.glRotatef(-55.0, 1.0, 0.0, 0.0)
@@ -592,8 +595,7 @@ class Table:
 		gl.glLoadIdentity()
 		glu.gluPickMatrix(position[0], v[3] - position[1], 2.0, 2.0, v);
 
-		# FIXME: Get rid of magical constants
-		glu.gluPerspective(45, 1.0*1024/768, 0.1, 100.0)
+		setup_perspective()
 
 		gl.glMatrixMode(gl.GL_MODELVIEW)
 
