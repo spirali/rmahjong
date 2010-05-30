@@ -22,6 +22,7 @@ import OpenGL.GLU as glu
 from tilepainter import TilePainter
 from directions import direction_up, direction_down, direction_left, direction_right
 from graphics import Texture, RawTexture, setup_perspective
+import utils
 
 all_tile_names = [ "C1","C2","C3","C4","C5","C6","C7","C8","C9","B1","B2","B3","B4","B5","B6","B7","B8",
 		"B9","P1","P2","P3","P4","P5","P6","P7","P8","P9","WE","WS","WW","WN","DR","DG","DW" ]
@@ -435,16 +436,8 @@ class Table:
 
 		self.init_dropzones()
 
-		for x in xrange(17):
-			self.new_dummy_tile((-19, x*2 -7, 0), (-90,90))
-			self.new_dummy_tile((17.5, x*2 -7 , 0), (90,90))
-			self.new_dummy_tile((x*2 - 17, 28, 0), (180,90))
-			self.new_dummy_tile((x*2 - 17, -10, 0), (180,90))
 
-			self.new_dummy_tile((-19, x*2 -7, 1.22), (-90,90))
-			self.new_dummy_tile((17.5, x*2 -7 , 1.22), (90,90))
-			self.new_dummy_tile((x*2 - 17, 28, 1.22), (180,90))
-			self.new_dummy_tile((x*2 - 17, -10, 1.22), (180,90))
+		self.init_wall()
 
 		z = 14 - 4
 		for x in xrange(z):
@@ -454,6 +447,35 @@ class Table:
 			self.new_dummy_tile((-24.5, x * 2.08 - 3, 0), (-90, 0))
 			self.new_dummy_tile((x * 2.08 - 14, 36, 0), (180, 0))
 
+
+	def init_wall(self):
+		wall = []
+
+		for x in xrange(17):
+			wall.append(self.new_dummy_tile(((16-x)*2 - 17, -10, 1.22), (180,90)))
+			wall.append(self.new_dummy_tile(((16-x)*2 - 17, -10, 0), (180,90)))
+
+		for x in xrange(17):
+			wall.append(self.new_dummy_tile((-19, x*2 -7, 1.22), (-90,90)))
+			wall.append(self.new_dummy_tile((-19, x*2 -7, 0), (-90,90)))
+
+		for x in xrange(17):
+			wall.append(self.new_dummy_tile((x*2 - 17, 28, 1.22), (180,90)))
+			wall.append(self.new_dummy_tile((x*2 - 17, 28, 0), (180,90)))
+
+		for x in xrange(17):
+			wall.append(self.new_dummy_tile((17.5, (16-x)*2 -7 , 1.22), (90,90)))
+			wall.append(self.new_dummy_tile((17.5, (16-x)*2 -7 , 0), (90,90)))
+		self.wall = wall
+
+	def break_wall(self, dice_num):
+		w = utils.right_shift_list(self.wall, (dice_num % 4) * 34)
+		w = utils.left_shift_list(w, dice_num * 2)
+
+		for tile in w[:4 * 13]:
+			tile.remove()
+		del w[:4 * 13 * dice_num]
+		self.wall = w
 
 	def init_dropzones(self):
 		dz_my = DropZone(self, (-6, 0), direction_up, 6)

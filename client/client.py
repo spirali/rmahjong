@@ -152,6 +152,11 @@ class Mahjong:
 
 	def init_round(self, message):
 		self.reset_all()
+
+		# TODO: Random number from server
+		import random 
+		self.table.break_wall(random.randint(1,6) + random.randint(1,6))
+
 		self.my_wind = message["my_wind"]
 		
 		names = [ self.get_username(), message["right"], message["across"], message["left"] ]
