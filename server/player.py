@@ -401,7 +401,6 @@ class BotPlayer(Player):
 
 	def move(self, tile):
 		Player.move(self, tile)
-
 		actions = self.hand_actions()
 		if "Tsumo" in actions:
 			self.server.declare_win(self, None, "Tsumo")

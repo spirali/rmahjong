@@ -69,11 +69,13 @@ class RoundPreparingState(State):
 			self.mahjong.init_round(message)
 			return
 		if name == "MOVE":
+			self.mahjong.table.remove_tile_from_wall()
 			actions = split_str(message["actions"],";")
 			state = MyMoveState(self.mahjong, message["tile"], actions)
 			self.mahjong.set_state(state)
 			return
 		if name == "OTHER_MOVE":
+			self.mahjong.table.remove_tile_from_wall()
 			state = OtherMoveState(self.mahjong, message["wind"])
 			self.mahjong.set_state(state)
 			return
@@ -160,12 +162,14 @@ class RoundState(State):
 			return
 
 		if name == "MOVE":
+			self.mahjong.table.remove_tile_from_wall()
 			actions = split_str(message["actions"], ";")
 			state = MyMoveState(self.mahjong, message["tile"], actions)
 			self.mahjong.set_state(state)
 			return
 
 		if name == "OTHER_MOVE":
+			self.mahjong.table.remove_tile_from_wall()
 			state = OtherMoveState(self.mahjong, message["wind"])
 			self.mahjong.set_state(state)
 			return

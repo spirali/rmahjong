@@ -474,8 +474,12 @@ class Table:
 
 		for tile in w[:4 * 13]:
 			tile.remove()
-		del w[:4 * 13 * dice_num]
+		del w[:4 * 13]
 		self.wall = w
+
+	def remove_tile_from_wall(self):
+		self.wall[0].remove()
+		del self.wall[0]
 
 	def init_dropzones(self):
 		dz_my = DropZone(self, (-6, 0), direction_up, 6)
