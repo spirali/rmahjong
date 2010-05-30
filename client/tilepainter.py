@@ -15,17 +15,19 @@
 # <http://www.gnu.org/licenses/>.
 
 
-from graphics import load_svg
+from graphics import load_svg, Texture, RawTexture
 import pygame
 
 class TilePainter:
 
 	def __init__(self, screen_size):
-		width = 450
-	#	self.image = load_svg("data/default.svgz", width = width)
-	#	self.bg_image = load_svg("data/bg/default.svg", width = 50)
+		width = 450 * 4
 		self.image = pygame.image.load("data/tiles/default.png")
 		self.bg_image = pygame.image.load("data/bg/default.png")
+		
+		self.border = Texture(pygame.image.load("data/tiles/border.png"))
+		self.back = Texture(pygame.image.load("data/tiles/back.png"))
+	
 		scale = width / 768.0
 		self.face_size = (68.0 * scale, 82.0 * scale)
 		self.matrix_size = (69.0 * scale, 88.5 * scale)
@@ -74,6 +76,7 @@ class TilePainter:
 		tile_sources["DW"] = (0,4)
 
 		self.tile_images = {}
+		self.tile_textures = {}
 		for name,source in tile_sources.items():
 			tx, ty = source
 			tx = tx * self.matrix_size[0] + self.matrix_start[0]
@@ -83,6 +86,7 @@ class TilePainter:
 			self.tile_images[name].append(pygame.transform.rotate(img, 270))
 			self.tile_images[name].append(pygame.transform.rotate(img, 180))
 			self.tile_images[name].append(pygame.transform.rotate(img, 90))
+			self.tile_textures[name] = Texture(img)
 
 	def draw_background(self, screen):
 		w = self.bg_image.get_width()

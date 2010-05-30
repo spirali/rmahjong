@@ -461,17 +461,18 @@ class TestState(State):
 
 	def __init__(self, mahjong):
 		State.__init__(self, mahjong)
-		self.mahjong.table.set_new_hand(["DW", "DW", "C2","C3","C4", "WW", "WW", "WW", "B8", "B6", "B7"])
-		self.mahjong.table.set_new_hand(["DW", "DW", "C2","C3","C4", "WW", "WW", "WW"])
+		#self.mahjong.table.set_new_hand(["DW", "DW", "C2","C3","C4", "WW", "WW", "WW", "B8", "B6", "B7"])
+		self.mahjong.table.set_new_hand(["DW", "DW", "C1", "C2", "C3", "C4"])
+		#self.mahjong.table.set_new_hand(["DW", "DW", "C2","C3","C4", "WW", "WW", "WW"])
 		self.mahjong.my_wind = "WE"
 		self.mahjong.set_round_wind("WS")
 		#self.mahjong.table.set_new_hand(["DW", "DW", ])
 
 		for x in xrange(4):
-			self.mahjong.table.add_open_set(x, [ "C2", "DR", "DR", "DR" ], [2,3])
-			self.mahjong.table.add_open_set(x, [ "C2", "C1", "C2", "C3" ], [1])
-			self.mahjong.table.add_open_set(x, [ "C2", "DR", "DR", "DR" ], [0])
-			self.mahjong.table.add_open_set(x, [ "C2", "C1", "C2", "C3" ], [3])
+			self.mahjong.table.add_open_set(x, [ "DR", "DR", "DR", "DR" ], [])
+			self.mahjong.table.add_open_set(x, [ "C1", "C2", "C3", "C4" ], [])
+			self.mahjong.table.add_open_set(x, [ "B7", "B8", "B9", "B9" ], [])
+	#		self.mahjong.table.add_open_set(x, [ "WN", "WE", "WS", "WW" ], [])
 
 		from table import all_tile_names
 		for tile in all_tile_names[:13]:

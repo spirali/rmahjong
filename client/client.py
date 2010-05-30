@@ -18,9 +18,9 @@
 import pygame
 import logging
 
-from graphics import init_fonts
+from graphics import init_fonts, init_opengl, enable2d, disable2d
 from table import Table, winds
-from gui import GuiManager, PlayerBox, RiichiStick, TextWidget
+from gui import GuiManager, PlayerBox, TextWidget
 from directions import direction_up, direction_down, direction_left, direction_right
 from states import ConnectingState, TestState, TestTableState
 
@@ -40,16 +40,7 @@ class Mahjong:
 		self.riichi = False
 		self.round_label = None
 
-		self.riichi_sticks = [ 
-			RiichiStick((420,440),(160,12)),
-			RiichiStick((605,252),(12,160)),
-			RiichiStick((420,210),(160,12)),
-			RiichiStick((380,252),(12,160)),
-		]
-
 	def reset_all(self):
-		for stick in self.riichi_sticks:
-			self.gui.remove_widget(stick)
 		for box in self.player_boxes:
 			self.gui.remove_widget(box)
 		if self.round_label:
@@ -84,7 +75,9 @@ class Mahjong:
 	def draw_all(self):
 		screen = pygame.display.get_surface()
 		self.table.draw()
-		self.gui.draw(screen)
+		enable2d()
+		self.gui.draw()
+		disable2d()
 		pygame.display.flip()
 
 	def run(self):
@@ -99,9 +92,9 @@ class Mahjong:
 	def init_player_boxes(self, names, player_winds, score):
 		self.player_boxes = [
 			PlayerBox((50, 700), names[0], player_winds[0], int(score[0]), direction_up, (0,-80)),
-			PlayerBox((954, 300), names[1], player_winds[1], int(score[1]), direction_left, (-210, 0)), 
+			PlayerBox((954, 50), names[1], player_winds[1], int(score[1]), direction_left, (-210, 0)), 
 			PlayerBox((700, 0), names[2], player_winds[2], int(score[2]), direction_up, (0,80)),
-			PlayerBox((0, 300), names[3], player_winds[3], int(score[3]), direction_right, (80,0)) ]
+			PlayerBox((0, 50), names[3], player_winds[3], int(score[3]), direction_right, (80,0)) ]
 		for widget in self.player_boxes:
 			self.gui.add_widget(widget)
 
@@ -118,10 +111,10 @@ class Mahjong:
 	def add_dropped_tile(self, wind, tile_name):
 		self.table.new_tile_to_dropzone(self.player_id_by_wind(wind), tile_name)
 
-	def set_riichi(self, wind):
+	def set_riichi(self, wind):		
 		player_id = self.player_id_by_wind(wind)
 		self.player_boxes[player_id].score_delta(-1000)
-		self.gui.add_widget(self.riichi_sticks[player_id])
+		self.table.set_riichi(player_id)
 		if player_id == 0:
 			self.riichi = True
 
@@ -178,7 +171,7 @@ class Mahjong:
 		wtiles_to_names = { "WE" : "east", "WS" : "south", "WN" : "north", "WW" : "west" }
 		if self.round_label:
 			self.gui.remove_widget(self.round_label)
-		self.round_label = TextWidget((500,270), "Round: " + wtiles_to_names[wind], (175,175,175))
+		self.round_label = TextWidget((530,310), "Round: " + wtiles_to_names[wind], (175,175,175))
 		self.gui.add_widget(self.round_label)
 
 
@@ -186,14 +179,17 @@ def main_init():
 	logging.basicConfig(filename = "client.log", format = "%(asctime)s - %(levelname)s - %(message)s", level = logging.DEBUG)
 	pygame.display.init()
 	pygame.font.init()
-	init_fonts()
-	pygame.display.set_mode((1024,768), pygame.DOUBLEBUF, 32)
+	pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLEBUFFERS,1)
+	pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLESAMPLES,4)
+	pygame.display.set_mode((1024,768), pygame.OPENGL | pygame.DOUBLEBUF)
 	pygame.display.set_caption("RMahjong")
+	init_fonts()
+	init_opengl(1024, 768)	
 
 main_init()
 mahjong = Mahjong()
-mahjong.set_state(ConnectingState(mahjong))
-#mahjong.set_state(TestState(mahjong))
+#mahjong.set_state(ConnectingState(mahjong))
+mahjong.set_state(TestState(mahjong))
 #mahjong.set_state(TestTableState(mahjong))
 mahjong.run()
 pygame.quit()

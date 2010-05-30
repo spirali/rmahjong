@@ -17,9 +17,11 @@
 
 import pygame
 from pygame import display
+import OpenGL.GL as gl
+import OpenGL.GLU as glu
 from tilepainter import TilePainter
 from directions import direction_up, direction_down, direction_left, direction_right
-
+from graphics import Texture, RawTexture
 
 all_tile_names = [ "C1","C2","C3","C4","C5","C6","C7","C8","C9","B1","B2","B3","B4","B5","B6","B7","B8",
 		"B9","P1","P2","P3","P4","P5","P6","P7","P8","P9","WE","WS","WW","WN","DR","DG","DW" ]
@@ -78,6 +80,303 @@ class TableTile:
 	def __repr__(self):
 		return "<TableTile %s>" % self.name
 
+class Tile:
+
+	def __init__(self, table, name, position = None, rotation = (0.0, 0.0)):
+		self.table = table
+		self.name = name
+		self.position = position
+		self.rotation = rotation
+		self.callback = None
+
+	def get_index(self):
+		return all_tile_names.index(self.name)
+
+	def remove(self):
+		self.table.remove_tile(self)
+
+	def on_left_button_down(self):
+		if self.callback:
+			self.callback(self)
+
+	def draw(self):
+		if len(self.position) < 3:
+			return
+
+		gl.glPushMatrix()
+		gl.glTranslatef(self.position[0], self.position[1], self.position[2] + 1.33)
+		gl.glRotate(self.rotation[0],0.0, 0.0, 1.0)
+		gl.glRotate(self.rotation[1],1.0, 0.0, 0.0)
+		self._render()
+		gl.glPopMatrix()
+
+	def _render(self):
+		x, y, z = 1.0, 0.60, 1.33
+		xx, yy, zz = 1.0, 0.60, 1.33
+
+		gl.glColor3f(1.0, 1.0, 1.0)
+		d = 0.08
+
+		if self.name != "XX":
+			texture = self.table.tp.tile_textures[self.name]
+			texture.bind()
+
+			# --- Front ---
+			gl.glBegin(gl.GL_QUADS)
+			gl.glNormal3f(0.0,-1.0, 0.0)
+			texture.tex_coord(0.02, 0.98)
+			gl.glVertex3f(-x + d, -y, z - d)
+			texture.tex_coord(0.98, 0.98)
+			gl.glVertex3f(x - d, -y, z - d)
+			texture.tex_coord(0.98, 0.02)
+			gl.glVertex3f(x - d, -y, -z + d)
+			texture.tex_coord(0.02, 0.02)
+			gl.glVertex3f(-x + d, -y, -z + d)
+			gl.glEnd()
+
+		# --- Back ---
+
+		texture = self.table.tp.back
+		texture.bind()
+
+		gl.glBegin(gl.GL_POLYGON)
+		gl.glNormal3f(0.0,1.0, 0.0)
+
+		texture.tex_coord(0.5, 0.6)
+		gl.glVertex3f(-x + d, y, z)
+
+		texture.tex_coord(0.5, 0.6)
+		gl.glVertex3f(x -d , y, z)
+
+		texture.tex_coord(0.5, 0.6)
+		gl.glVertex3f(x, y, z - d)
+
+		texture.tex_coord(0.5, 0.6)
+		gl.glVertex3f(x, y, -z + d)
+
+		texture.tex_coord(0.5, 0.6)
+		gl.glVertex3f(x - d, y, -z)
+
+		texture.tex_coord(0.5, 0.6)
+		gl.glVertex3f(-x + d, y, -z)
+
+		texture.tex_coord(0.5, 0.6)
+		gl.glVertex3f(-x, y, -z + d)
+
+		texture.tex_coord(0.5, 0.6)
+		gl.glVertex3f(-x, y, z - d)
+
+		gl.glEnd()
+
+		texture = self.table.tp.border
+		texture.bind()
+
+		# --- Right ---
+		gl.glBegin(gl.GL_QUADS)
+		gl.glNormal3f(1.0,0.0, 0.0)
+		texture.tex_coord(0.97, 0.97)
+		gl.glVertex3f(x, -y + d, z - d)
+		texture.tex_coord(0.3, 0.97)
+		gl.glVertex3f(x, y, z - d)
+		texture.tex_coord(0.3, 0.3)
+		gl.glVertex3f(x, y, -z + d)
+		texture.tex_coord(0.97, 0.3)
+		gl.glVertex3f(x, -y + d, -z + d)
+		gl.glEnd()
+
+		# --- Left ----
+		gl.glBegin(gl.GL_QUADS)
+		gl.glNormal3f(-1.0,0.0, 0.0)
+		texture.tex_coord(0.97, 0.97)
+		gl.glVertex3f(-x, -y + d, z - d)
+		texture.tex_coord(0.3, 0.97)
+		gl.glVertex3f(-x, y, z)
+		texture.tex_coord(0.3, 0.3)
+		gl.glVertex3f(-x, y, -z)
+		texture.tex_coord(0.97, 0.3)
+		gl.glVertex3f(-x, -y + d, -z + d)
+		gl.glEnd()
+
+		x, y, z = xx - d, yy - d, zz
+		# --- Top ----
+		gl.glBegin(gl.GL_QUADS)
+		gl.glNormal3f(0.0,0.0, 1.0)
+		texture.tex_coord(0.97,0.97)
+		gl.glVertex3f(-x, -y, z)
+		texture.tex_coord(0.3, 0.97)
+		gl.glVertex3f(-x, y + d, z)
+		texture.tex_coord(0.3, 0.3)
+		gl.glVertex3f(x, y + d, z)
+		texture.tex_coord(0.97, 0.3)
+		gl.glVertex3f(x, -y, z)
+		gl.glEnd()
+
+		# --- Bottom ----
+		gl.glBegin(gl.GL_QUADS)
+		gl.glNormal3f(0.0,0.0, -1.0)
+		texture.tex_coord(0.97, 0.97)
+		gl.glVertex3f(x, -y, -z)
+		texture.tex_coord(0.3, 0.97)
+		gl.glVertex3f(x, y + d, -z)
+		texture.tex_coord(0.3, 0.3)
+		gl.glVertex3f(-x, y + d, -z)
+		texture.tex_coord(0.97, 0.3)
+		gl.glVertex3f(-x, -y, -z)
+		gl.glEnd()
+
+
+		# --- Left-Front
+		gl.glBegin(gl.GL_QUADS)
+		gl.glNormal3f(-1.0,-1.0, 0.0)
+		texture.tex_coord(0.95,0.95)
+		gl.glVertex3f(-xx, -yy + d, zz - d)
+		texture.tex_coord(0.90, 0.95)
+		gl.glVertex3f(-xx, -yy + d, -zz + d)
+		texture.tex_coord(0.90, 0.90)
+		gl.glVertex3f(-xx + d, -yy, -zz + d)
+		texture.tex_coord(0.95, 0.90)
+		gl.glVertex3f(-xx + d, -yy, zz - d)
+		gl.glEnd()
+
+		# --- Right-Front
+		gl.glBegin(gl.GL_QUADS)
+		gl.glNormal3f(1.0,-1.0, 0.0)
+		texture.tex_coord(0.95,0.95)
+		gl.glVertex3f(xx, -yy + d, zz - d)
+		texture.tex_coord(0.90, 0.95)
+		gl.glVertex3f(xx, -yy + d, -zz + d)
+		texture.tex_coord(0.90, 0.90)
+		gl.glVertex3f(xx - d, -yy, -zz + d)
+		texture.tex_coord(0.95, 0.90)
+		gl.glVertex3f(xx - d, -yy, zz - d)
+		gl.glEnd()
+
+
+		# --- Top-Front
+		gl.glBegin(gl.GL_QUADS)
+		gl.glNormal3f(0.0,-1.0, 1.0)
+		texture.tex_coord(0.95,0.95)
+		gl.glVertex3f(-xx + d, -yy + d, zz)
+		texture.tex_coord(0.90, 0.95)
+		gl.glVertex3f(-xx + d, -yy, zz - d)
+		texture.tex_coord(0.90, 0.90)
+		gl.glVertex3f(xx - d, -yy, zz - d)
+		texture.tex_coord(0.95, 0.90)
+		gl.glVertex3f(xx - d, -yy + d , zz)
+		gl.glEnd()
+
+		# --- Right-Top
+		gl.glBegin(gl.GL_QUADS)
+		gl.glNormal3f(1.0,0.0, 1.0)
+		texture.tex_coord(0.3,0.3)
+		gl.glVertex3f(xx - d, yy, zz)
+		texture.tex_coord(0.3, 0.97)
+		gl.glVertex3f(xx, yy, zz - d)
+		texture.tex_coord(0.97, 0.97)
+		gl.glVertex3f(xx, -yy + d, zz - d)
+		texture.tex_coord(0.97, 0.3)
+		gl.glVertex3f(xx - d, -yy + d, zz)
+
+		gl.glEnd()
+
+		# --- Left-Top
+		gl.glBegin(gl.GL_QUADS)
+		gl.glNormal3f(-1.0,0.0, 1.0)
+		texture.tex_coord(0.3,0.3)
+		gl.glVertex3f(-xx + d, yy, zz)
+		texture.tex_coord(0.3, 0.97)
+		gl.glVertex3f(-xx, yy, zz - d)
+		texture.tex_coord(0.97, 0.97)
+		gl.glVertex3f(-xx, -yy + d, zz - d)
+		texture.tex_coord(0.97, 0.3)
+		gl.glVertex3f(-xx + d, -yy + d, zz)
+		gl.glEnd()
+
+		# --- Bottom-Front
+		gl.glBegin(gl.GL_QUADS)
+		gl.glNormal3f(0.0,-1.0, -1.0)
+		texture.tex_coord(0.95,0.95)
+		gl.glVertex3f(-xx + d, -yy + d, -zz)
+		texture.tex_coord(0.90, 0.95)
+		gl.glVertex3f(-xx + d, -yy, -zz + d)
+		texture.tex_coord(0.90, 0.90)
+		gl.glVertex3f(xx - d, -yy, -zz + d)
+		texture.tex_coord(0.95, 0.90)
+		gl.glVertex3f(xx - d, -yy + d , -zz)
+		gl.glEnd()
+
+		# --- Right-Bottom
+		gl.glBegin(gl.GL_QUADS)
+		gl.glNormal3f(1.0,0.0, -1.0)
+		texture.tex_coord(0.3,0.3)
+		gl.glVertex3f(xx - d, yy - d, -zz)
+		texture.tex_coord(0.3, 0.97)
+		gl.glVertex3f(xx, yy - d, -zz + d)
+		texture.tex_coord(0.97, 0.97)
+		gl.glVertex3f(xx, -yy + d, -zz + d)
+		texture.tex_coord(0.97, 0.3)
+		gl.glVertex3f(xx - d, -yy + d, -zz)
+
+		gl.glEnd()
+
+		# --- Left-Bottom
+		gl.glBegin(gl.GL_QUADS)
+		gl.glNormal3f(-1.0,0.0, -1.0)
+		texture.tex_coord(0.3,0.3)
+		gl.glVertex3f(-xx + d, yy - d, -zz)
+		texture.tex_coord(0.3, 0.97)
+		gl.glVertex3f(-xx, yy - d, -zz + d)
+		texture.tex_coord(0.97, 0.97)
+		gl.glVertex3f(-xx, -yy + d, -zz + d)
+		texture.tex_coord(0.97, 0.3)
+		gl.glVertex3f(-xx + d, -yy + d, -zz)
+		gl.glEnd()
+
+		# --- Left-Top-Front
+		gl.glBegin(gl.GL_TRIANGLES)
+		gl.glNormal3f(-1.0,-1.0, 1.0)
+		texture.tex_coord(0.95,0.95)
+		gl.glVertex3f(-xx + d, -yy + d, zz)
+		texture.tex_coord(0.90, 0.95)
+		gl.glVertex3f(-xx + d, -yy, zz - d)
+		texture.tex_coord(0.90, 0.90)
+		gl.glVertex3f(-xx, -yy + d, zz - d)
+		gl.glEnd()
+
+		# --- Right-Top-Front
+		gl.glBegin(gl.GL_TRIANGLES)
+		gl.glNormal3f(-1.0,-1.0, 1.0)
+		texture.tex_coord(0.95,0.95)
+		gl.glVertex3f(xx - d, -yy + d, zz)
+		texture.tex_coord(0.90, 0.95)
+		gl.glVertex3f(xx - d, -yy, zz - d)
+		texture.tex_coord(0.90, 0.90)
+		gl.glVertex3f(xx, -yy + d, zz - d)
+		gl.glEnd()
+
+		# --- Left-Bottom-Front
+		gl.glBegin(gl.GL_TRIANGLES)
+		gl.glNormal3f(-1.0,-1.0, -1.0)
+		texture.tex_coord(0.95,0.95)
+		gl.glVertex3f(-xx + d, -yy + d, -zz)
+		texture.tex_coord(0.90, 0.95)
+		gl.glVertex3f(-xx + d, -yy, -zz + d)
+		texture.tex_coord(0.90, 0.90)
+		gl.glVertex3f(-xx, -yy + d, -zz + d)
+		gl.glEnd()
+
+		# --- Right-Bottom-Front
+		gl.glBegin(gl.GL_TRIANGLES)
+		gl.glNormal3f(-1.0,-1.0, -1.0)
+		texture.tex_coord(0.95,0.95)
+		gl.glVertex3f(xx - d, -yy + d, -zz)
+		texture.tex_coord(0.90, 0.95)
+		gl.glVertex3f(xx - d, -yy, -zz + d)
+		texture.tex_coord(0.90, 0.90)
+		gl.glVertex3f(xx, -yy + d, -zz + d)
+		gl.glEnd()
+
+
 class DropZone:
 	
 	def __init__(self, table, initial_position, direction, row_size):
@@ -95,14 +394,15 @@ class DropZone:
 		self.tile_in_row += 1
 		if self.tile_in_row == self.row_size:
 			self.tile_in_row = 0
-			self.position = self.direction.move_down(self.position, self.table.get_face_size_y() + 7)
+			self.position = self.direction.move_down(self.position, self.table.get_face_size_y() + 0.2)
 			self.position = self.direction.move_left(self.position, self.table.get_face_size_x() * (self.row_size - 1))
 		else:
 			self.position = self.direction.move_right(self.position, self.table.get_face_size_x())
 		return p
 			
 	def new_tile(self, name):
-		tile = self.table.new_tile(name, self.next_position(), self.direction)
+		pos = self.next_position()
+		tile = self.table.new_tile(name, (pos[0], pos[1], 0) , (self.direction.angle, -90))
 		self.last_tile = tile
 		return tile
 
@@ -115,6 +415,9 @@ class Table:
 
 	def __init__(self):
 		self.tp = TilePainter((640,480))
+		
+		# FIXME
+		self.bg_texture = RawTexture(self.tp.bg_image)
 		self.reset_all()
 
 	def reset_all(self):
@@ -124,19 +427,39 @@ class Table:
 		self.ura_dora_indicators = []
 
 		self.open_set_positions = [ 
-			((1005,690), direction_up, 0), 
-			((950,80), direction_left, 0),
-			((15,15), direction_down, 0),
-			((45,680), direction_right, 0),
+			((17,-13.5,0), direction_up, 0), 
+			((22,24,0), direction_left, 0),
+			((-15,34,0), direction_down, 0),
+			((-23.5,-6,0), direction_right, 0),
 		]
 
 		self.init_dropzones()
 
+		for x in xrange(17):
+			self.new_dummy_tile((-19, x*2 -7, 0), (-90,90))
+			self.new_dummy_tile((17.5, x*2 -7 , 0), (90,90))
+			self.new_dummy_tile((x*2 - 17, 28, 0), (180,90))
+			self.new_dummy_tile((x*2 - 17, -10, 0), (180,90))
+
+			self.new_dummy_tile((-19, x*2 -7, 1.22), (-90,90))
+			self.new_dummy_tile((17.5, x*2 -7 , 1.22), (90,90))
+			self.new_dummy_tile((x*2 - 17, 28, 1.22), (180,90))
+			self.new_dummy_tile((x*2 - 17, -10, 1.22), (180,90))
+
+		z = 14 - 4
+		for x in xrange(z):
+			self.new_dummy_tile((22.5, x * 2.08 - 4, 0), (90, 0))
+
+		for x in xrange(14-z,14):
+			self.new_dummy_tile((-24.5, x * 2.08 - 3, 0), (-90, 0))
+			self.new_dummy_tile((x * 2.08 - 14, 36, 0), (180, 0))
+
+
 	def init_dropzones(self):
-		dz_my = DropZone(self, (380, 470), direction_up, 6)
-		dz_across = DropZone(self, (580, 140), direction_down, 6)
-		dz_right = DropZone(self, (640, 410), direction_left, 6)
-		dz_left = DropZone(self, (320, 210), direction_right,6)
+		dz_my = DropZone(self, (-6, 0), direction_up, 6)
+		dz_across = DropZone(self, (4, 15), direction_down, 6)
+		dz_right = DropZone(self, (6.5, 2.5), direction_left, 6)
+		dz_left = DropZone(self, (-8.5, 12.5), direction_right,6)
 		self.drop_zones = [ dz_my, dz_right, dz_across, dz_left ]
 
 	def sort_hand(self):
@@ -146,8 +469,11 @@ class Table:
 		self.hand = [ self.new_tile(name) for name in tile_names ]
 		self.arrange_hand()
 
-	def new_tile(self, name, position = None, direction = direction_up):
-		t = TableTile(self, name, position, direction)
+	def new_dummy_tile(self, position, rotation):
+		return self.new_tile("XX", position, rotation)
+
+	def new_tile(self, name, position = None, rotation = (0,0)):
+		t = Tile(self, name, position, rotation)
 		self.add_tile(t)
 		return t
 
@@ -162,10 +488,11 @@ class Table:
 
 	def arrange_hand(self):
 		self.sort_hand()
-		px, py = 320, 690
+		px, py = -11.5, -15
 		for tile in self.hand:
-			tile.position = (px, py)
-			px += self.tp.face_size[0] + 1
+			tile.position = (px, py, 0)
+			tile.rotation = (0.0, -25.0)
+			px += 2.08
 
 	def add_tile(self, tile):
 		self.tiles.append(tile)
@@ -204,22 +531,98 @@ class Table:
 			px += self.get_face_size_x()
 
 	def draw(self):
-		self.tiles.sort(key=lambda t: t.position[0], reverse = True)
-		self.tiles.sort(key=lambda t: t.position[1])
-		screen = display.get_surface()
-		self.tp.draw_background(screen)
+		gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
+		self._draw_init()
+		self._draw_background()
+
 		for tile in self.tiles:
-			self.tp.draw_tile(screen, tile)
+			tile.draw()
+
+	def _draw_init(self):
+		gl.glLoadIdentity()
+		#gl.glTranslatef(1.0, -3.5, -50.0)
+		#gl.glRotatef(-45.0, 1.0, 0.0, 0.0)
+
+		gl.glTranslatef(2.0, -3.5, -51.0)
+		gl.glRotatef(-45.0, 1.0, 0.0, 0.0)
+
+	#	gl.glTranslatef(1.0, -3.5, -55.0)
+	#	gl.glRotatef(-55.0, 1.0, 0.0, 0.0)
+
+
+		#gl.glTranslatef(0.0, -7.0, -65.0)
+		#gl.glRotatef(-05.0, 1.0, 0.0, 0.0)
+
+		gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, (-5.0,5.0,30.0,1.0));
+		gl.glLightfv(gl.GL_LIGHT1, gl.GL_POSITION, (-5.0,-20.0,30.0,1.0));
+
+	def _draw_background(self):
+		gl.glColor3f(1.0, 1.0, 1.0)
+		texture = self.bg_texture
+		texture.bind()
+		gl.glBegin(gl.GL_QUADS)
+		gl.glNormal3f(0.0,0.0, 1.0)
+		tx = 60
+		texture.tex_coord(0, tx)
+		gl.glVertex3f(-100.0, 100.0, 0)
+		texture.tex_coord(tx, 0)
+		gl.glVertex3f(100.0, 100.0, 0)
+		texture.tex_coord(tx, tx)
+		gl.glVertex3f(100.0, -100.0, 0)
+		texture.tex_coord(0.0, 0.0)
+		gl.glVertex3f(-100.0, -100.0, 0)
+		gl.glEnd()
 
 	def get_face_size_x(self):
-		return self.tp.face_size[0]
+		return 2.0
 
 	def get_face_size_y(self):
-		return self.tp.face_size[1]
+		return 2.66
+
+	def pick_object_on_position(self, position):
+		v = gl.glGetIntegerv(gl.GL_VIEWPORT)
+		gl.glSelectBuffer(len(self.tiles) * 20)
+		gl.glRenderMode(gl.GL_SELECT)
+		gl.glInitNames()
+		self._draw_init()
+		gl.glPushName(-1)
+
+		gl.glMatrixMode(gl.GL_PROJECTION)
+		gl.glPushMatrix()
+		gl.glLoadIdentity()
+		glu.gluPickMatrix(position[0], v[3] - position[1], 2.0, 2.0, v);
+
+		# FIXME: Get rid of magical constants
+		glu.gluPerspective(45, 1.0*1024/768, 0.1, 100.0)
+
+		gl.glMatrixMode(gl.GL_MODELVIEW)
+
+		gl.glClear(gl.GL_COLOR_BUFFER_BIT)
+		self._draw_init()
+
+
+		for tile_id, tile in enumerate(self.tiles):
+			gl.glLoadName(tile_id)
+			tile.draw()
+		pygame.display.flip()
+
+
+		gl.glFlush()
+		hits = gl.glRenderMode(gl.GL_RENDER)
+		gl.glMatrixMode(gl.GL_PROJECTION)
+		gl.glPopMatrix()
+		gl.glMatrixMode(gl.GL_MODELVIEW)
+
+		if hits:
+			hits.sort(key = lambda s: s.near)
+			tile_id = hits[0].names[0]
+			return self.tiles[tile_id]
+		return None
 
 	def on_left_button_down(self, position):
-		for tile in self.tiles:
-			tile.on_left_button_down(position)
+		tile = self.pick_object_on_position(position)
+		if tile:
+			tile.on_left_button_down()
 
 	def set_hand_callback(self, callback):
 		for tile in self.hand:
@@ -228,22 +631,18 @@ class Table:
 	def add_open_set(self, player, tile_names, marked):
 		orig_position, direction, level = self.open_set_positions[player]
 		position = orig_position
-		fx, fy = self.get_face_size_x(), self.get_face_size_y()
+		fx, fy = 2, 2.66
 		for i, tile_name in reversed(list(enumerate(tile_names))):
-			dr, mv = (direction.next, fy) if i in marked else (direction, fx)
-			# Cheap hack with directions
-			if direction == direction_up or direction == direction_right:
-				position = direction.move_left(position, mv)
-			tile = self.new_tile(tile_name, position, dr)
-			if direction == direction_down or direction == direction_left:
-				position = direction.move_left(position, mv)
+			dr, mv, turn = (direction.next, fy, 0) if i in marked else (direction, fx, 0)
+			tile = self.new_tile(tile_name, position, (direction.angle, -90))
+			position = direction.move_left(position, mv)
 		level += 1
 		if level == 2:
 			level = 0
-			position = direction.move_left(orig_position, fx * 2 + fy * 2 + 10)
-			position = direction.move_down(position, fy + 10)
+			position = direction.move_left(orig_position, fx * 4.3)
+			position = direction.move_up(position, fy + 0.2)
 		else:
-			position = direction.move_up(orig_position, fy + 10)
+			position = direction.move_down(orig_position, fy + 0.2)
 		self.open_set_positions[player] = (position, direction, level)
 
 	def find_tile_in_hand(self, tile_name):
@@ -251,4 +650,5 @@ class Table:
 			if tile.name == tile_name:
 				return tile
 
-
+	def set_riichi(self, player_id):
+		pass
