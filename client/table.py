@@ -125,7 +125,6 @@ class Tile:
 		x, y, z = 1.0, 0.60, 1.33
 		xx, yy, zz = 1.0, 0.60, 1.33
 
-		gl.glColor3f(1.0, 1.0, 1.0)
 		d = 0.08
 
 		if self.name != "XX":
@@ -421,6 +420,50 @@ class DropZone:
 		self.tile_in_row = (self.tile_in_row - 1) % self.row_size
 		self.position = self.last_pos
 		self.last_tile.remove()
+
+
+class RiichiStick:
+
+	def __init__(self, position, rotation, texture):
+		self.position = position
+		self.rotation = rotation
+		self.texture = texture
+		self.size = (3.6, 0.25, 0.2)
+		self.visible = False
+
+	def hide(self):
+		self.visible = False
+
+	def show(self):
+		self.visible = True
+
+	def draw(self):
+		if not self.visible:
+			return
+		sx, sy, sz = self.size
+		gl.glPushMatrix()
+		gl.glTranslatef(self.position[0], self.position[1], self.position[2] + sz)
+		gl.glRotate(self.rotation,0.0, 0.0, 1.0)
+		
+		texture = self.texture
+		texture.bind()
+
+		gl.glBegin(gl.GL_QUADS)
+		gl.glNormal3f(0.0,0.0, 1.0)
+		texture.tex_coord(0.0,0.0)
+		gl.glVertex3f(-sx,-sy, sz)
+		texture.tex_coord(0.0, 1.0)
+		gl.glVertex3f(-sx,sy, sz)
+		texture.tex_coord(1.0, 1.0)
+		gl.glVertex3f(sx,sy, sz)
+		texture.tex_coord(1.0, 0.0)
+		gl.glVertex3f(sx,-sy, sz)
+		gl.glEnd()
+
+		#TODO: Other faces
+	
+		gl.glPopMatrix()
+
 	
 class Table:
 
@@ -429,9 +472,22 @@ class Table:
 		
 		# FIXME
 		self.bg_texture = RawTexture(self.tp.bg_image)
+
+		rstick_texture = RawTexture(pygame.image.load("data/others/rstick.png"))
+		self.riichi_sticks = [
+			RiichiStick( (-0.9,4,0), 0, rstick_texture),
+			RiichiStick( (3.4,8.1,0), 90, rstick_texture),
+			RiichiStick( (-0.8,12,0), 0, rstick_texture),
+			RiichiStick( (-5.0,8.1,0), 90, rstick_texture),
+		]
+
 		self.reset_all()
 
 	def reset_all(self):
+
+		for stick in self.riichi_sticks:
+			stick.hide()
+
 		self.tiles = []
 		self.hand = []
 		self.dora_indicators = []
@@ -583,17 +639,15 @@ class Table:
 		dorai.name = tile_name
 
 	def add_ura_dora_indicator(self, tile_name):
-		self.ura_dora_indicators.append(self.new_tile(tile_name))
-		px, py = 500, 300 + self.get_face_size_y() + 10
-		px -= self.get_face_size_x() * len(self.ura_dora_indicators) / 2
-		for tile in self.ura_dora_indicators:
-			tile.position = (px, py)
-			px += self.get_face_size_x()
+		pass
 
 	def draw(self):
 		gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
 		self._draw_init()
 		self._draw_background()
+
+		for stick in self.riichi_sticks:
+			stick.draw()
 
 		for tile in self.tiles:
 			tile.draw()
@@ -613,8 +667,8 @@ class Table:
 	#	gl.glRotatef(-55.0, 1.0, 0.0, 0.0)
 
 
-		#gl.glTranslatef(0.0, -7.0, -65.0)
-		#gl.glRotatef(-05.0, 1.0, 0.0, 0.0)
+	#	gl.glTranslatef(0.0, -7.0, -65.0)
+	#	gl.glRotatef(-05.0, 1.0, 0.0, 0.0)
 
 		gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, (-5.0,5.0,30.0,1.0));
 		gl.glLightfv(gl.GL_LIGHT1, gl.GL_POSITION, (-5.0,-20.0,30.0,1.0));
@@ -713,4 +767,4 @@ class Table:
 				return tile
 
 	def set_riichi(self, player_id):
-		pass
+		self.riichi_sticks[player_id].show()
