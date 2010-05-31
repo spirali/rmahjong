@@ -24,7 +24,7 @@ class TilePainter:
 		width = 450 * 4
 		self.image = pygame.image.load("data/tiles/default.png")
 		self.bg_image = pygame.image.load("data/bg/default.png")
-		
+
 		self.border = Texture(pygame.image.load("data/tiles/border.png"))
 		self.back = Texture(pygame.image.load("data/tiles/back.png"))
 	

@@ -165,20 +165,8 @@ class Texture:
 	def bind(self):
 		gl.glBindTexture(gl.GL_TEXTURE_2D, self.texture)
 
-	def _from_surface(self, surface):
-		data = pygame.image.tostring(surface, "RGBA", 1)
-		width = surface.get_width()
-		height = surface.get_height()
-		texture = gl.glGenTextures(1)
-		gl.glBindTexture(gl.GL_TEXTURE_2D, texture)
-		gl.glTexEnvf( gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE );
-		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR)
-		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR_MIPMAP_LINEAR)
-		gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAX_ANISOTROPY_EXT, 1000.0)
-
-		gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA, width, height, 0, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, data)
-		glu.gluBuild2DMipmaps(gl.GL_TEXTURE_2D, 4, width, height, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, data );
-		return texture
+	def free(self):
+		gl.glDeleteTextures([self.texture])
 
 	def tex_coord(self, x, y):		
 		gl.glTexCoord2f(self.x_coef * x, self.y_coef * y)
@@ -197,3 +185,20 @@ class Texture:
 		self.tex_coord(0.0,0.0)
 		gl.glVertex2f(x, y - self.height)
 		gl.glEnd()
+
+	def _from_surface(self, surface):
+		data = pygame.image.tostring(surface, "RGBA", 1)
+		width = surface.get_width()
+		height = surface.get_height()
+		texture = gl.glGenTextures(1)
+		gl.glBindTexture(gl.GL_TEXTURE_2D, texture)
+		gl.glTexEnvf( gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE );
+		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR)
+		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR_MIPMAP_LINEAR)
+		gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAX_ANISOTROPY_EXT, 1000.0)
+
+		gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA, width, height, 0, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, data)
+		glu.gluBuild2DMipmaps(gl.GL_TEXTURE_2D, 4, width, height, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, data );
+		return texture
+
+

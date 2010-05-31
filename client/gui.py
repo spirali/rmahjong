@@ -11,6 +11,7 @@ class GuiManager:
 
 	def add_widget(self, widget):
 		self.widgets.append(widget)
+		widget.on_enter(self)
 	
 	def add_widget_with_timeout(self, widget, timeout):
 		self.add_widget(widget)
@@ -19,6 +20,7 @@ class GuiManager:
 	def remove_widget(self, widget):
 		if widget in self.widgets:
 			self.widgets.remove(widget)
+		widget.on_leave(self)
 
 	def draw(self):
 		for widget in self.widgets:
@@ -45,11 +47,21 @@ class Widget:
 	def __init__(self, position, size):
 		self.position = position
 		self.size = size
-#		self.surface = None
+		self.surface = None
 		self.texture = None
 
 	def set_surface(self, surface):
-		self.texture = graphics.Texture(surface)
+		self.surface = surface
+
+	def on_enter(self, manager):
+		if self.surface:
+			assert self.texture == None
+			self.texture = graphics.Texture(self.surface)
+
+	def on_leave(self, manager):
+		if self.texture:
+			self.texture.free()
+			self.texture = None
 
 	def draw(self):
 		if self.texture:
