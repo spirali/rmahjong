@@ -49,19 +49,27 @@ class Widget:
 		self.size = size
 		self.surface = None
 		self.texture = None
+		self.manager = None
 
 	def set_surface(self, surface):
 		self.surface = surface
+		if self.manager != None:
+			if self.texture != None:
+				self.texture.free()
+			self.texture = graphics.Texture(self.surface)
 
 	def on_enter(self, manager):
+		self.manager = manager
 		if self.surface:
-			assert self.texture == None
+			if self.texture != None:
+				self.texture.free()
 			self.texture = graphics.Texture(self.surface)
 
 	def on_leave(self, manager):
 		if self.texture:
 			self.texture.free()
 			self.texture = None
+		self.manager = None
 
 	def draw(self):
 		if self.texture:
