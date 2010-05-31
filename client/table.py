@@ -560,12 +560,11 @@ class Table:
 		raise Exception("Tile is not in hand")
 
 	def add_dora_indicator(self, tile_name):
-		self.dora_indicators.append(self.new_tile(tile_name))
-		px, py = 500, 300
-		px -= self.get_face_size_x() * len(self.dora_indicators) / 2
-		for tile in self.dora_indicators:
-			tile.position = (px, py)
-			px += self.get_face_size_x()
+		pos = len(self.dora_indicators)
+		dorai = self.wall[-(pos * 2 + 6)]
+		self.dora_indicators.append(dorai)
+		dorai.rotation = (dorai.rotation[0], -90)
+		dorai.name = tile_name
 
 	def add_ura_dora_indicator(self, tile_name):
 		self.ura_dora_indicators.append(self.new_tile(tile_name))
