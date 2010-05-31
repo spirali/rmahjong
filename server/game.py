@@ -240,7 +240,7 @@ class Round:
 
 class DebugRound(Round):
 	
-	def __init__(self, players, random):
+	def __init__(self, players, random, round_wind, potential_last):
 		def tiles(strs):
 			return map(Tile, strs)
 
@@ -260,7 +260,7 @@ class DebugRound(Round):
 	
 		self.hands = map(tiles, hands) 
 		self.rnd = tiles(r)
-		Round.__init__(self, players, random)
+		Round.__init__(self, players, random, round_wind, potential_last)
 
 		for h in self.hands:
 			for t in h:

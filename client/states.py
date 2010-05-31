@@ -227,6 +227,7 @@ class RoundState(State):
 			self.mahjong.set_state(OtherMoveState(self.mahjong, player, False))
 
 	def process_closed_kan(self, message):
+		self.mahjong.table.remove_dead_wall_tile_for_kan()
 		self.mahjong.add_dora_indicator(message["dora_indicator"])
 		tile_name = message["tile"]
 		player = message["player"]

@@ -89,6 +89,7 @@ class Tile:
 		self.position = position
 		self.rotation = rotation
 		self.callback = None
+		self.visible = True
 
 	def get_index(self):
 		return all_tile_names.index(self.name)
@@ -100,8 +101,17 @@ class Tile:
 		if self.callback:
 			self.callback(self)
 
+	def hide(self):
+		self.visible = False
+
+	def show(self):
+		self.visible = True
+
+	def is_visible(self):
+		return self.visible
+
 	def draw(self):
-		if len(self.position) < 3:
+		if not self.visible:
 			return
 
 		gl.glPushMatrix()
@@ -551,6 +561,12 @@ class Table:
 		if tile in self.hand:
 			self.hand.remove(tile)
 		self.tiles.remove(tile)
+
+	def remove_dead_wall_tile_for_kan(self):
+		for tile in [ self.wall[-2], self.wall[-1], self.wall[-4], self.wall[-3] ]:
+			if tile.is_visible():
+				tile.hide()
+				return
 
 	def remove_hand_tile_by_name(self, tile_name):
 		for tile in self.hand:
