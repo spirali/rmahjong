@@ -96,12 +96,14 @@ class RoundPreparingState(State):
 			self.mahjong.init_round(message)
 			return
 		if name == "MOVE":
+			self.mahjong.table.remove_tile_from_wall()
 			actions = split_str(message["actions"],";")
 			state = MyMoveState(self.mahjong, message["tile"], actions)
 			self.mahjong.set_state(state)
 			return
 		if name == "OTHER_MOVE":
-			state = OtherMoveState(self.mahjong, message["wind"])
+			self.mahjong.table.remove_tile_from_wall()
+			state = OtherMoveState(self.mahjong, message["wind"], True)
 			self.mahjong.set_state(state)
 			return
 		State.process_message(self, message)		
@@ -228,13 +230,15 @@ class RoundState(State):
 			return
 
 		if name == "MOVE":
+			self.mahjong.table.remove_tile_from_wall()
 			actions = split_str(message["actions"], ";")
 			state = MyMoveState(self.mahjong, message["tile"], actions)
 			self.mahjong.set_state(state)
 			return
 
 		if name == "OTHER_MOVE":
-			state = OtherMoveState(self.mahjong, message["wind"])
+			self.mahjong.table.remove_tile_from_wall()
+			state = OtherMoveState(self.mahjong, message["wind"], True)
 			self.mahjong.set_state(state)
 			return
 
@@ -260,12 +264,10 @@ class RoundState(State):
 		State.process_message(self, message)		
 
 	def add_buttons(self, button_labels, callback):
-		pos = self.mahjong.table.picked_tile_position()
-		px, py = pos[0],640
-		button_labels.reverse()
+		px, py = 290,730
 		for label in button_labels:
 			button = Button((px, py), (75,25), label, callback)
-			py -= 27
+			px += 80
 			self.mahjong.gui.add_widget(button)
 			self.widgets.append(button)
 
@@ -289,9 +291,11 @@ class RoundState(State):
 			self.mahjong.arrange_hand()
 			self.mahjong.set_state(MyMoveState(self.mahjong, None, []))
 		else:
-			self.mahjong.set_state(OtherMoveState(self.mahjong, player))
+			self.mahjong.table.remove_tiles_from_other_hand(player_id, len(tiles) - 1)
+			self.mahjong.set_state(OtherMoveState(self.mahjong, player, False))
 
 	def process_closed_kan(self, message):
+		self.mahjong.table.remove_dead_wall_tile_for_kan()
 		self.mahjong.add_dora_indicator(message["dora_indicator"])
 		tile_name = message["tile"]
 		player = message["player"]
@@ -301,6 +305,13 @@ class RoundState(State):
 		self.mahjong.table.add_open_set(player_id, [tile_name] * 4, [])
 		if player_id == 0:
 			self.process_self_kan(message)
+		else:
+			if self.picked_tile:
+				self.mahjong.table.remove_tiles_from_other_hand(player_id, 3)			
+				self.picked_tile.remove()
+				self.picked_tile = None
+			else:
+				self.mahjong.table.remove_tiles_from_other_hand(player_id, 4)			
 
 	def process_self_kan(self, message):
 		raise Exception("Invalid state for self_kan")
@@ -341,7 +352,7 @@ class MyMoveState(RoundState):
 			self.drop_picked_tile(self.picked_tile)
 
 	def new_picked_tile(self, tile_name):
-		tile = self.mahjong.table.new_tile(tile_name, self.mahjong.table.picked_tile_position())
+		tile = self.mahjong.table.picked_tile(tile_name)
 		tile.callback = self.drop_picked_tile
 		self.picked_tile = tile
 
@@ -407,18 +418,33 @@ class MyMoveState(RoundState):
 
 class OtherMoveState(RoundState):
 
-	def __init__(self, mahjong, wind):
+	def __init__(self, mahjong, wind, pick_tile):
 		RoundState.__init__(self, mahjong)
 		self.wind = wind
+		self.pick_tile = pick_tile
+		self.picked_tile = None
 		self.highlight_tiles = []
 
 	def enter_state(self):
 		RoundState.enter_state(self)
 		self.mahjong.select_box(self.wind)
+		if self.pick_tile:
+			player_id = self.mahjong.player_id_by_wind(self.wind)
+			self.picked_tile = self.mahjong.table.picked_other_hand_tile(player_id)
 
 	def leave_state(self):
 		RoundState.leave_state(self)
 		self.mahjong.select_none()
+
+	def process_message(self, message):
+		RoundState.process_message(self, message)
+		if message["message"] == "DROPPED":
+			if self.picked_tile:
+				self.picked_tile.remove()
+				self.picked_tile = None
+			else:
+				player_id = self.mahjong.player_id_by_wind(self.wind)
+				self.mahjong.table.remove_tiles_from_other_hand(player_id, 1)
 
 	def on_steal_action_click(self, button):
 		self.remove_widgets()
@@ -455,7 +481,7 @@ class ScoreState(RoundPreparingState):
 
 		name = self.message["message"]
 		if name == "ROUND_END":	
-			button = Button( (475,380), (120, 30), "Show score", self.show_score_clicked)
+			button = Button( (475,340), (120, 30), "Show score", self.show_score_clicked)
 			shoutbox = self.mahjong.create_shoutbox(self.message["player"], self.message["wintype"] + "!")
 			self.setup_widgets([ button, shoutbox ])
 			for tile_name in self.message["ura_dora_indicators"].split():
@@ -569,17 +595,18 @@ class TestState(State):
 
 	def __init__(self, mahjong):
 		State.__init__(self, mahjong)
-		self.mahjong.table.set_new_hand(["DW", "DW", "C2","C3","C4", "WW", "WW", "WW", "B8", "B6", "B7"])
-		self.mahjong.table.set_new_hand(["DW", "DW", "C2","C3","C4", "WW", "WW", "WW"])
+		#self.mahjong.table.set_new_hand(["DW", "DW", "C2","C3","C4", "WW", "WW", "WW", "B8", "B6", "B7"])
+		self.mahjong.table.set_new_hand(["DW", "DW", "C1", "C2", "C3", "C4"])
+		#self.mahjong.table.set_new_hand(["DW", "DW", "C2","C3","C4", "WW", "WW", "WW"])
 		self.mahjong.my_wind = "WE"
 		self.mahjong.set_round_wind("WS")
 		#self.mahjong.table.set_new_hand(["DW", "DW", ])
 
 		for x in xrange(4):
-			self.mahjong.table.add_open_set(x, [ "C2", "DR", "DR", "DR" ], [2,3])
-			self.mahjong.table.add_open_set(x, [ "C2", "C1", "C2", "C3" ], [1])
-			self.mahjong.table.add_open_set(x, [ "C2", "DR", "DR", "DR" ], [0])
-			self.mahjong.table.add_open_set(x, [ "C2", "C1", "C2", "C3" ], [3])
+			self.mahjong.table.add_open_set(x, [ "DR", "DR", "DR", "DR" ], [])
+			self.mahjong.table.add_open_set(x, [ "C1", "C2", "C3", "C4" ], [])
+			self.mahjong.table.add_open_set(x, [ "B7", "B8", "B9", "B9" ], [])
+	#		self.mahjong.table.add_open_set(x, [ "WN", "WE", "WS", "WW" ], [])
 
 		from table import all_tile_names
 		for tile in all_tile_names[:13]:

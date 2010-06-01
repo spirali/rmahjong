@@ -15,26 +15,23 @@
 # <http://www.gnu.org/licenses/>.
 
 
+from graphics import Texture, RawTexture
 import pygame
 
 class TilePainter:
 
 	def __init__(self, screen_size):
-		width = 450
-	#	self.image = load_svg("data/default.svgz", width = width)
-	#	self.bg_image = load_svg("data/bg/default.svg", width = 50)
+		width = 450 * 4
 		self.image = pygame.image.load("data/tiles/default.png")
 		self.bg_image = pygame.image.load("data/bg/default.png")
+
+		self.border = Texture(pygame.image.load("data/tiles/border.png"))
+		self.back = Texture(pygame.image.load("data/tiles/back.png"))
+	
 		scale = width / 768.0
 		self.face_size = (68.0 * scale, 82.0 * scale)
 		self.matrix_size = (69.0 * scale, 88.5 * scale)
-
-		self.tile_size = [ (97.0 * scale, 115.0 * scale), (116.0 * scale, 97.0 * scale), (97.0 * scale, 115.0 * scale)]
-		self.tile_start = [ (0,0), (195.0 * scale,0), (97.5 * scale,0), (195.0 * scale,0) ]
-
 		self.matrix_start = (1 * scale, 120.5 * scale)
-		self.face_offset = [ (28.0 * scale, 3.0 * scale),  (30.0 * scale, 0.0 * scale) ]
-		self.face_offset.append(self.face_offset[0])
 
 		tile_sources = {}
 		tile_sources["C1"] = (0,0)
@@ -73,32 +70,14 @@ class TilePainter:
 		tile_sources["DW"] = (0,4)
 
 		self.tile_images = {}
+		self.tile_textures = {}
 		for name,source in tile_sources.items():
 			tx, ty = source
 			tx = tx * self.matrix_size[0] + self.matrix_start[0]
 			ty = ty * self.matrix_size[1] + self.matrix_start[1]
 			img = self.image.subsurface(pygame.Rect((tx, ty), self.face_size))
-			self.tile_images[name] = [img]
-			self.tile_images[name].append(pygame.transform.rotate(img, 270))
-			self.tile_images[name].append(pygame.transform.rotate(img, 180))
-			self.tile_images[name].append(pygame.transform.rotate(img, 90))
-
-	def draw_background(self, screen):
-		w = self.bg_image.get_width()
-		h = self.bg_image.get_height()
-		for y in xrange(0, screen.get_height(), h):
-			for x in xrange(0, screen.get_width(), w):
-				screen.blit(self.bg_image, (x, y))
-
-	def draw_tile(self, screen, tile):
-		if tile.is_vertical():
-			if tile.highlight:
-				bg_id = 2
-			else:
-				bg_id = 0
-		else:
-			bg_id = 1
-		self._draw_tile(screen, tile.position, self.tile_images[tile.name][tile.image_id()], bg_id)
+			self.tile_images[name] = img
+			self.tile_textures[name] = Texture(img)
 
 	def draw_tile_image(self, screen, position, name):
 		if name != "XX":
@@ -114,3 +93,5 @@ class TilePainter:
 		py = position[1] - self.face_offset[bg_id][1]
 		screen.blit(self.image, (px, py), pygame.Rect(self.tile_start[bg_id], self.tile_size[bg_id]))	
 		screen.blit(img, position)	
+
+

@@ -12,6 +12,7 @@ class GuiManager:
 
 	def add_widget(self, widget):
 		self.widgets.append(widget)
+		widget.on_enter(self)
 	
 	def add_widget_with_timeout(self, widget, timeout):
 		self.add_widget(widget)
@@ -20,10 +21,11 @@ class GuiManager:
 	def remove_widget(self, widget):
 		if widget in self.widgets:
 			self.widgets.remove(widget)
+		widget.on_leave(self)
 
-	def draw(self, screen):
+	def draw(self):
 		for widget in self.widgets:
-			widget.draw(screen)
+			widget.draw()
 
 	def button_up(self, button, position):
 		for widget in self.widgets:
@@ -47,10 +49,32 @@ class Widget:
 		self.position = position
 		self.size = size
 		self.surface = None
+		self.texture = None
+		self.manager = None
 
-	def draw(self, screen):
+	def set_surface(self, surface):
+		self.surface = surface
+		if self.manager != None:
+			if self.texture != None:
+				self.texture.free()
+			self.texture = graphics.Texture(self.surface)
+
+	def on_enter(self, manager):
+		self.manager = manager
 		if self.surface:
-			screen.blit(self.surface, self.position)
+			if self.texture != None:
+				self.texture.free()
+			self.texture = graphics.Texture(self.surface)
+
+	def on_leave(self, manager):
+		if self.texture:
+			self.texture.free()
+			self.texture = None
+		self.manager = None
+
+	def draw(self):
+		if self.texture:
+			self.texture.draw(self.position[0], self.position[1])
 
 	def is_inside(self, position):
 		px, py = position
@@ -66,11 +90,6 @@ class Widget:
 
 	def create_bg_surface(self):
 		return pygame.Surface(self.size, pygame.SRCALPHA, pygame.display.get_surface())
-
-	def blit_to_center(self, surface):
-		px = (self.surface.get_width() - surface.get_width()) / 2
-		py = (self.surface.get_height() - surface.get_height()) / 2
-		self.surface.blit(surface, (px, py))
 
 	def get_rect(self):
 		return pygame.Rect( (0,0), self.size)
@@ -107,7 +126,7 @@ class Button(Widget):
 		pygame.draw.line(surface, c1, (0,0), (0,size[1]))
 		pygame.draw.line(surface, c2, (size[0] - 1,0), (size[0] - 1, size[1] - 1))
 		pygame.draw.line(surface, c2, (0,size[1] - 1), (size[0] - 1, size[1] - 1))
-		self.surface = surface
+		self.set_surface(surface)
 
 	def button_down(self, button, position):
 		if button == 1 and self.is_inside(position):
@@ -133,8 +152,8 @@ class Label(Widget):
 		surface = self.create_bg_surface()
 		surface.fill(self.bg_color)
 		textsurface = graphics.font.render(text, True, self.color)
-		self.surface = surface
-		self.blit_to_center(textsurface)
+		graphics.blit_to_center(surface, textsurface)
+		self.set_surface(surface)
 
 
 class TextWidget(Widget):
@@ -146,7 +165,7 @@ class TextWidget(Widget):
 		w = textsurface.get_width()
 		h = textsurface.get_height()		
 		Widget.__init__(self, (position[0] - w/2 , position[1] - h/2), (w, h))
-		self.surface = textsurface
+		self.set_surface(textsurface)
 
 
 class PlayerBox(Widget):
@@ -189,7 +208,7 @@ class PlayerBox(Widget):
 		py = 0
 		surface.blit(textsurface, (px, py))
 
-		self.surface = pygame.transform.rotate(surface, self.direction.angle)
+		self.set_surface(pygame.transform.rotate(surface, self.direction.angle))
 
 	def create_shoutbox(self, text):
 		px = self.position[0] + self.shout_vector[0]
@@ -201,13 +220,14 @@ class ShoutBox(Widget):
 	
 	def __init__(self, position, text):
 		Widget.__init__(self, position, (200, 70))
-		self.surface = self.create_bg_surface()
+		surface = self.create_bg_surface()
 	
 		rect = self.get_rect()
-		pygame.draw.ellipse(self.surface, (255,255,255), rect)
+		pygame.draw.ellipse(surface, (255,255,255), rect)
 
 		textsurface = graphics.font.render(text, True, (0,0,0))
-		self.blit_to_center(textsurface)
+		graphics.blit_to_center(surface, textsurface)
+		self.set_surface(surface)
 
 
 class Table(Widget):
@@ -240,6 +260,9 @@ class Table(Widget):
 		pygame.draw.line(self.surface, color, (0, self.row), (self.size[0], self.row))
 		self.row += row_change
 
+	def table_done(self):
+		self.set_surface(self.surface)
+
 
 class ScoreTable(Table):
 	
@@ -256,17 +279,9 @@ class ScoreTable(Table):
 		self.text("Payment: " + payment, 25) 
 		if int(looser_riichi) != 0:
 			self.text("Riichi bets from others: +" + looser_riichi, 25) 
+
+		self.table_done()
 	
-
-class RiichiStick(Widget):
-
-	def __init__(self, position, size):
-		Widget.__init__(self, position, size)
-		self.surface = self.create_bg_surface()
-		self.surface.fill((235,235,235,255))
-		sx, sy = size
-		pygame.draw.circle(self.surface, (255,40,40, 128), (sx / 2, sy / 2), min(sx, sy) / 4)
-
 
 class PaymentTable(Table):
 
@@ -280,6 +295,7 @@ class PaymentTable(Table):
 			self.text(str(score), None, x = 20)
 			self.text(self.payment_prefix(payment), 30, x = 150, color = self.payment_color(payment))
 			self.line(15)
+		self.table_done()
 
 	def payment_color(self, payment):
 		if payment < 0:
@@ -308,6 +324,7 @@ class FinalTable(Table):
 			self.text_center(name, 30)
 			self.text_center(str(score), 30)
 			self.line(15)
+		self.table_done()
 
 
 class Frame(Widget):
@@ -334,5 +351,7 @@ class HandWidget(Widget):
 			names = names + [ "XX" ] + set
 
 		tile_painter.draw_tile_list(surface, (30,20), names, 1)
-		
-		self.surface = surface
+
+		self.set_surface(surface)
+
+
