@@ -30,56 +30,8 @@ all_tile_names = [ "C1","C2","C3","C4","C5","C6","C7","C8","C9","B1","B2","B3","
 winds = [ "WE", "WS", "WW", "WN" ]
 
 
-class TableTile:
+tile_size = (1.0, 0.60, 1.33)
 
-	def __init__(self, table, name, position = None, direction = direction_up, callback = None):
-		self.table = table
-		self.name = name
-		self.position = position
-		self.direction = direction
-		self.callback = callback
-		self.highlight = False
-
-	def remove(self):
-		self.table.remove_tile(self)
-
-	def is_vertical(self):
-		return self.direction.is_vertical()
-
-	def is_horizontal(self):
-		return self.direction.is_horizontal()
-
-	def image_id(self):
-		return self.direction.dir_id
-
-	def get_index(self):
-		return all_tile_names.index(self.name)
-
-	def on_left_button_down(self, position):
-		px, py = position
-		x, y = self.position
-		table = self.table
-		if px >= x and py >= y and px < x + table.get_face_size_x() and py < y + table.get_face_size_y():
-			if self.callback:
-				self.callback(self)
-
-	def get_face_size_x(self):
-		if self.direction == direction_up or self.direction_down:
-			return self.table.get_face_size_x()
-		else:
-			return self.table.get_face_size_y()
-
-	def get_face_size_y(self):
-		if self.direction == direction_up or self.direction_down:
-			return self.table.get_face_size_y()
-		else:
-			return self.table.get_face_size_x()
-
-	def get_face_size(self):
-		return (self.get_face_size_x(), self.get_face_size_y())
-
-	def __repr__(self):
-		return "<TableTile %s>" % self.name
 
 class Tile:
 
@@ -122,8 +74,9 @@ class Tile:
 		gl.glPopMatrix()
 
 	def _render(self):
-		x, y, z = 1.0, 0.60, 1.33
-		xx, yy, zz = 1.0, 0.60, 1.33
+		# FIXME: Refactoring needed!
+		x, y, z = tile_size
+		xx, yy, zz = tile_size
 
 		d = 0.08
 
@@ -385,6 +338,9 @@ class Tile:
 		texture.tex_coord(0.90, 0.90)
 		gl.glVertex3f(xx, -yy + d, -zz + d)
 		gl.glEnd()
+
+	def __repr__(self):
+		return "<Tile %s>" % self.name
 
 
 class DropZone:
