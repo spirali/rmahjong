@@ -180,13 +180,26 @@ class Mahjong:
 		self.gui.add_widget(self.round_label)
 
 
+def init_display(multisamples):
+	if multisamples:
+		pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLEBUFFERS,1)
+		pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLESAMPLES,4)
+	else:
+		pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLEBUFFERS,0)
+		pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLESAMPLES,0)
+	pygame.display.set_mode((1024,768), pygame.OPENGL | pygame.DOUBLEBUF)
+	
+
 def main_init():
 	logging.basicConfig(filename = "client.log", format = "%(asctime)s - %(levelname)s - %(message)s", level = logging.DEBUG)
 	pygame.display.init()
 	pygame.font.init()
-	pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLEBUFFERS,1)
-	pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLESAMPLES,4)
-	pygame.display.set_mode((1024,768), pygame.OPENGL | pygame.DOUBLEBUF)
+	try:
+		init_display(True)
+	except pygame.error, e:
+		print "!! Display init failed: " + str(e)
+		print "!! Openning fallback display without GL_MULTISAMPLEBUFFERS"
+		init_display(False)
 	pygame.display.set_caption("RMahjong")
 	init_fonts()
 	init_opengl(1024, 768)	
