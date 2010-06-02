@@ -254,6 +254,7 @@ main_init()
 mahjong = Mahjong()
 try:
 	mahjong.open_main_menu()
+	#mahjong.set_state(ConnectingState(mahjong, "localhost"))
 	#mahjong.set_state(TestState(mahjong))
 	#mahjong.set_state(TestTableState(mahjong))
 	mahjong.run()

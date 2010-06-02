@@ -26,9 +26,9 @@ class Game:
 	def __init__(self, players, seed):
 		self.random = Random(seed)
 		self.players = copy(players)
-		self.random.shuffle(self.players)
-		#self.rotate_players() # DEBUG
-		#self.rotate_players() # DEBUG
+		#self.random.shuffle(self.players)
+		self.rotate_players() # DEBUG
+		self.rotate_players() # DEBUG
 		#self.rotate_players() # DEBUG
 		self.first_east_player = self.players[0]
 		self.round_wind = east_wind
@@ -245,7 +245,10 @@ class DebugRound(Round):
 			return map(Tile, strs)
 
 		hands = [
-			[ "WW", "DG", "DG", "DG", "DR", "DR", "DR", "DW", "DW", "DW", "B8", "B7", "B6" ],
+			[ "P5", "P5", "P2", "P2", "P4", "P4", "P6", "P7", "P8", "P1", "P1", "C4", "P1" ],
+			[ "C5", "C5", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C1", "DW", "DW" ],
+			[ "C5", "C5", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C1", "DG", "DG" ],
+			[ "C5", "C5", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C1", "DR", "DR" ],
 			[ "C9", "C5", "C8", "C5", "C5", "C5", "B5", "B5", "B5", "B5", "B1", "DW", "DW" ],
 			[ "C8", "C7", "C5", "C2", "C4", "DR", "DR", "DR", "DW", "B7", "B6", "B7", "B7" ],
 			[ "C8", "C9", "C5", "C6", "C4", "C2", "C3", "C1", "DW", "DW", "DW", "B7", "B7" ],
@@ -256,7 +259,7 @@ class DebugRound(Round):
 			[ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C9" ],
 		]
 
-		r = [ "DR", "WW", "WN", "P9", "DW", "DW", "C9", "P1","DW","DW","DW" ]
+		r = [ "C4", "P1", "WN", "P9", "DW", "DW", "C9", "P1","DW","DW","DW" ]
 	
 		self.hands = map(tiles, hands) 
 		self.rnd = tiles(r)

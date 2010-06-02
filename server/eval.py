@@ -449,9 +449,9 @@ def find_potential_chi(hand, tile):
 	nt = tile.next_tile()
 	nnt = nt.next_tile()
 	if n < 9 and n > 1 and pt in hand and nt in hand:
-		r.append((Chi(pt, tile, nt), nt))
+		r.append((Chi(pt, tile, nt), pt))
 	if n < 8 and nt in hand and nnt in hand:
-		r.append((Chi(tile, nt, nnt), nnt))
+		r.append((Chi(tile, nt, nnt), tile))
 	if n > 2 and pt in hand and ppt in hand:
 		r.append((Chi(ppt, pt, tile), ppt))
 	return r
