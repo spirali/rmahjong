@@ -354,4 +354,27 @@ class HandWidget(Widget):
 
 		self.set_surface(surface)
 
+class GameSummary(Widget):
+	
+	def __init__(self, tile_painter, dora_indicators, uradora_indicators, round_wind):
+		Widget.__init__(self, (100,130), (230, 290))
+		surface = self.create_bg_surface()
+		surface.fill((0,0,0,110))
+
+		color = (255,255,255)
+		textsurface = graphics.font.render("Round wind", True, color)
+		surface.blit(textsurface, (20, 20))
+
+		textsurface = graphics.font.render("Dora indicator(s)", True, color)
+		surface.blit(textsurface, (20, 105))
+
+		tile_painter.draw_tile(surface, (20, 40), round_wind)
+		tile_painter.draw_tile_list(surface, (20, 125), dora_indicators, space = 3)
+
+		if uradora_indicators:
+			textsurface = graphics.font.render("Uradora indicator(s)", True, color)
+			surface.blit(textsurface, (20, 185))
+			tile_painter.draw_tile_list(surface, (20, 205), uradora_indicators, space = 3)
+
+		self.set_surface(surface)
 

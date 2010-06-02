@@ -79,19 +79,14 @@ class TilePainter:
 			self.tile_images[name] = img
 			self.tile_textures[name] = Texture(img)
 
-	def draw_tile_image(self, screen, position, name):
+	def draw_tile(self, screen, position, name):
 		if name != "XX":
-			self._draw_tile(screen, position, self.tile_images[name][0], 0)
+			img = self.tile_images[name]
+			w = img.get_width()
+			h = img.get_height()
+			screen.blit(pygame.transform.smoothscale(img, (w/4, h/4)), position)
 
 	def draw_tile_list(self, screen, position, tile_names, space = 0):
-		for i, tile_name in reversed(list(enumerate(tile_names))):
-			x = (self.face_size[0] + space) * i
-			self.draw_tile_image(screen, (x + position[0], position[1]), tile_name)
-	
-	def _draw_tile(self, screen, position, img, bg_id):
-		px = position[0] - self.face_offset[bg_id][0]
-		py = position[1] - self.face_offset[bg_id][1]
-		screen.blit(self.image, (px, py), pygame.Rect(self.tile_start[bg_id], self.tile_size[bg_id]))	
-		screen.blit(img, position)	
-
-
+		for i, tile_name in enumerate(tile_names):
+			x = (self.face_size[0]/4 + space) * i
+			self.draw_tile(screen, (x + position[0], position[1]), tile_name)

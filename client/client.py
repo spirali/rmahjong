@@ -191,11 +191,15 @@ class Mahjong:
 		self.table.add_dora_indicator(tile_name)
 
 	def set_round_wind(self, wind):
+		self.round_wind = wind
 		wtiles_to_names = { "WE" : "east", "WS" : "south", "WN" : "north", "WW" : "west" }
 		if self.round_label:
 			self.gui.remove_widget(self.round_label)
 		self.round_label = TextWidget((530,310), "Round: " + wtiles_to_names[wind], (175,175,175))
 		self.gui.add_widget(self.round_label)
+
+	def get_round_wind(self):
+		return self.round_wind
 
 	def open_main_menu(self):
 		self.set_light_state(None)

@@ -17,7 +17,7 @@
 
 from connection import Connection
 from dictprotocol import DictProtocol
-from gui import Button, Label, ScoreTable, PaymentTable, FinalTable, Frame, HandWidget
+from gui import Button, Label, ScoreTable, PaymentTable, FinalTable, Frame, HandWidget, GameSummary
 from table import winds
 from copy import copy
 import subprocess
@@ -484,8 +484,8 @@ class ScoreState(RoundPreparingState):
 			button = Button( (475,340), (120, 30), "Show score", self.show_score_clicked)
 			shoutbox = self.mahjong.create_shoutbox(self.message["player"], self.message["wintype"] + "!")
 			self.setup_widgets([ button, shoutbox ])
-			for tile_name in self.message["ura_dora_indicators"].split():
-				self.mahjong.table.add_ura_dora_indicator(tile_name)
+			#for tile_name in self.message["ura_dora_indicators"].split():
+			#	self.mahjong.table.add_ura_dora_indicator(tile_name)
 		else:
 			# Draw
 			if self.message["tenpai"]:
@@ -508,12 +508,16 @@ class ScoreState(RoundPreparingState):
 		looser_riichi = self.message["looser_riichi"]
 		winner_hand = self.message["winner_hand"].split()
 		winner_sets = [ s.split() for s in self.message["winner_sets"].split(";") ]
+		ura_dora_indicators = self.message["ura_dora_indicators"].split()
 
 		table = ScoreTable(score_items , total, payment, player_name, looser_riichi)
 		button = Button( (400,560), (300, 25), "Show payments", self.show_payments)
 		hand = HandWidget((10,10), winner_hand, winner_sets , self.mahjong.table.tp)
+
+		dora_indicators_names = [ tile.name for tile in self.mahjong.table.dora_indicators ]
+		summary = GameSummary(self.mahjong.table.tp, dora_indicators_names, ura_dora_indicators, self.mahjong.get_round_wind())
 		
-		self.setup_widgets([table, button, hand])
+		self.setup_widgets([table, button, hand, summary])
 
 	def get_results(self):
 		results = []
@@ -641,13 +645,15 @@ class TestTableState(State):
 		State.__init__(self, mahjong)
 		
 		table = ScoreTable(["ABC 100", "XYZ 200"], "8000", "2000/300", "Player_name", "2000")
+		gamesummary = GameSummary(self.mahjong.table.tp, ["DW", "C1", "C4", "B9"], ["DW", "C1", "WW", "WE"],  "WE")
 		#table = PaymentTable([("ABC", 1000, 2000), ("CDE", 200000, -15000), ("EFG", 0, 123456), ("XYZ", 15000, 0)])
 		#table = FinalTable([("ABC", 1000), ("CDE", 200000), ("EFG", 0), ("XYZ", 15000)])
-		hand = HandWidget((10,10), ["DR","C1","C2","C3", "P5", "B5", "B5", "WE", "WE", "WE", "DR", "P6", "P7", "B5"], [] , self.mahjong.table.tp)
+		hand = HandWidget((10,10), ["DR","C1","C2","DW", "DW", "B5", "B5", "WE", "WE", "WE", "DR", "P6", "P7", "B5"], [] , self.mahjong.table.tp)
 	#	hand = HandWidget((10,10), ["DR","DR","C1","C2","C3", "B5", "B5", "B5", "WE", "WE", "WE"], [ ["WN", "WN", "WN"] ], self.mahjong.table.tp)
-	#	hand = HandWidget((10,10), ["DR","DR"], [ ["WN", "WN", "WN", "WE"], ["WN", "WN", "WN", "WE"], ["WN", "WN", "WN", "WE"], ["WN", "WN", "WN", "WE"] ], self.mahjong.table.tp)
+		#hand = HandWidget((10,10), ["DR","DR"], [ ["WN", "WN", "WN", "WE"], ["WN", "WN", "WN", "WE"], ["WN", "WN", "WN", "WE"], ["WN", "WN", "WN", "WE"] ], self.mahjong.table.tp)
 		mahjong.gui.add_widget(table)
 		mahjong.gui.add_widget(hand)
+		mahjong.gui.add_widget(gamesummary)
 
 	def tick(self):
 		pass
