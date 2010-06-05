@@ -645,7 +645,7 @@ class TestTableState(State):
 		State.__init__(self, mahjong)
 		
 		table = ScoreTable(["ABC 100", "XYZ 200"], "8000", "2000/300", "Player_name", "2000")
-		gamesummary = GameSummary(self.mahjong.table.tp, ["DW", "C1", "C4", "B9"], ["DW", "C1", "WW", "WE"],  "WE")
+		gamesummary = GameSummary(self.mahjong.table.tp, ["DW", "C1", "C4", "B9", "WW", ], ["DW", "C1", "WW", "WE", "B1"],  "WE")
 		#table = PaymentTable([("ABC", 1000, 2000), ("CDE", 200000, -15000), ("EFG", 0, 123456), ("XYZ", 15000, 0)])
 		#table = FinalTable([("ABC", 1000), ("CDE", 200000), ("EFG", 0), ("XYZ", 15000)])
 		hand = HandWidget((10,10), ["DR","C1","C2","DW", "DW", "B5", "B5", "WE", "WE", "WE", "DR", "P6", "P7", "B5"], [] , self.mahjong.table.tp)

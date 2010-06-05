@@ -357,7 +357,7 @@ class HandWidget(Widget):
 class GameSummary(Widget):
 	
 	def __init__(self, tile_painter, dora_indicators, uradora_indicators, round_wind):
-		Widget.__init__(self, (100,130), (230, 290))
+		Widget.__init__(self, (95,130), (245, 290))
 		surface = self.create_bg_surface()
 		surface.fill((0,0,0,110))
 
