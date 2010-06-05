@@ -111,7 +111,8 @@ class Round:
 		return [ self.pick_random_tile() for i in xrange(13) ]
 
 	def get_remaining_tiles_in_wall(self):
-		return len(self.wall) - 14 + len(self.dora_indicators)
+		""" Returns number of tiles in live wall """
+		return len(self.wall) - 14 + (2 * len(self.dora_indicators) - 1)
 
 	def is_draw(self):
 		return self.get_remaining_tiles_in_wall() < 1
