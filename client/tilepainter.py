@@ -17,6 +17,9 @@
 
 from graphics import Texture, RawTexture
 import pygame
+import OpenGL.GL as gl
+import OpenGL.GLU as glu
+
 
 class TilePainter:
 
@@ -90,3 +93,93 @@ class TilePainter:
 		for i, tile_name in enumerate(tile_names):
 			x = (self.face_size[0]/4 + space) * i
 			self.draw_tile(screen, (x + position[0], position[1]), tile_name)
+
+
+def draw_face_y(texture, m, dx, dy, normal):
+	gl.glBegin(gl.GL_QUADS)
+	gl.glNormal3f(*normal)
+	texture.tex_coord(0.03, 0.97)
+	gl.glVertex3f(-dx, m, dy)
+	texture.tex_coord(0.97, 0.97)
+	gl.glVertex3f(dx, m, dy)
+	texture.tex_coord(0.97, 0.03)
+	gl.glVertex3f(dx, m, -dy)
+	texture.tex_coord(0.03, 0.03)
+	gl.glVertex3f(-dx, m, -dy)
+	gl.glEnd()
+
+def draw_face_z(texture, m, dx, dy, normal):
+	gl.glBegin(gl.GL_QUADS)
+	gl.glNormal3f(*normal)
+	texture.tex_coord(0.03, 0.97)
+	gl.glVertex3f(dx, dy, m)
+	texture.tex_coord(0.97, 0.97)
+	gl.glVertex3f(dx, -dy, m)
+	texture.tex_coord(0.97, 0.03)
+	gl.glVertex3f(-dx,-dy, m)
+	texture.tex_coord(0.03, 0.03)
+	gl.glVertex3f(-dx,dy, m)
+	gl.glEnd()
+
+def draw_face_x(texture, m, dx, dy, normal):
+	gl.glBegin(gl.GL_QUADS)
+	gl.glNormal3f(*normal)
+	texture.tex_coord(0.03, 0.97)
+	gl.glVertex3f(m, dx, dy)
+	texture.tex_coord(0.97, 0.97)
+	gl.glVertex3f(m, -dx, dy)
+	texture.tex_coord(0.97, 0.03)
+	gl.glVertex3f(m, -dx, -dy)
+	texture.tex_coord(0.03, 0.03)
+	gl.glVertex3f(m, dx, -dy)
+	gl.glEnd()
+
+def draw_face_xy_skew(texture, x1, x2, y1, y2, z1, z2, normal):
+	gl.glBegin(gl.GL_QUADS)
+	gl.glNormal3f(*normal)
+	texture.tex_coord(0.95,0.95)
+	gl.glVertex3f(x1, y1, z1)
+	texture.tex_coord(0.90, 0.95)
+	gl.glVertex3f(x1, y1, z2)
+	texture.tex_coord(0.90, 0.90)
+	gl.glVertex3f(x2, y2, z2)
+	texture.tex_coord(0.95, 0.90)
+	gl.glVertex3f(x2, y2, z1)
+	gl.glEnd()
+
+def draw_face_yz_skew(texture, x1, x2, y1, y2, z1, z2, normal):
+	gl.glBegin(gl.GL_QUADS)
+	gl.glNormal3f(*normal)
+	texture.tex_coord(0.95,0.95)
+	gl.glVertex3f(x1, y1, z1)
+	texture.tex_coord(0.90, 0.95)
+	gl.glVertex3f(x1, y2, z2)
+	texture.tex_coord(0.90, 0.90)
+	gl.glVertex3f(x2, y2, z2)
+	texture.tex_coord(0.95, 0.90)
+	gl.glVertex3f(x2, y1, z1)
+	gl.glEnd()
+
+def draw_face_xz_skew(texture, x1, x2, y1, y2, z1, z2, normal):
+	gl.glBegin(gl.GL_QUADS)
+	gl.glNormal3f(*normal)
+	texture.tex_coord(0.03,0.03)
+	gl.glVertex3f(x1, y1, z1)
+	texture.tex_coord(0.03, 0.97)
+	gl.glVertex3f(x2, y1, z2)
+	texture.tex_coord(0.97, 0.97)
+	gl.glVertex3f(x2, y2, z2)
+	texture.tex_coord(0.97, 0.03)
+	gl.glVertex3f(x1, y2, z1)
+	gl.glEnd()
+
+def draw_face_triangle(texture, x1, x2, y1, y2, z1, z2, normal):
+	gl.glBegin(gl.GL_TRIANGLES)
+	gl.glNormal3f(*normal)
+	texture.tex_coord(0.95,0.95)
+	gl.glVertex3f(x1, y1, z1)
+	texture.tex_coord(0.90, 0.95)
+	gl.glVertex3f(x1, y2, z2)
+	texture.tex_coord(0.90, 0.90)
+	gl.glVertex3f(x2, y1, z2)
+	gl.glEnd()

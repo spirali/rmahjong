@@ -20,6 +20,8 @@ from pygame import display
 import OpenGL.GL as gl
 import OpenGL.GLU as glu
 from tilepainter import TilePainter
+from tilepainter import draw_face_x, draw_face_y, draw_face_z, draw_face_triangle
+from tilepainter import draw_face_xy_skew, draw_face_xz_skew, draw_face_yz_skew
 from directions import direction_up, direction_down, direction_left, direction_right
 from graphics import Texture, RawTexture, setup_perspective
 import utils
@@ -28,7 +30,6 @@ all_tile_names = [ "C1","C2","C3","C4","C5","C6","C7","C8","C9","B1","B2","B3","
 		"B9","P1","P2","P3","P4","P5","P6","P7","P8","P9","WE","WS","WW","WN","DR","DG","DW" ]
 
 winds = [ "WE", "WS", "WW", "WN" ]
-
 
 tile_size = (1.0, 0.60, 1.33)
 
@@ -70,274 +71,87 @@ class Tile:
 		gl.glTranslatef(self.position[0], self.position[1], self.position[2] + 1.33)
 		gl.glRotate(self.rotation[0],0.0, 0.0, 1.0)
 		gl.glRotate(self.rotation[1],1.0, 0.0, 0.0)
+
+		#x = 10.4
+		#gl.glScale(x,x, x)
+
 		self._render()
 		gl.glPopMatrix()
 
 	def _render(self):
-		# FIXME: Refactoring needed!
 		x, y, z = tile_size
-		xx, yy, zz = tile_size
 
-		d = 0.08
+		dx = x - 0.08
+		dy = y - 0.08
+		dz = z - 0.08
 
 		if self.name != "XX":
 			texture = self.table.tp.tile_textures[self.name]
 			texture.bind()
-
-			# --- Front ---
-			gl.glBegin(gl.GL_QUADS)
-			gl.glNormal3f(0.0,-1.0, 0.0)
-			texture.tex_coord(0.02, 0.98)
-			gl.glVertex3f(-x + d, -y, z - d)
-			texture.tex_coord(0.98, 0.98)
-			gl.glVertex3f(x - d, -y, z - d)
-			texture.tex_coord(0.98, 0.02)
-			gl.glVertex3f(x - d, -y, -z + d)
-			texture.tex_coord(0.02, 0.02)
-			gl.glVertex3f(-x + d, -y, -z + d)
-			gl.glEnd()
-
-		# --- Back ---
+			# Front
+			draw_face_y(texture, -y, dx,  dz, (0.0, -1.0, 0.0))
 
 		texture = self.table.tp.back
 		texture.bind()
 
-		gl.glBegin(gl.GL_POLYGON)
-		gl.glNormal3f(0.0,1.0, 0.0)
+		# Back
+		draw_face_y(texture, y, dx, dz, (0.0, 1.0, 0.0))
 
-		texture.tex_coord(0.5, 0.6)
-		gl.glVertex3f(-x + d, y, z)
+		# Back-left & back-right
+		draw_face_xy_skew(texture, -x, -dx, dy, y, dz, -dz, (-1.0, 1.0, 0.0))
+		draw_face_xy_skew(texture, x, dx, dy, y, dz, -dz, (1.0, 1.0, 0.0))
 
-		texture.tex_coord(0.5, 0.6)
-		gl.glVertex3f(x -d , y, z)
+		# top-back & bottom-back
+		draw_face_yz_skew(texture, -dx, dx, dy, y, z, dz, (0.0, 1.0, 1.0))
+		draw_face_yz_skew(texture, -dx, dx, dy, y, -z, -dz, (0.0, 1.0, -1.0))
 
-		texture.tex_coord(0.5, 0.6)
-		gl.glVertex3f(x, y, z - d)
+		# Left-top-back
+		draw_face_triangle(texture, -dx, -x, dy, y, z, dz, (-1.0, 1.0, 1.0))
+		# Right-top-back
+		draw_face_triangle(texture, dx, x, dy, y, z, dz, (1.0, 1.0, 1.0))
 
-		texture.tex_coord(0.5, 0.6)
-		gl.glVertex3f(x, y, -z + d)
-
-		texture.tex_coord(0.5, 0.6)
-		gl.glVertex3f(x - d, y, -z)
-
-		texture.tex_coord(0.5, 0.6)
-		gl.glVertex3f(-x + d, y, -z)
-
-		texture.tex_coord(0.5, 0.6)
-		gl.glVertex3f(-x, y, -z + d)
-
-		texture.tex_coord(0.5, 0.6)
-		gl.glVertex3f(-x, y, z - d)
-
-		gl.glEnd()
+		# Left-bottom-back
+		draw_face_triangle(texture, -dx, -x, dy, y, -z, -dz, (-1.0, 1.0, -1.0))
+		# Right-bottom-back
+		draw_face_triangle(texture, dx, x, dy, y, -z, -dz, (1.0, 1.0, -1.0))
 
 		texture = self.table.tp.border
 		texture.bind()
 
-		# --- Right ---
-		gl.glBegin(gl.GL_QUADS)
-		gl.glNormal3f(1.0,0.0, 0.0)
-		texture.tex_coord(0.97, 0.97)
-		gl.glVertex3f(x, -y + d, z - d)
-		texture.tex_coord(0.3, 0.97)
-		gl.glVertex3f(x, y, z - d)
-		texture.tex_coord(0.3, 0.3)
-		gl.glVertex3f(x, y, -z + d)
-		texture.tex_coord(0.97, 0.3)
-		gl.glVertex3f(x, -y + d, -z + d)
-		gl.glEnd()
+		# Left & Right
+		draw_face_x(texture, x, dy, dz, (1.0, 0.0, 0.0))		
+		draw_face_x(texture, -x, dy, dz, (-1.0, 0.0, 0.0))		
 
-		# --- Left ----
-		gl.glBegin(gl.GL_QUADS)
-		gl.glNormal3f(-1.0,0.0, 0.0)
-		texture.tex_coord(0.97, 0.97)
-		gl.glVertex3f(-x, -y + d, z - d)
-		texture.tex_coord(0.3, 0.97)
-		gl.glVertex3f(-x, y, z)
-		texture.tex_coord(0.3, 0.3)
-		gl.glVertex3f(-x, y, -z)
-		texture.tex_coord(0.97, 0.3)
-		gl.glVertex3f(-x, -y + d, -z + d)
-		gl.glEnd()
+		# Top & Bottom 
+		draw_face_z(texture, z, dx + 0.04, dy + 0.05, (0.0, 0.0, 1.0))
+		draw_face_z(texture, -z, dx + 0.04, dy + 0.05, (0.0, 0.0, -1.0))		
+		# Don't know exactly why but with this +0.04 it looks slightly better
 
-		x, y, z = xx - d, yy - d, zz
-		# --- Top ----
-		gl.glBegin(gl.GL_QUADS)
-		gl.glNormal3f(0.0,0.0, 1.0)
-		texture.tex_coord(0.97,0.97)
-		gl.glVertex3f(-x, -y, z)
-		texture.tex_coord(0.3, 0.97)
-		gl.glVertex3f(-x, y + d, z)
-		texture.tex_coord(0.3, 0.3)
-		gl.glVertex3f(x, y + d, z)
-		texture.tex_coord(0.97, 0.3)
-		gl.glVertex3f(x, -y, z)
-		gl.glEnd()
+		# Left-front & right-front
+		draw_face_xy_skew(texture, -x, -dx, -dy, -y, dz, -dz, (-1.0, -1.0, 0.0))
+		draw_face_xy_skew(texture, x, dx, -dy, -y, dz, -dz, (1.0, -1.0, 0.0))
 
-		# --- Bottom ----
-		gl.glBegin(gl.GL_QUADS)
-		gl.glNormal3f(0.0,0.0, -1.0)
-		texture.tex_coord(0.97, 0.97)
-		gl.glVertex3f(x, -y, -z)
-		texture.tex_coord(0.3, 0.97)
-		gl.glVertex3f(x, y + d, -z)
-		texture.tex_coord(0.3, 0.3)
-		gl.glVertex3f(-x, y + d, -z)
-		texture.tex_coord(0.97, 0.3)
-		gl.glVertex3f(-x, -y, -z)
-		gl.glEnd()
+		# top-front & bottom-front
+		draw_face_yz_skew(texture, -dx, dx, -dy, -y, z, dz, (0.0, -1.0, 1.0))
+		draw_face_yz_skew(texture, -dx, dx, -dy, -y, -z, -dz, (0.0, -1.0, -1.0))
 
+		# Right-top & Left-top
+		draw_face_xz_skew(texture, dx, x, dy, -dy, z, dz, (1.0, 0.0, 1.0))
+		draw_face_xz_skew(texture, -dx, -x, dy, -dy, z, dz, (-1.0, 0.0, 1.0))
 
-		# --- Left-Front
-		gl.glBegin(gl.GL_QUADS)
-		gl.glNormal3f(-1.0,-1.0, 0.0)
-		texture.tex_coord(0.95,0.95)
-		gl.glVertex3f(-xx, -yy + d, zz - d)
-		texture.tex_coord(0.90, 0.95)
-		gl.glVertex3f(-xx, -yy + d, -zz + d)
-		texture.tex_coord(0.90, 0.90)
-		gl.glVertex3f(-xx + d, -yy, -zz + d)
-		texture.tex_coord(0.95, 0.90)
-		gl.glVertex3f(-xx + d, -yy, zz - d)
-		gl.glEnd()
+		# Right-bottom & left-bottom
+		draw_face_xz_skew(texture, dx, x, dy, -dy, -z, -dz, (1.0, 0.0, -1.0))
+		draw_face_xz_skew(texture, -dx, -x, dy, -dy, -z, -dz, (-1.0, 0.0, -1.0))
 
-		# --- Right-Front
-		gl.glBegin(gl.GL_QUADS)
-		gl.glNormal3f(1.0,-1.0, 0.0)
-		texture.tex_coord(0.95,0.95)
-		gl.glVertex3f(xx, -yy + d, zz - d)
-		texture.tex_coord(0.90, 0.95)
-		gl.glVertex3f(xx, -yy + d, -zz + d)
-		texture.tex_coord(0.90, 0.90)
-		gl.glVertex3f(xx - d, -yy, -zz + d)
-		texture.tex_coord(0.95, 0.90)
-		gl.glVertex3f(xx - d, -yy, zz - d)
-		gl.glEnd()
+		# Left-top-front
+		draw_face_triangle(texture, -dx, -x, -dy, -y, z, dz, (-1.0, -1.0, 1.0))
+		# Right-top-front
+		draw_face_triangle(texture, dx, x, -dy, -y, z, dz, (1.0, -1.0, 1.0))
 
-
-		# --- Top-Front
-		gl.glBegin(gl.GL_QUADS)
-		gl.glNormal3f(0.0,-1.0, 1.0)
-		texture.tex_coord(0.95,0.95)
-		gl.glVertex3f(-xx + d, -yy + d, zz)
-		texture.tex_coord(0.90, 0.95)
-		gl.glVertex3f(-xx + d, -yy, zz - d)
-		texture.tex_coord(0.90, 0.90)
-		gl.glVertex3f(xx - d, -yy, zz - d)
-		texture.tex_coord(0.95, 0.90)
-		gl.glVertex3f(xx - d, -yy + d , zz)
-		gl.glEnd()
-
-		# --- Right-Top
-		gl.glBegin(gl.GL_QUADS)
-		gl.glNormal3f(1.0,0.0, 1.0)
-		texture.tex_coord(0.3,0.3)
-		gl.glVertex3f(xx - d, yy, zz)
-		texture.tex_coord(0.3, 0.97)
-		gl.glVertex3f(xx, yy, zz - d)
-		texture.tex_coord(0.97, 0.97)
-		gl.glVertex3f(xx, -yy + d, zz - d)
-		texture.tex_coord(0.97, 0.3)
-		gl.glVertex3f(xx - d, -yy + d, zz)
-
-		gl.glEnd()
-
-		# --- Left-Top
-		gl.glBegin(gl.GL_QUADS)
-		gl.glNormal3f(-1.0,0.0, 1.0)
-		texture.tex_coord(0.3,0.3)
-		gl.glVertex3f(-xx + d, yy, zz)
-		texture.tex_coord(0.3, 0.97)
-		gl.glVertex3f(-xx, yy, zz - d)
-		texture.tex_coord(0.97, 0.97)
-		gl.glVertex3f(-xx, -yy + d, zz - d)
-		texture.tex_coord(0.97, 0.3)
-		gl.glVertex3f(-xx + d, -yy + d, zz)
-		gl.glEnd()
-
-		# --- Bottom-Front
-		gl.glBegin(gl.GL_QUADS)
-		gl.glNormal3f(0.0,-1.0, -1.0)
-		texture.tex_coord(0.95,0.95)
-		gl.glVertex3f(-xx + d, -yy + d, -zz)
-		texture.tex_coord(0.90, 0.95)
-		gl.glVertex3f(-xx + d, -yy, -zz + d)
-		texture.tex_coord(0.90, 0.90)
-		gl.glVertex3f(xx - d, -yy, -zz + d)
-		texture.tex_coord(0.95, 0.90)
-		gl.glVertex3f(xx - d, -yy + d , -zz)
-		gl.glEnd()
-
-		# --- Right-Bottom
-		gl.glBegin(gl.GL_QUADS)
-		gl.glNormal3f(1.0,0.0, -1.0)
-		texture.tex_coord(0.3,0.3)
-		gl.glVertex3f(xx - d, yy - d, -zz)
-		texture.tex_coord(0.3, 0.97)
-		gl.glVertex3f(xx, yy - d, -zz + d)
-		texture.tex_coord(0.97, 0.97)
-		gl.glVertex3f(xx, -yy + d, -zz + d)
-		texture.tex_coord(0.97, 0.3)
-		gl.glVertex3f(xx - d, -yy + d, -zz)
-
-		gl.glEnd()
-
-		# --- Left-Bottom
-		gl.glBegin(gl.GL_QUADS)
-		gl.glNormal3f(-1.0,0.0, -1.0)
-		texture.tex_coord(0.3,0.3)
-		gl.glVertex3f(-xx + d, yy - d, -zz)
-		texture.tex_coord(0.3, 0.97)
-		gl.glVertex3f(-xx, yy - d, -zz + d)
-		texture.tex_coord(0.97, 0.97)
-		gl.glVertex3f(-xx, -yy + d, -zz + d)
-		texture.tex_coord(0.97, 0.3)
-		gl.glVertex3f(-xx + d, -yy + d, -zz)
-		gl.glEnd()
-
-		# --- Left-Top-Front
-		gl.glBegin(gl.GL_TRIANGLES)
-		gl.glNormal3f(-1.0,-1.0, 1.0)
-		texture.tex_coord(0.95,0.95)
-		gl.glVertex3f(-xx + d, -yy + d, zz)
-		texture.tex_coord(0.90, 0.95)
-		gl.glVertex3f(-xx + d, -yy, zz - d)
-		texture.tex_coord(0.90, 0.90)
-		gl.glVertex3f(-xx, -yy + d, zz - d)
-		gl.glEnd()
-
-		# --- Right-Top-Front
-		gl.glBegin(gl.GL_TRIANGLES)
-		gl.glNormal3f(-1.0,-1.0, 1.0)
-		texture.tex_coord(0.95,0.95)
-		gl.glVertex3f(xx - d, -yy + d, zz)
-		texture.tex_coord(0.90, 0.95)
-		gl.glVertex3f(xx - d, -yy, zz - d)
-		texture.tex_coord(0.90, 0.90)
-		gl.glVertex3f(xx, -yy + d, zz - d)
-		gl.glEnd()
-
-		# --- Left-Bottom-Front
-		gl.glBegin(gl.GL_TRIANGLES)
-		gl.glNormal3f(-1.0,-1.0, -1.0)
-		texture.tex_coord(0.95,0.95)
-		gl.glVertex3f(-xx + d, -yy + d, -zz)
-		texture.tex_coord(0.90, 0.95)
-		gl.glVertex3f(-xx + d, -yy, -zz + d)
-		texture.tex_coord(0.90, 0.90)
-		gl.glVertex3f(-xx, -yy + d, -zz + d)
-		gl.glEnd()
-
-		# --- Right-Bottom-Front
-		gl.glBegin(gl.GL_TRIANGLES)
-		gl.glNormal3f(-1.0,-1.0, -1.0)
-		texture.tex_coord(0.95,0.95)
-		gl.glVertex3f(xx - d, -yy + d, -zz)
-		texture.tex_coord(0.90, 0.95)
-		gl.glVertex3f(xx - d, -yy, -zz + d)
-		texture.tex_coord(0.90, 0.90)
-		gl.glVertex3f(xx, -yy + d, -zz + d)
-		gl.glEnd()
+		# Left-bottom-front
+		draw_face_triangle(texture, -dx, -x, -dy, -y, -z, -dz, (-1.0, -1.0, -1.0))
+		# Right-bottom-front
+		draw_face_triangle(texture, dx, x, -dy, -y, -z, -dz, (1.0, -1.0, -1.0))
 
 	def __repr__(self):
 		return "<Tile %s>" % self.name

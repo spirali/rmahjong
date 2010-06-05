@@ -90,6 +90,7 @@ def enable2d():
 	gl.glLoadIdentity()
 	gl.glDisable(gl.GL_DEPTH_TEST)
 	gl.glEnable(gl.GL_BLEND)
+	gl.glDisable(gl.GL_LIGHTING);
 
 def disable2d():
 	gl.glMatrixMode(gl.GL_PROJECTION)
@@ -98,6 +99,7 @@ def disable2d():
 	gl.glPopMatrix()
 	gl.glEnable(gl.GL_DEPTH_TEST)
 	gl.glDisable(gl.GL_BLEND)
+	gl.glEnable(gl.GL_LIGHTING);
 	
 class RawTexture:
 
