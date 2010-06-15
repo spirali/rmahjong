@@ -26,9 +26,9 @@ class Game:
 	def __init__(self, players, seed):
 		self.random = Random(seed)
 		self.players = copy(players)
-		#self.random.shuffle(self.players)
-		self.rotate_players() # DEBUG
-		self.rotate_players() # DEBUG
+		self.random.shuffle(self.players)
+		#self.rotate_players() # DEBUG
+		#self.rotate_players() # DEBUG
 		#self.rotate_players() # DEBUG
 		self.first_east_player = self.players[0]
 		self.round_wind = east_wind
