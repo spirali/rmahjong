@@ -118,6 +118,8 @@ class Player:
 		options = []
 		if self.hand.count(tile) >= 2 and not self.riichi:
 			options.append("Pon")
+			if self.hand.count(tile) >= 3 and not self.riichi:
+				options.append("Kan")
 
 		if player == self.left_player and not self.riichi:
 			if find_potential_chi(self.hand, tile):
@@ -138,7 +140,7 @@ class Player:
 	def closed_kan_played_by_me(self, kan, new_tile, dora_indicator):
 		self.new_hand_tile(new_tile)
 
-	def stolen_tile(self, player, from_player, action, opened_set, tile):
+	def stolen_tile(self, player, from_player, action, opened_set, tile, new_tile, dora_indicator):
 		if self.ippatsu_move_id:
 			self.ippatsu_move_id = -100 # Round is interrupeted
 
@@ -149,10 +151,13 @@ class Player:
 			tiles = my_set.tiles()
 			tiles.remove(tile)
 			for t in tiles:
-				self.hand.remove(t)
+				self.hand.remove(t)			
 	
 			self.sets.append(my_set)
 			self.can_drop_tile = True
+			
+			if action == "Kan":
+				self.new_hand_tile(new_tile)
 
 	def drop_tile(self, tile):
 		self.hand.remove(tile)
@@ -252,8 +257,10 @@ class NetworkPlayer(Player):
 					if marker == chi_tile:
 						opened_set = s
 						break
-			else:
+			elif action == "Pon":
 				opened_set = Pon(self.steal_tile)
+			else:
+				opened_set = Kan(self.steal_tile)
 
 			self.potential_chi = None
 			self.steal_tile = None
@@ -369,15 +376,22 @@ class NetworkPlayer(Player):
 
 		self.connection.send_dict(msg)
 	
-	def stolen_tile(self, player, from_player, action, opened_set, stolen_tile):
-		Player.stolen_tile(self, player, from_player, action, opened_set, stolen_tile)
+	def stolen_tile(self, player, from_player, action, opened_set, stolen_tile, new_tile, dora_indicator):
+		Player.stolen_tile(self, player, from_player, action, opened_set, stolen_tile, new_tile, dora_indicator)
 		msg = { "message" : "STOLEN_TILE",
 				"action" : action,
 				"player" : player.wind.name,
 				"from_player" : from_player.wind.name,
 				"tiles" : " ".join([tile.name for tile in opened_set.tiles()]),
-				"stolen_tile" : stolen_tile.name
+				"stolen_tile" : stolen_tile.name								
 		}
+
+		if action == "Kan":
+			msg["dora_indicator"] = dora_indicator.name
+			if player == self:
+				msg["new_tile"] = new_tile.name
+				msg["actions"] = ";".join(self.hand_actions())
+
 		self.connection.send_dict(msg)
 
 	def server_quit(self):
@@ -484,8 +498,8 @@ class BotPlayer(Player):
 		self.riichi_allowed = self.round.roll_dice(2) == 1
 		logging.info("Bot.riichi_allowed for %s: %s", self.name, self.riichi_allowed)
 
-	def stolen_tile(self, player, from_player, action, set, tile):
-		Player.stolen_tile(self, player, from_player, action, set, tile)
+	def stolen_tile(self, player, from_player, action, set, tile, new_tile, dora_indicator):
+		Player.stolen_tile(self, player, from_player, action, set, tile, new_tile, dora_indicator)
 
 		if self == player:
 			self._set_basic_state()

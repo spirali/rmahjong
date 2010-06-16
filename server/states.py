@@ -122,7 +122,7 @@ class PlayerMoveState(GenericGameState):
 		self.server.set_state(StealTileState(self.server, player, tile))
 
 
-steal_priority = ("Ron", "Pon", "Chi", "Pass")
+steal_priority = ("Ron", "Kan", "Pon", "Chi", "Pass")
 
 class StealTileState(GenericGameState):
 	
@@ -158,7 +158,7 @@ class StealTileState(GenericGameState):
 
 			logging.debug("Responses on drop: %s" % self.ready_players)
 
-			s_player, s_action, s_chichoose = self.ready_players[0]
+			s_player, s_action, s_opened_set = self.ready_players[0]
 			if s_action == "Ron":
 
 				# Cancel riichi it was played this turn
@@ -173,7 +173,7 @@ class StealTileState(GenericGameState):
 			elif s_action == "Pass":
 				self.server.set_state(PlayerMoveState(self.server, self.player.right_player))
 			else:
-				state = DropAfterStealState(self.server, s_player, self.player, self.droped_tile, s_action, s_chichoose)
+				state = DropAfterStealState(self.server, s_player, self.player, self.droped_tile, s_action, s_opened_set)
 				self.server.set_state(state)
 
 
@@ -189,8 +189,15 @@ class DropAfterStealState(GenericGameState):
 
 	def enter_state(self):
 		self.server.round.move_interrputed()
+
+		if self.action == "Kan":
+			new_tile, dora_indicator = self.server.round.kan_played()
+		else:
+			new_tile = None
+			dora_indicator = None
+
 		for player in self.server.players:
-			player.stolen_tile(self.player, self.from_player, self.action, self.opened_set, self.stolen_tile)
+			player.stolen_tile(self.player, self.from_player, self.action, self.opened_set, self.stolen_tile, new_tile, dora_indicator)
 
 	def drop_tile(self, player, tile):
 		assert player == self.player

@@ -291,16 +291,27 @@ class RoundState(State):
 		self.mahjong.gui.add_widget_with_timeout(shoutbox, 2500)
 		self.mahjong.table.add_open_set(player_id, tiles, [])
 		self.mahjong.table.steal_from_dropzone(self.mahjong.player_id_by_wind(from_player))
+
+		if action == "Kan":
+			self.mahjong.add_dora_indicator(message["dora_indicator"])
 		
 		if player_id == 0:
 			tiles.remove(stolen_tile) # Tiles are now removed from hand, so we dont want remove stolen tile
 			for tile in tiles:
 				self.mahjong.table.remove_hand_tile_by_name(tile)
 			self.mahjong.arrange_hand()
-			self.mahjong.set_state(MyMoveState(self.mahjong, None, []))
+
+			if action == "Kan":
+				new_tile = message["new_tile"]
+				actions = message["actions"].split(";")
+			else:
+				new_tile = None
+				actions = []
+
+			self.mahjong.set_state(MyMoveState(self.mahjong, new_tile, actions))
 		else:
 			self.mahjong.table.remove_tiles_from_other_hand(player_id, len(tiles) - 1)
-			self.mahjong.set_state(OtherMoveState(self.mahjong, player, False))
+			self.mahjong.set_state(OtherMoveState(self.mahjong, player, action == "Kan"))
 
 	def process_closed_kan(self, message):
 		self.mahjong.table.remove_dead_wall_tile_for_kan()
@@ -395,7 +406,7 @@ class MyMoveState(RoundState):
 			self.action_tsumo()
 		if button.label == "Riichi":
 			self.action_riichi()
-		if button.label.startswith("Kan"):
+		if button.label.startswith("Kan "):
 			self.action_kan(button.label.split()[1])
 
 	def action_tsumo(self):

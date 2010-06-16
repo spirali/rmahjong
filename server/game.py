@@ -133,14 +133,17 @@ class Round:
 		self.last_innterruption = self.move_id
 
 	def closed_kan_played(self, player, kan):
+		tile, dora_indicator = self.kan_played()
+		player.closed_kan_played_by_me(kan, tile, dora_indicator) 
+		for p in player.other_players():
+			p.closed_kan_played_by_other(player, kan, dora_indicator)
+
+	def kan_played(self):
 		dora_indicator = self.pick_random_tile()
 		dora = dora_from_indicator(dora_indicator)
 		self.dora_indicators.append(dora_indicator)
 		self.doras.append(dora)
-		
-		player.closed_kan_played_by_me(kan, self.pick_random_tile(), dora_indicator) 
-		for p in player.other_players():
-			p.closed_kan_played_by_other(player, kan, dora_indicator)
+		return (self.pick_random_tile(), dora_indicator)
 
 	def player_on_move(self, player):
 		self.move_id += 1
@@ -247,6 +250,8 @@ class DebugRound(Round):
 
 		hands = [
 			[ "P5", "P5", "P2", "P2", "P4", "P4", "P6", "P7", "P8", "P1", "P1", "C4", "P1" ],
+			[ "P9", "P9", "P9", "C7", "C8", "C9", "B1", "B1", "WN", "WN", "P1", "P1", "P1" ],
+			[ "P5", "P5", "P2", "P2", "P4", "P4", "P6", "P7", "P8", "P1", "P9", "C4", "P2" ],
 			[ "C5", "C5", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C1", "DW", "DW" ],
 			[ "C5", "C5", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C1", "DG", "DG" ],
 			[ "C5", "C5", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C1", "DR", "DR" ],
@@ -260,7 +265,7 @@ class DebugRound(Round):
 			[ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C9" ],
 		]
 
-		r = [ "C4", "P1", "WN", "P9", "DW", "DW", "C9", "P1","DW","DW","DW" ]
+		r = [ "C4", "P1", "WN", "WN", "WN", "WN", "C9", "P1","DW","DW","DW" ]
 	
 		self.hands = map(tiles, hands) 
 		self.rnd = tiles(r)
