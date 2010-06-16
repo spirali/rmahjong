@@ -33,6 +33,7 @@ class Player:
 		self.sets = []
 		self.riichi = False
 		self.ippatsu_move_id = 0
+		self.kan_played = False
 
 	def player_round_reset(self):
 		self.drop_zone = []
@@ -40,6 +41,7 @@ class Player:
 		self.can_drop_tile = False
 		self.riichi = False
 		self.ippatsu_move_id = 0
+		self.kan_played = False
 
 	def set_neighbours(self, left, right, across):
 		self.left_player = left
@@ -80,6 +82,9 @@ class Player:
 			if self.ippatsu_move_id >= self.round.move_id:
 				specials.append(('Ippatsu', 1)) 
 			specials.append(('Riichi', 1)) 
+
+		if self.kan_played:
+			specials.append(("Rinjankaihoo", 1))
 		return specials
 
 	def round_is_ready(self):
@@ -139,6 +144,7 @@ class Player:
 
 	def closed_kan_played_by_me(self, kan, new_tile, dora_indicator):
 		self.new_hand_tile(new_tile)
+		self.kan_played = True
 
 	def stolen_tile(self, player, from_player, action, opened_set, tile, new_tile, dora_indicator):
 		if self.ippatsu_move_id:
@@ -158,11 +164,13 @@ class Player:
 			
 			if action == "Kan":
 				self.new_hand_tile(new_tile)
+				self.kan_played = True
 
 	def drop_tile(self, tile):
 		self.hand.remove(tile)
 		self.drop_zone.append(tile)
 		self.server.state.drop_tile(self, tile)
+		self.kan_played = False
 
 	def riichi_played_this_turn(self):
 		return self.riichi and self.ippatsu_move_id - 4  == self.round.move_id
