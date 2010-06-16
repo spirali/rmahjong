@@ -511,6 +511,11 @@ class BotPlayer(Player):
 
 	def closed_kan_played_by_me(self, kan, new_tile, dora_indicator):
 		Player.closed_kan_played_by_me(self, kan, new_tile, dora_indicator)
+
+		if "Tsumo" in self.hand_actions():
+			self.server.declare_win(self, None, "Tsumo")
+			return
+
 		self._set_basic_state()
 		self.engine.question_discard_and_target()
 		self.action = self.action_discard
