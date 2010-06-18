@@ -168,6 +168,9 @@ def compute_score(hand, sets, wintype, doras_and_ura_doras, specials, round_wind
 	yaku += compute_doras(hand, sets, doras, "Dora")
 	yaku += compute_doras(hand, sets, ura_doras, "Ura dora")
 
+	if wintype == "Tsumo":
+		yaku.append(("Tsumo", 1))
+
 	if ("Pinfu",1) in yaku:
 		minipoints = 30 if wintype == "Ron" else 20	
 	else:
