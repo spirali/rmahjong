@@ -20,6 +20,7 @@ from unittest import TestCase
 
 from tile import Tile, Chi, Pon, Kan, all_tiles
 from eval import count_of_tiles_yaku, compute_payment, hand_in_tenpai, compute_score, find_tiles_yaku, riichi_test
+from eval import find_waiting_tiles
 from botengine import BotEngine
 
 
@@ -63,7 +64,7 @@ test_hands = [
 	([ "C6", "C7", "C8", "B6", "B7", "B8", "P6", "P7", "P8", "C9", "C9" ], [ ckan("C8") ], 2), #13, Sanshoku doujun (closed)
 	([ "B6", "B7", "B8", "P6", "P7", "P8", "C9", "C9" ], [ pon("B2"), chi("C6") ], 1 ), #14, Sanshoku doujun (opened)
 	([ "B6", "B7", "B8", "P6", "P7", "P8", "C9", "C9" ], [ ckan("B2"), chi("C6") ], 1 ), #15, Sanshoku doujun (opened)
-	([ "C6", "C7", "C8", "B6", "B7", "B8", "P6", "P7", "P8", "C2", "C2", "B6", "B7", "B8" ], [], 4), #16, Sanshoku doujun (closed), Ipeikou, Tan-Yao
+	([ "C6", "C7", "C8", "B6", "B7", "B8", "P6", "P7", "P8", "C2", "C2", "B6", "B8", "B7" ], [], 4), #16, Sanshoku doujun (closed), Ipeikou, Tan-Yao, Pinfu
 	([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P1", "WN", "WN" ], [], 2), #17, Itsu (closed)
 	([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "WN", "WN" ], [ ckan("P1") ], 2), #18, Itsu (closed)
 	([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "WE", "WE" ], [ chi("P7") ], 1), #19, Itsu (opened)
@@ -99,6 +100,15 @@ test_hands = [
 	([ "B2", "B2" ], [ ckan("B8"), pon("P1"), ckan("C2"), ckan("B5") ], 4), #49, Toitoi, San-anko
 	([ "P2", "P2", "P2", "B1", "B1", "B1", "P9", "P9" ], [ ckan("B2"), ckan("C2") ], 6), #50, Sanshoku douko, San-anko, Toitoi
 	([ "P4", "P4", "C6", "P3", "C5", "B7", "B6", "P1", "B8", "B8" ], [ ckan("WE") ], 0), #51, Nothing
+	([ "C6", "C8", "B7", "B8", "B9", "P1", "P2", "P3", "C2", "C2", "B6", "B7", "B9" ], [], 0), #52, Nothing
+	([ "C6", "C7", "C8", "B7", "B8", "B9", "P1", "P2", "P3", "DR", "DR", "B6", "B7", "B8" ], [], 0), #53, Nohthing
+
+
+	# -----Pinfu hands --------- Ignored by bot eval (bot don't see pinfu yet)
+	([ "C6", "C7", "C8", "B6", "B7", "B8", "P6", "P7", "P8", "C2", "C2", "B6", "B7", "B8" ], [], 5), #X, Sanshoku doujun (closed), Ipeikou, Tan-Yao, Pinfu
+	([ "C6", "C7", "C8", "B7", "B8", "B9", "P1", "P2", "P3", "C2", "C2", "B6", "B7", "B8" ], [], 1), #X, Pinfu
+	([ "C6", "C7", "C8", "B7", "B8", "B9", "P1", "P2", "P3", "WW", "WW", "B6", "B7", "B8" ], [], 1), #X, Pinfu
+
 
 	# -----Special hands --------- Ignored by bot eval
 	([ "WE", "WE", "P9", "P9", "C9", "C9", "P1", "P1", "DR", "DR", "B3", "B3", "B4", "B4"], [], 2), #X, Chii toitsu
@@ -157,13 +167,19 @@ class EvalHandTestCase(TestCase):
 		self.assertEquals(compute_payment(13, 40, "Tsumo", Tile("WE")), ("Yakuman", (16000, 0)))
 
 	def test_tenpai(self):
-		hands = (([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P1", "WN"], [], True),
-						([ "B3", "B3", "B2", "B2", "C9", "C9", "WW", "WW", "DR", "DR", "P1", "P1", "WN"], [], True),
-						([ "B3", "B3", "B2", "B2", "C9", "C9", "WW", "WW", "DR", "DR", "P1", "P7", "WN"], [], False),
-						([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P3", "P1", "WN"], [], False),
-						([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "WN"], [ pon("P1") ], True))
-		for h, sets, tenpai in hands:
+		hands = (([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P1", "WN"], [], True, ["WN"]),
+						([ "B3", "B3", "B2", "B2", "C9", "C9", "WW", "WW", "DR", "DR", "P1", "P1", "WN"], [], True, ["WN"]),
+						([ "B3", "B3", "B2", "B2", "C9", "C9", "WW", "WW", "DR", "DR", "P1", "P7", "WN"], [], False, []),
+						([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P3", "P1", "WN"], [], False, []),
+						([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "WN", "WN"], [ pon("P1") ], True, ["B3","B6","B9"]),
+						([ "P1", "P2", "P3", "DR", "DR", "DR", "B7", "B8", "WN", "WN"], [ pon("P1") ], True, ["B6", "B9"]),
+						([ "P1", "P2", "P3", "DR", "DR", "DR", "B7", "B9", "WN", "WN"], [ pon("P1") ], True, ["B8"]))
+
+		for h, sets, tenpai, w in hands:
 			self.assertEquals(hand_in_tenpai(tiles(h), sets), tenpai)
+			waiting = [ t.name for t in find_waiting_tiles(tiles(h), sets) ]
+			waiting.sort()
+			self.assertEquals(waiting, w)
 
 	def test_riichi(self):
 		hands = (([ "P5", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P1", "WN"], [], True),
@@ -224,7 +240,8 @@ class BotEngineTestCase(TestCase):
 		try:
 			e.set_blocking()
 			# Remove last 4 tests (Hand: seven pairs), bot "question_yaku" detect only "normal sets"
-			for hand_id, h in enumerate(test_hands[:-4]): 
+			# + 3 next hand because bot don't see pinfu yet
+			for hand_id, h in enumerate(test_hands[:-7]): 
 				hand, sets, r = h
 				e.set_hand(tiles(hand))
 				e.set_sets(sets)

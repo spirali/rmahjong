@@ -27,13 +27,14 @@ def is_hand_open(sets):
 	return False
 
 def find_tiles_yaku(hand, sets, specials, round_wind, player_wind):
+	last_tile = hand[-1]
 	if not sets and all((hand.count(tile) == 2 for tile in hand)):
 		return score_special_chii_toitsu(hand) + specials
 
 	for pair, rest in detect_pairs(hand):
 		founded_sets = find_sets(rest, sets)
 		if founded_sets:
-			return eval_sets(pair, founded_sets, round_wind, player_wind) + specials
+			return eval_sets(pair, founded_sets, round_wind, player_wind, last_tile) + specials
 	return []
 
 
@@ -167,7 +168,10 @@ def compute_score(hand, sets, wintype, doras_and_ura_doras, specials, round_wind
 	yaku += compute_doras(hand, sets, doras, "Dora")
 	yaku += compute_doras(hand, sets, ura_doras, "Ura dora")
 
-	minipoints = compute_minipoints(hand, sets, wintype, round_wind, player_wind)
+	if ("Pinfu",1) in yaku:
+		minipoints = 30 if wintype == "Ron" else 20	
+	else:
+		minipoints = compute_minipoints(hand, sets, wintype, round_wind, player_wind)
 	fans = min(sum(map(lambda r: r[1], yaku)), 13)
 
 	# TODO: Red-fives
@@ -227,13 +231,31 @@ def find_sets(hand, sets):
 			return None
 	return check_triples(hand, 1 + len(sets))
 
+def check_pinfu(pair, sets, round_wind, player_wind, last_tile):
+	if for_any_sets(sets, lambda s: not s.closed or not s.is_chi()):
+		return False
 
-def eval_sets(pair, sets, round_wind, player_wind):
+	if pair in [ red_dragon, white_dragon, green_dragon, round_wind, player_wind ]:
+		return False
+
+	# Kan don't need to be tested because all sets are chi
+	hand = [ pair, pair ]
+	for s in sets :
+		hand += s.tiles()
+	hand.remove(last_tile)
+
+	return len(find_waiting_tiles(hand, [])) > 1
+
+
+def eval_sets(pair, sets, round_wind, player_wind, last_tile):
 	result = []
 	for name, fn in score_functions:
 		score = fn(pair, sets)
 		if score > 0:
 			result.append((name, score))
+
+	if check_pinfu(pair, sets, round_wind, player_wind, last_tile):
+		result.append(("Pinfu", 1))
 
 	yaku_pai_base = 0 
 	for set in sets:
@@ -422,7 +444,7 @@ def score_special_chii_toitsu(hand):
 
 	return yaku
 
-		
+
 score_functions = [ 
 	("Yaku-Pai", score_yaku_pai),
 	("Tan-Yao", score_tan_yao),
@@ -474,18 +496,27 @@ def riichi_test(hand, sets):
 	return False
 
 def hand_in_tenpai(hand, sets):
-	""" Function work with 13 tiles hand """
+	""" Check if hand is in tenpai. Function work with 13 tiles hand """
 	# TODO: Special hands
+
+	return len(find_waiting_tiles(hand, sets)) > 0
+
+def find_waiting_tiles(hand, sets):
+	""" Returns tiles that forming hand. Function work with 13 tiles hand """
 
 	if not sets:
 		# Seven pairs
 		counts = tile_counts(hand)
 		if len(counts[1]) == 1 and len(counts[2]) == 6:
-			return True
+			return counts[1]
 
+	tiles = []
 	for tile in all_tiles:
 		for pair, rest in detect_pairs(hand + [tile]):
 			if find_sets(rest, sets):
-				return True
+				tiles.append(tile)
+		
+	return tiles
 
-	return False
+
+
