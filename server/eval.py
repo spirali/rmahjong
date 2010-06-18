@@ -119,7 +119,7 @@ def points_sum(tiles, nontermial_points):
 			s += nontermial_points * 2
 	return s
 
-def compute_minipoints(hand, sets, wintype, round_wind, player_wind):
+def compute_minipoints(hand, sets, wintype, round_wind, player_wind, last_tile):
 	if not is_hand_open(sets) and wintype == "Ron":
 		points = 30
 	else:
@@ -139,7 +139,10 @@ def compute_minipoints(hand, sets, wintype, round_wind, player_wind):
 	if wintype == "Tsumo":
 		points += 2
 
-	# TODO: Waitings
+	hh = copy(hand)
+	hh.remove(last_tile)
+	if is_single_waiting(hh, sets):
+		points += 2
 
 	if points == 20:
 		# In what case can 20 points happend??
@@ -162,6 +165,7 @@ def compute_doras(hand, sets, doras, score_name):
 
 
 def compute_score(hand, sets, wintype, doras_and_ura_doras, specials, round_wind, player_wind):
+	last_tile = hand[-1]
 	yaku = find_tiles_yaku(hand, sets, specials, round_wind, player_wind)
 
 	doras, ura_doras = doras_and_ura_doras
@@ -174,7 +178,7 @@ def compute_score(hand, sets, wintype, doras_and_ura_doras, specials, round_wind
 	if ("Pinfu",1) in yaku:
 		minipoints = 30 if wintype == "Ron" else 20	
 	else:
-		minipoints = compute_minipoints(hand, sets, wintype, round_wind, player_wind)
+		minipoints = compute_minipoints(hand, sets, wintype, round_wind, player_wind, last_tile)
 	fans = min(sum(map(lambda r: r[1], yaku)), 13)
 
 	# TODO: Red-fives
@@ -247,7 +251,7 @@ def check_pinfu(pair, sets, round_wind, player_wind, last_tile):
 		hand += s.tiles()
 	hand.remove(last_tile)
 
-	return len(find_waiting_tiles(hand, [])) > 1
+	return not is_single_waiting(hand, [])
 
 
 def eval_sets(pair, sets, round_wind, player_wind, last_tile):
@@ -521,5 +525,6 @@ def find_waiting_tiles(hand, sets):
 		
 	return tiles
 
-
-
+def is_single_waiting(hand, sets):
+	# FIXME: This is NOT correct way how to detect single waiting!
+	return len(find_waiting_tiles(hand,sets)) == 1
