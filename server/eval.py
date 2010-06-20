@@ -139,9 +139,7 @@ def compute_minipoints(hand, sets, wintype, round_wind, player_wind, last_tile):
 	if wintype == "Tsumo":
 		points += 2
 
-	hh = copy(hand)
-	hh.remove(last_tile)
-	if is_single_waiting(hh, sets):
+	if check_single_waiting(hand, sets):
 		points += 2
 
 	if points == 20:
@@ -250,8 +248,9 @@ def check_pinfu(pair, sets, round_wind, player_wind, last_tile):
 	for s in sets :
 		hand += s.tiles()
 	hand.remove(last_tile)
+	hand.append(last_tile) # We want to move last_tile to the end
 
-	return not is_single_waiting(hand, [])
+	return not check_single_waiting(hand, [])
 
 
 def eval_sets(pair, sets, round_wind, player_wind, last_tile):
@@ -504,8 +503,6 @@ def riichi_test(hand, sets):
 
 def hand_in_tenpai(hand, sets):
 	""" Check if hand is in tenpai. Function work with 13 tiles hand """
-	# TODO: Special hands
-
 	return len(find_waiting_tiles(hand, sets)) > 0
 
 def find_waiting_tiles(hand, sets):
@@ -525,6 +522,20 @@ def find_waiting_tiles(hand, sets):
 		
 	return tiles
 
-def is_single_waiting(hand, sets):
-	# FIXME: This is NOT correct way how to detect single waiting!
-	return len(find_waiting_tiles(hand,sets)) == 1
+def check_single_waiting(hand, sets):
+	""" Hand is 14-tile hand, assuming last tile is last tile in 'hand', specials hand is not handled """
+	last_tile = hand[-1]
+
+	for pair, rest in detect_pairs(hand):
+		s = find_sets(rest, sets)
+		if s:
+			if last_tile == pair:
+				return True
+			for set in s:
+				if set.is_chi():
+					tiles = set.tiles()
+					if tiles[1] == last_tile or (last_tile.is_terminal() and (tiles[0] == last_tile or tiles[2] == last_tile)):
+						return True
+	return False				
+
+

@@ -20,7 +20,7 @@ from unittest import TestCase
 
 from tile import Tile, Chi, Pon, Kan, all_tiles
 from eval import count_of_tiles_yaku, compute_payment, hand_in_tenpai, compute_score, find_tiles_yaku, riichi_test
-from eval import find_waiting_tiles
+from eval import find_waiting_tiles, check_single_waiting
 from botengine import BotEngine
 
 
@@ -102,12 +102,15 @@ test_hands = [
 	([ "P4", "P4", "C6", "P3", "C5", "B7", "B6", "P1", "B8", "B8" ], [ ckan("WE") ], 0), #51, Nothing
 	([ "C6", "C8", "B7", "B8", "B9", "P1", "P2", "P3", "C2", "C2", "B6", "B7", "B9" ], [], 0), #52, Nothing
 	([ "C6", "C7", "C8", "B7", "B8", "B9", "P1", "P2", "P3", "DR", "DR", "B6", "B7", "B8" ], [], 0), #53, Nohthing
-
+	([ "C6", "C7", "C8", "B7", "B8", "B9", "P1", "P2", "P3", "C2", "C2", "B6", "B7", "B8" ], [], 0), #54, Nothing
+	([ "C6", "C7", "C8", "B7", "B8", "B9", "P2", "P3", "C2", "C2", "B3", "B4", "B5", "P1" ], [], 0), #55, Nothing
+	([ "C6", "C7", "C8", "B7", "B8", "B9", "P1", "P2", "P3", "WW", "B6", "B7", "B8", "WW" ], [], 0), #56, Nothing
+	([ "C6", "C7", "C8", "B2", "B3", "B4", "P1", "P2", "P3", "C2", "C2", "B7", "B8", "B9" ], [], 0), #57, Nothing
 
 	# -----Pinfu hands --------- Ignored by bot eval (bot don't see pinfu yet)
 	([ "C6", "C7", "C8", "B6", "B7", "B8", "P6", "P7", "P8", "C2", "C2", "B6", "B7", "B8" ], [], 5), #X, Sanshoku doujun (closed), Ipeikou, Tan-Yao, Pinfu
-	([ "C6", "C7", "C8", "B7", "B8", "B9", "P1", "P2", "P3", "C2", "C2", "B6", "B7", "B8" ], [], 1), #X, Pinfu
-	([ "C6", "C7", "C8", "B7", "B8", "B9", "P1", "P2", "P3", "WW", "WW", "B6", "B7", "B8" ], [], 1), #X, Pinfu
+	([ "C6", "C7", "C8", "B7", "B8", "B9", "P1", "P2", "P3", "C2", "C2", "B7", "B8", "B6" ], [], 1), #X, Pinfu
+	([ "C6", "C7", "C8", "B7", "B8", "B9", "P1", "P2", "P3", "C2", "C2", "C3", "C4", "C5" ], [], 1), #X, Pinfu
 
 
 	# -----Special hands --------- Ignored by bot eval
@@ -191,6 +194,18 @@ class EvalHandTestCase(TestCase):
 					([ "P4", "P4", "C6", "P3", "C5", "B7", "B6", "P1", "DR", "B8", "DR" ], [ ckan("WE") ], False))
 		for h, sets, riichi in hands:
 			self.assertEquals(riichi_test(tiles(h), sets), riichi, [h,sets])
+
+	def test_singlewait(self):
+		hands = (([  "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P1", "WN", "WN"], [], True),
+				([  "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "WN", "WN", "WN"], [], False),
+				([  "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P1", "P2", "P3"], [], False),
+				([  "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P3", "P2", "P1"], [], True),
+				([  "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "C7", "C8", "C9"], [], True),
+				([  "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "C6", "C7", "C8"], [], False),
+				([  "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P3", "P1", "P2"], [], True))
+		for h, sets, singlewait in hands:
+			self.assertEquals(check_single_waiting(tiles(h), sets), singlewait)
+
 
 	def test_score(self):
 		hand = [ "WN", "B9", "B6", "WN", "B4", "B8", "B5", "B7"]
