@@ -26,7 +26,7 @@ def is_hand_open(sets):
 			return True
 	return False
 
-def find_tiles_yaku(hand, sets, specials, round_wind, player_wind):
+def find_tiles_yaku(hand, sets, specials, round_wind, player_wind, wintype):
 	last_tile = hand[-1]
 	if not sets and all((hand.count(tile) == 2 for tile in hand)):
 		return score_special_chii_toitsu(hand) + specials
@@ -34,12 +34,12 @@ def find_tiles_yaku(hand, sets, specials, round_wind, player_wind):
 	for pair, rest in detect_pairs(hand):
 		founded_sets = find_sets(rest, sets)
 		if founded_sets:
-			return eval_sets(pair, founded_sets, round_wind, player_wind, last_tile) + specials
+			return eval_sets(pair, founded_sets, round_wind, player_wind, last_tile, wintype) + specials
 	return []
 
 
-def count_of_tiles_yaku(hand, sets, specials, round_wind, player_wind):
-	score = find_tiles_yaku(hand, sets, specials, round_wind, player_wind)
+def count_of_tiles_yaku(hand, sets, specials, round_wind, player_wind, wintype):
+	score = find_tiles_yaku(hand, sets, specials, round_wind, player_wind, wintype)
 	return sum(map(lambda r: r[1], score))
 
 
@@ -164,14 +164,11 @@ def compute_doras(hand, sets, doras, score_name):
 
 def compute_score(hand, sets, wintype, doras_and_ura_doras, specials, round_wind, player_wind):
 	last_tile = hand[-1]
-	yaku = find_tiles_yaku(hand, sets, specials, round_wind, player_wind)
+	yaku = find_tiles_yaku(hand, sets, specials, round_wind, player_wind, wintype)
 
 	doras, ura_doras = doras_and_ura_doras
 	yaku += compute_doras(hand, sets, doras, "Dora")
 	yaku += compute_doras(hand, sets, ura_doras, "Ura dora")
-
-	if wintype == "Tsumo":
-		yaku.append(("Tsumo", 1))
 
 	if ("Pinfu",1) in yaku:
 		minipoints = 30 if wintype == "Ron" else 20	
@@ -253,7 +250,7 @@ def check_pinfu(pair, sets, round_wind, player_wind, last_tile):
 	return not check_single_waiting(hand, [])
 
 
-def eval_sets(pair, sets, round_wind, player_wind, last_tile):
+def eval_sets(pair, sets, round_wind, player_wind, last_tile, wintype):
 	result = []
 
 	# Yakumans
@@ -270,6 +267,9 @@ def eval_sets(pair, sets, round_wind, player_wind, last_tile):
 	# Pinfu
 	if check_pinfu(pair, sets, round_wind, player_wind, last_tile):
 		result.append(("Pinfu", 1))
+
+	if wintype == "Tsumo" and for_all_sets(sets, lambda s: s.closed):
+		result.append(("Tsumo", 1))
 
 	yaku_pai_base = 0 
 	for set in sets:

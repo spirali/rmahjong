@@ -132,21 +132,23 @@ class EvalHandTestCase(TestCase):
 	def test_yaku_count(self):
 		for hand_id, h in enumerate(test_hands):
 			hand, sets, r = h
-			score = count_of_tiles_yaku(tiles(hand), sets, [], Tile("XX"), Tile("XX"))
-			yaku = find_tiles_yaku(tiles(hand), sets, [], Tile("XX"), Tile("XX"))
+			score = count_of_tiles_yaku(tiles(hand), sets, [], Tile("XX"), Tile("XX"), "Ron")
+			yaku = find_tiles_yaku(tiles(hand), sets, [], Tile("XX"), Tile("XX"), "Ron")
 			self.assert_(score == r, "Hand %i returned score %i %s hand=%s" % (hand_id, score, yaku, hand))
 
 		hand = [ "WE", "C2", "C3", "C4", "WN", "WN", "WN", "DR", "B9", "DR", "B8", "B7", "WE", "WE" ]
 		sets = []
-		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WN")), 2)
-		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WE")), 2)
-		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WS")), 1)
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WN"), "Ron"), 2)
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WN"), "Tsumo"), 3)
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WE"), "Ron"), 2)
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WS"), "Ron"), 1)
 		hand = [ "WE", "DW", "DW", "DW", "C4", "C2", "C3", "DR", "B9", "DR", "B8", "B7", "WE", "WE" ]
-		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WS")), 2)
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WS"), "Ron"), 2)
 
 		hand = [ "WN", "B9", "B6", "WN", "B4", "B8", "B5", "B7"]
 		sets = [chi("B1"), chi("P5")]
-		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WW")), 1)
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WW"), "Ron"), 1)
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WW"), "Tsumo"), 1)
 
 	def test_basic_payment(self):
 		self.assert_(compute_payment(2, 40, "Ron", Tile("WN")) == ("", 2600))

@@ -101,7 +101,7 @@ class Player:
 
 	def hand_actions(self):
 		options = []
-		if count_of_tiles_yaku(self.hand, self.sets, self.get_specials_yaku(), self.round.round_wind, self.wind) > 0:
+		if count_of_tiles_yaku(self.hand, self.sets, self.get_specials_yaku(), self.round.round_wind, self.wind, "Tsumo") > 0:
 			options.append("Tsumo")
 
 		if self.other_condition_for_riichi() and riichi_test(self.hand, self.sets):
@@ -131,7 +131,7 @@ class Player:
 				options.append("Chi")
 
 		if count_of_tiles_yaku(self.hand + [ tile ], self.sets, self.get_specials_yaku(), self.round.round_wind, 
-				self.wind) > 0 and not self.is_furiten():
+				self.wind, "Ron") > 0 and not self.is_furiten():
 			options.append("Ron")
 
 		return options
