@@ -40,6 +40,10 @@ def pon(tile_name):
 	pon.closed = False
 	return pon
 
+def kan(tile_name):
+	kan =  Kan(Tile(tile_name))
+	kan.closed = False
+	return kan
 
 def ckan(tile_name):
 	kan =  Kan(Tile(tile_name))
@@ -51,7 +55,7 @@ test_hands = [
 	([ "WW", "C4", "C4", "C4", "C4", "C2", "C3", "DR", "B9", "DR", "B8", "B7", "DR", "WW" ], [], 1), #0, Yaku-Pai
 	([ "DR", "DR", "C1", "C1", "C4", "C2", "C3", "B8", "B9", "WN", "WN", "B7", "DR", "WN" ], [], 1), #1, Yaku-Pai
 	([ "C1", "B1", "B9", "C2", "WW", "WW", "WN", "WS", "DR", "DG", "DW", "C5", "P7", "P9" ], [], 0), #2, Nothing
-	([ "DG", "DG", "DR", "DW", "DG", "DW", "DW", "DR", "B1", "P2", "P2", "P2", "B1", "DR" ], [], 7), #3, 3x Yaku-Pai, San-anko, Toitoiho
+	([ "C1", "C1", "DR", "DW", "C1", "DW", "DW", "DR", "B1", "P2", "P2", "P2", "B1", "DR" ], [], 6), #3, 2x Yaku-Pai, San-anko, Toitoiho
 	([ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C2", "C2" ], [], 1), #4, Tan-Yao
 	([ "C2", "C3", "C4", "B3", "B3", "B4", "P8", "P8", "P8", "P5", "P6", "P7", "C9", "C9" ], [], 0), #5, Nothing
 	([ "WW", "C1", "C1", "C1", "B9", "B8", "B7", "WW" ], [ pon("DR"), chi("C2")], 1), #6, Yaku-Pai
@@ -106,6 +110,8 @@ test_hands = [
 	([ "C6", "C7", "C8", "B7", "B8", "B9", "P2", "P3", "C2", "C2", "B3", "B4", "B5", "P1" ], [], 0), #55, Nothing
 	([ "C6", "C7", "C8", "B7", "B8", "B9", "P1", "P2", "P3", "WW", "B6", "B7", "B8", "WW" ], [], 0), #56, Nothing
 	([ "C6", "C7", "C8", "B2", "B3", "B4", "P1", "P2", "P3", "C2", "C2", "B7", "B8", "B9" ], [], 0), #57, Nothing
+	([ "DR", "DR", "DR", "B3", "B4", "B2", "P2", "P2" ], [ ckan("DW"), pon("DG") ], 13), #58, dai-sangen
+	([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "WN", "WN" ], [ kan("P1") ], 1), #59, Itsu (opened)
 
 	# -----Pinfu hands --------- Ignored by bot eval (bot don't see pinfu yet)
 	([ "C6", "C7", "C8", "B6", "B7", "B8", "P6", "P7", "P8", "C2", "C2", "B6", "B7", "B8" ], [], 5), #X, Sanshoku doujun (closed), Ipeikou, Tan-Yao, Pinfu

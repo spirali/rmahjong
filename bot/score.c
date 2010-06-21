@@ -84,11 +84,13 @@ int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count, i
 	TileSet *chi[4], *pon[4];
 	int chi_count = 0;
 	int pon_count = 0;
+	int dragons = 0;
 
 	/* Yaku-pai */
 	for (t = 0; t < 4; t++) {
 		if (sets[t]->type == PON) {
 			 if (sets[t]->tile >= TILE_DRAGONS_FIRST && sets[t]->tile <= TILE_DRAGONS_LAST) {
+				dragons++;
 				fan++;
 			 } else {
 				 if (sets[t]->tile == round_wind)
@@ -104,6 +106,11 @@ int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count, i
 		} else {
 			pon[pon_count++] = sets[t];
 		}
+	}
+
+	/* Dai-sangen */
+	if (dragons == 3) {
+		return 13; 
 	}
 
 	/* Tan-yao */

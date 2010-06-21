@@ -136,6 +136,8 @@ int read_sets(FILE *file, TileSet *set, int max, int *count)
 			type = CHI;
 		} else if (!strcmp("Pon", token)) {
 			type = PON;
+		} else if (!strcmp("Kan", token)) {
+			type = PON; // Current bot processes kans as pons
 		} else {
 			return 0;
 		}

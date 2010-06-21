@@ -16,7 +16,7 @@
 
 import collections 
 from tile import Pon, Chi
-from tile import red_dragon, white_dragon, green_dragon
+from tile import red_dragon, white_dragon, green_dragon, dragons
 from tile import bamboos, chars, pins, all_tiles, honors
 from copy import copy
 
@@ -255,11 +255,19 @@ def check_pinfu(pair, sets, round_wind, player_wind, last_tile):
 
 def eval_sets(pair, sets, round_wind, player_wind, last_tile):
 	result = []
+
+	# Yakumans
+	for name, fn in score_functions_yakuman:
+		if fn(pair, sets):
+			return [(name, 13)]
+
+	# Other hands
 	for name, fn in score_functions:
 		score = fn(pair, sets)
 		if score > 0:
 			result.append((name, score))
 
+	# Pinfu
 	if check_pinfu(pair, sets, round_wind, player_wind, last_tile):
 		result.append(("Pinfu", 1))
 
@@ -451,6 +459,14 @@ def score_special_chii_toitsu(hand):
 	return yaku
 
 
+def score_daisangen(pair_tile, sets):
+	c = 0
+	for set in sets:
+		if set.is_pon_or_kan() and set.tile in dragons:
+			c += 1
+	return c == 3
+
+
 score_functions = [ 
 	("Yaku-Pai", score_yaku_pai),
 	("Tan-Yao", score_tan_yao),
@@ -464,6 +480,10 @@ score_functions = [
 	("Chinitsu", score_chinitsu),
 	("San-anko", score_sananko),
 	("Toitoiho", score_toitoiho),
+]
+
+score_functions_yakuman = [
+	("Dai-sangen", score_daisangen),
 ]
 
 
