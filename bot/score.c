@@ -20,6 +20,23 @@
 #include "score.h"
 #include "io.h"
 
+static int fan_to_score[14] = {
+ 1,          // 0
+ 1000,       // 1
+ 2000,       // 2
+ 3900,       // 3
+ 7700,       // 4
+ 8000,       // 5
+ 12000,      // 6
+ 12000,      // 7
+ 16000,      // 8
+ 16000,      // 9
+ 16000,      // 10
+ 24000,      // 11
+ 24000,      // 12
+ 32000,      // 13
+};
+
 static int suit_value(tile_id id)
 {
 	if (id >= TILE_C1) {
@@ -276,13 +293,10 @@ int score_of_hand(tile_id *tiles, int pair, TileSet **sets, int open_sets_count,
 		return 0;
 	}
 
-	int t;
-	int score = 80;
-	for (t = 0; t < fan; t++) {
-		score *= 2;
-	}
-	return score;
-	/*return (score - 1) / 100 + 1;*/
+	if (fan > 13)
+		fan = 13;
+
+	return fan_to_score[fan];
 }
 
 int score_of_seven_pairs(tile_id *hand)
