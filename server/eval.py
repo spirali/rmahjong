@@ -484,6 +484,12 @@ def score_dai_suushi(pair_tile, sets):
 			c += 1
 	return c == 4
 
+def score_suu_ankou(pair_tile, sets):
+	return for_all_sets(sets, lambda s: s.closed and s.is_pon_or_kan())
+
+def score_suu_kantsu(pair_tile, sets):
+	return for_all_sets(sets, lambda s: s.is_kan())
+
 
 score_functions = [ 
 	("Yaku-Pai", score_yaku_pai),
@@ -504,6 +510,8 @@ score_functions_yakuman = [
 	("Dai-sangen", score_daisangen),
 	("Shou-suushi", score_shou_suushi),
 	("Dai-suushi", score_dai_suushi),
+	("Suu-ankou", score_suu_ankou),
+	("Suu-kantsu", score_suu_kantsu),
 ]
 
 

@@ -55,7 +55,7 @@ test_hands = [
 	([ "WW", "C4", "C4", "C4", "C4", "C2", "C3", "DR", "B9", "DR", "B8", "B7", "DR", "WW" ], [], 1), #0, Yaku-Pai
 	([ "DR", "DR", "C1", "C1", "C4", "C2", "C3", "B8", "B9", "WN", "WN", "B7", "DR", "WN" ], [], 1), #1, Yaku-Pai
 	([ "C1", "B1", "B9", "C2", "WW", "WW", "WN", "WS", "DR", "DG", "DW", "C5", "P7", "P9" ], [], 0), #2, Nothing
-	([ "C1", "C1", "DR", "DW", "C1", "DW", "DW", "DR", "B1", "P2", "P2", "P2", "B1", "DR" ], [], 6), #3, 2x Yaku-Pai, San-anko, Toitoiho
+	([ "C1", "C1", "DW", "C1", "DW", "DW", "B1", "P2", "P2", "P2", "B1" ], [ kan("DR") ], 6), #3, 2x Yaku-Pai, San-anko, Toitoiho
 	([ "C2", "C3", "C4", "B2", "B2", "B2", "P8", "P8", "P8", "P5", "P6", "P7", "C2", "C2" ], [], 1), #4, Tan-Yao
 	([ "C2", "C3", "C4", "B3", "B3", "B4", "P8", "P8", "P8", "P5", "P6", "P7", "C9", "C9" ], [], 0), #5, Nothing
 	([ "WW", "C1", "C1", "C1", "B9", "B8", "B7", "WW" ], [ pon("DR"), chi("C2")], 1), #6, Yaku-Pai
@@ -102,7 +102,7 @@ test_hands = [
 	([ "WW", "C1", "C2", "C3", "WW" ], [ pon("B9"), pon("P1"), pon("C2") ], 0), #47, Nothing 
 	([ "B2", "B2" ], [ pon("B9"), pon("P1"), ckan("C2"), ckan("B5") ], 2), #48, Toitoi 
 	([ "B2", "B2" ], [ ckan("B8"), pon("P1"), ckan("C2"), ckan("B5") ], 4), #49, Toitoi, San-anko
-	([ "P2", "P2", "P2", "B1", "B1", "B1", "P9", "P9" ], [ ckan("B2"), ckan("C2") ], 6), #50, Sanshoku douko, San-anko, Toitoi
+	([ "P2", "P2", "P2", "P9", "P9" ], [ kan("B1"), ckan("B2"), ckan("C2") ], 6), #50, Sanshoku douko, San-anko, Toitoi
 	([ "P4", "P4", "C6", "P3", "C5", "B7", "B6", "P1", "B8", "B8" ], [ ckan("WE") ], 0), #51, Nothing
 	([ "C6", "C8", "B7", "B8", "B9", "P1", "P2", "P3", "C2", "C2", "B6", "B7", "B9" ], [], 0), #52, Nothing
 	([ "C6", "C7", "C8", "B7", "B8", "B9", "P1", "P2", "P3", "DR", "DR", "B6", "B7", "B8" ], [], 0), #53, Nohthing
@@ -114,6 +114,11 @@ test_hands = [
 	([ "WE", "WE", "WE", "B3", "B4", "B2", "WN", "WN" ], [ ckan("WW"), pon("WS") ], 13), #59, shou-suushi
 	([ "WE", "WE", "WE", "C9", "C9", "WN", "WN", "WN" ], [ ckan("WW"), pon("WS") ], 13), #60, dai-suushi
 	([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "WN", "WN" ], [ kan("P1") ], 1), #61, Itsu (opened)
+	([ "B1", "B1", "B1", "C2", "C2", "C2", "C9", "C9", "C9", "WW", "WW" ], [ ckan("DR") ], 13), #62, suu-ankou
+
+
+	# --------- Ignored by bot (because kan and pon are the same for bot)
+	([ "B6", "B6" ], [ kan("B5"), kan("P3"), ckan("WE"), ckan("C9") ], 13), #63, suu-kantsu
 
 	# -----Pinfu hands --------- Ignored by bot eval (bot don't see pinfu yet)
 	([ "C6", "C7", "C8", "B6", "B7", "B8", "P6", "P7", "P8", "C2", "C2", "B6", "B7", "B8" ], [], 5), #X, Sanshoku doujun (closed), Ipeikou, Tan-Yao, Pinfu
@@ -266,7 +271,8 @@ class BotEngineTestCase(TestCase):
 			e.set_blocking()
 			# Remove last 4 tests (Hand: seven pairs), bot "question_yaku" detect only "normal sets"
 			# + 3 next hand because bot don't see pinfu yet
-			for hand_id, h in enumerate(test_hands[:-7]): 
+			# + 1 beacause bot see kan as pon
+			for hand_id, h in enumerate(test_hands[:-8]): 
 				hand, sets, r = h
 				e.set_hand(tiles(hand))
 				e.set_sets(sets)

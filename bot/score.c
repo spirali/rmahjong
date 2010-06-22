@@ -151,6 +151,9 @@ int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count, i
 			}
 		}
 		if (closed_pons >= 3) {
+			if (closed_pons == 4) {
+				return 13; // suu-ankou
+			}
 			fan += 2; // San-anko
 		}
 
