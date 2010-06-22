@@ -53,6 +53,9 @@ class Tile(object):
 	def is_dragon(self):
 		return self.get_type() == "D"
 
+	def is_wind(self):
+		return self.get_type() == "W"
+
 	def is_suit(self):
 		return self.get_type() in self.suit_types
 

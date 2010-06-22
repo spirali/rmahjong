@@ -467,6 +467,24 @@ def score_daisangen(pair_tile, sets):
 	return c == 3
 
 
+def score_shou_suushi(pair_tile, sets):
+	if not pair_tile.is_wind():
+		return False
+	c = 0
+	for set in sets:
+		if set.is_pon_or_kan() and set.tile.is_wind():
+			c += 1
+	return c == 3
+
+
+def score_dai_suushi(pair_tile, sets):
+	c = 0
+	for set in sets:
+		if set.is_pon_or_kan() and set.tile.is_wind():
+			c += 1
+	return c == 4
+
+
 score_functions = [ 
 	("Yaku-Pai", score_yaku_pai),
 	("Tan-Yao", score_tan_yao),
@@ -484,6 +502,8 @@ score_functions = [
 
 score_functions_yakuman = [
 	("Dai-sangen", score_daisangen),
+	("Shou-suushi", score_shou_suushi),
+	("Dai-suushi", score_dai_suushi),
 ]
 
 

@@ -111,7 +111,9 @@ test_hands = [
 	([ "C6", "C7", "C8", "B7", "B8", "B9", "P1", "P2", "P3", "WW", "B6", "B7", "B8", "WW" ], [], 0), #56, Nothing
 	([ "C6", "C7", "C8", "B2", "B3", "B4", "P1", "P2", "P3", "C2", "C2", "B7", "B8", "B9" ], [], 0), #57, Nothing
 	([ "DR", "DR", "DR", "B3", "B4", "B2", "P2", "P2" ], [ ckan("DW"), pon("DG") ], 13), #58, dai-sangen
-	([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "WN", "WN" ], [ kan("P1") ], 1), #59, Itsu (opened)
+	([ "WE", "WE", "WE", "B3", "B4", "B2", "WN", "WN" ], [ ckan("WW"), pon("WS") ], 13), #59, shou-suushi
+	([ "WE", "WE", "WE", "C9", "C9", "WN", "WN", "WN" ], [ ckan("WW"), pon("WS") ], 13), #60, dai-suushi
+	([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "WN", "WN" ], [ kan("P1") ], 1), #61, Itsu (opened)
 
 	# -----Pinfu hands --------- Ignored by bot eval (bot don't see pinfu yet)
 	([ "C6", "C7", "C8", "B6", "B7", "B8", "P6", "P7", "P8", "C2", "C2", "B6", "B7", "B8" ], [], 5), #X, Sanshoku doujun (closed), Ipeikou, Tan-Yao, Pinfu
