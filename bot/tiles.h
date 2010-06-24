@@ -77,6 +77,7 @@
 #define IS_TERMINAL(x) (((x) == TILE_B1) || ((x) == TILE_B9) || ((x) == TILE_C1) || ((x) == TILE_C9) || ((x) == TILE_P1) || ((x) == TILE_P9))
 #define IS_HONOR(x) ((x) <= 6)
 #define IS_WIND(x) (((x) >= TILE_WE) && ((x) <= TILE_WN))
+#define IS_GREEN(x) (((x) == TILE_DG) || (((x) >= TILE_B2) && ((x) <= TILE_B4)) || ((x) == TILE_B6) || ((x) == TILE_B8))
 
 
 typedef unsigned char tile_id;

@@ -92,6 +92,7 @@ static int score_san_shoku_dokou(int tile_1, int tile_2, int tile_3)
 	return 0;
 }
 
+
 /* !! Open sets has to be at the end of array of sets */
 int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count, int round_wind, int player_wind)
 {
@@ -125,6 +126,22 @@ int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count, i
 		}
 	}
 
+	if (IS_GREEN(pair)) {
+		for (t = 0; t < 4; t++) {
+			if (sets[t]->type == PON) {
+				if (!IS_GREEN(sets[t]->tile))
+					break;
+			} else {
+				if (sets[t]->tile != TILE_B2) {
+					break;
+				}
+			}
+		}
+		if (t == 4) {
+			return 13; // ryuu-iisou
+		}
+	}
+
 	/* Dai-sangen */
 	if (dragons == 3) {
 		return 13; 
@@ -155,6 +172,12 @@ int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count, i
 				return 13; // suu-ankou
 			}
 			fan += 2; // San-anko
+		}
+
+		if (pon_count == 4 && IS_TERMINAL(pair) 
+			&& IS_TERMINAL(pon[0]->tile) && IS_TERMINAL(pon[1]->tile) && IS_TERMINAL(pon[2]->tile) && IS_TERMINAL(pon[3]->tile)) {
+			// chinroutou
+			return 13;
 		}
 
 		fan += score_san_shoku_dokou(pon[0]->tile, pon[1]->tile, pon[2]->tile);

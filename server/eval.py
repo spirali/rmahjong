@@ -293,6 +293,8 @@ def eval_sets(pair, sets, round_wind, player_wind, last_tile, wintype):
 def sum_over_sets(sets, fn):
 	return reduce(lambda a, s: fn(s) + a, sets, 0)
 
+def for_all_tiles_in_sets(sets, fn):
+	return for_all_sets(sets, lambda s: s.all_tiles(fn))
 
 def for_all_sets(sets, fn):
 	for set in sets:
@@ -484,11 +486,21 @@ def score_dai_suushi(pair_tile, sets):
 			c += 1
 	return c == 4
 
+
 def score_suu_ankou(pair_tile, sets):
 	return for_all_sets(sets, lambda s: s.closed and s.is_pon_or_kan())
 
+
 def score_suu_kantsu(pair_tile, sets):
 	return for_all_sets(sets, lambda s: s.is_kan())
+
+
+def score_chinroutou(pair_tile, sets):
+	return pair_tile.is_terminal() and for_all_tiles_in_sets(sets, lambda t: t.is_terminal())
+
+
+def score_ryuu_iisou(pair_tile, sets):
+	return pair_tile.is_green() and for_all_tiles_in_sets(sets, lambda t: t.is_green())
 
 
 score_functions = [ 
@@ -512,6 +524,8 @@ score_functions_yakuman = [
 	("Dai-suushi", score_dai_suushi),
 	("Suu-ankou", score_suu_ankou),
 	("Suu-kantsu", score_suu_kantsu),
+	("Chinroutou", score_chinroutou),
+	("Ryuu-iisou", score_ryuu_iisou),
 ]
 
 

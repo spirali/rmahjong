@@ -95,6 +95,9 @@ class Tile(object):
 	def is_pins(self):
 		return self.name[0] == "P"
 
+	def is_green(self):
+		return self.name in ("DG", "B2", "B3", "B4", "B6", "B8")
+
 	def is_same_type(self, tile):
 		return self.name[0] == tile.name[0]
 
