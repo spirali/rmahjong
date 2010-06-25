@@ -174,10 +174,16 @@ int count_of_fan(tile_id *tile, int pair, TileSet **sets, int open_sets_count, i
 			fan += 2; // San-anko
 		}
 
-		if (pon_count == 4 && IS_TERMINAL(pair) 
-			&& IS_TERMINAL(pon[0]->tile) && IS_TERMINAL(pon[1]->tile) && IS_TERMINAL(pon[2]->tile) && IS_TERMINAL(pon[3]->tile)) {
-			// chinroutou
-			return 13;
+		if (pon_count == 4) {
+			if (IS_TERMINAL(pair) 
+				&& IS_TERMINAL(pon[0]->tile) && IS_TERMINAL(pon[1]->tile) && IS_TERMINAL(pon[2]->tile) && IS_TERMINAL(pon[3]->tile)) {
+				// chinroutou
+				return 13;
+			}
+			if (IS_HONOR(pair)
+				&& IS_HONOR(pon[0]->tile) && IS_HONOR(pon[1]->tile) && IS_HONOR(pon[2]->tile) && IS_HONOR(pon[3]->tile)) {
+				return 13;
+			}
 		}
 
 		fan += score_san_shoku_dokou(pon[0]->tile, pon[1]->tile, pon[2]->tile);
@@ -345,9 +351,20 @@ int score_of_hand(tile_id *tiles, int pair, TileSet **sets, int open_sets_count,
 
 int score_of_seven_pairs(tile_id *hand)
 {
-	int fan = 2;
 
 	int t;
+	for (t = 0; t < TILES_COUNT; t++) {
+		if (hand[t] > 0 && !IS_HONOR(t)) {
+			break;
+		}
+	}
+
+	// tsu-iisou
+	if (t == TILES_COUNT) {
+		return fan_to_score[13];
+	}
+	
+	int fan = 2;
 	for (t = 0; t < TILES_COUNT; t++) {
 		if (hand[t] > 0 && !IS_NONTERMINAL(t)) {
 			break;
@@ -359,9 +376,5 @@ int score_of_seven_pairs(tile_id *hand)
 		fan += 1;
 	}
 
-	int score = 80;
-	for (t = 0; t < fan; t++) {
-		score *= 2;
-	}
-	return score;
+	return fan_to_score[fan];
 }

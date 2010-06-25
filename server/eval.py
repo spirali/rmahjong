@@ -447,6 +447,10 @@ def score_toitoiho(pair_tile, sets):
 
 def score_special_chii_toitsu(hand):
 	yaku = [ ("Chii toitsu", 2) ]
+
+	if all((tile.is_honor() for tile in hand)):
+		return [("Tsu-iisou", 13)]
+
 	if all((tile.is_nonterminal() for tile in hand)):
 		yaku.append(("Tan-Yao", 1))
 
@@ -502,6 +506,8 @@ def score_chinroutou(pair_tile, sets):
 def score_ryuu_iisou(pair_tile, sets):
 	return pair_tile.is_green() and for_all_tiles_in_sets(sets, lambda t: t.is_green())
 
+def score_tsu_iisou(pair_tile, sets):
+	return pair_tile.is_honor() and for_all_tiles_in_sets(sets, lambda t: t.is_honor())
 
 score_functions = [ 
 	("Yaku-Pai", score_yaku_pai),
@@ -526,6 +532,7 @@ score_functions_yakuman = [
 	("Suu-kantsu", score_suu_kantsu),
 	("Chinroutou", score_chinroutou),
 	("Ryuu-iisou", score_ryuu_iisou),
+	("Tsu-iisou", score_tsu_iisou)
 ]
 
 

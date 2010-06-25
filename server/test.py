@@ -117,6 +117,7 @@ test_hands = [
 	([ "B1", "B1", "B1", "C2", "C2", "C2", "C9", "C9", "C9", "WW", "WW" ], [ ckan("DR") ], 13), #62, suu-ankou
 	([ "C1", "C1", "C1", "C9", "C9", "C9", "B9", "B9", "B1", "B1", "B1" ], [ kan("P9") ], 13), #63, Chinroutou
 	([ "DG", "DG", "B2", "B3", "B4", "B4", "B4", "B4", ], [ kan("B6"), pon("B8") ], 13), #64, ryuu-iisou
+	([ "DG", "DG", "DG", "WE", "WE", "WN", "WN", "WN", ], [ kan("DR"), pon("WW") ], 13), #65, tsu-iisou
 
 	# --------- Ignored by bot (because kan and pon are the same for bot)
 	([ "B6", "B6" ], [ kan("B5"), kan("P3"), ckan("WE"), ckan("C9") ], 13), #63, suu-kantsu
@@ -132,6 +133,7 @@ test_hands = [
 	([ "C3", "C3", "P8", "P8", "C7", "C7", "P5", "P5", "P6", "P6", "B3", "B3", "B4", "B4"], [], 3), #X, Chii toitsu, tanyao
 	([ "WE", "WE", "P9", "P9", "P8", "P8", "P1", "P1", "DR", "DR", "P3", "P3", "P4", "P4"], [], 5), #X, Chii toitsu, honitsu
 	([ "B1", "B1", "B8", "B8", "B7", "B7", "B5", "B5", "B6", "B6", "B3", "B3", "B4", "B4"], [], 8), #X, Chii toitsu, chinitsu
+	([ "DR", "DR", "DG", "DG", "DW", "DW", "WE", "WE", "WW", "WW", "WN", "WN", "WS", "WS"], [], 13), #X, Tsu-iisou
 ]
 
 
@@ -270,10 +272,10 @@ class BotEngineTestCase(TestCase):
 		e = BotEngine()
 		try:
 			e.set_blocking()
-			# Remove last 4 tests (Hand: seven pairs), bot "question_yaku" detect only "normal sets"
+			# Remove last 5 tests (Hand: seven pairs), bot "question_yaku" detect only "normal sets"
 			# + 3 next hand because bot don't see pinfu yet
 			# + 1 beacause bot see kan as pon
-			for hand_id, h in enumerate(test_hands[:-8]): 
+			for hand_id, h in enumerate(test_hands[:-9]): 
 				hand, sets, r = h
 				e.set_hand(tiles(hand))
 				e.set_sets(sets)
@@ -338,6 +340,19 @@ class BotEngineTestCase(TestCase):
 			e.question_discard_tiles()
 			tile_list = e.get_tiles()
 			self.assertEquals(tile_list, [Tile("P1")])
+
+			wall = 3 * all_tiles
+			wall.remove(Tile("WW"))
+			wall.remove(Tile("WW"))
+			wall.remove(Tile("C1"))
+			e.set_turns(12)
+			e.set_wall(wall)
+			h = tiles([ "DR", "DR", "DW", "DW", "DG", "DG", "WE", "WE", "WW", "C9", "WN", "WN", "WS", "WS" ])
+			e.set_hand(h)
+			e.question_discard_tiles()
+			tile_list = e.get_tiles()
+			self.assertEquals(tile_list, [Tile("C9")])
+
 		finally:
 			e.shutdown()
 
