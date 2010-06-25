@@ -118,6 +118,10 @@ test_hands = [
 	([ "C1", "C1", "C1", "C9", "C9", "C9", "B9", "B9", "B1", "B1", "B1" ], [ kan("P9") ], 13), #63, Chinroutou
 	([ "DG", "DG", "B2", "B3", "B4", "B4", "B4", "B4", ], [ kan("B6"), pon("B8") ], 13), #64, ryuu-iisou
 	([ "DG", "DG", "DG", "WE", "WE", "WN", "WN", "WN", ], [ kan("DR"), pon("WW") ], 13), #65, tsu-iisou
+	([ "C1", "C1", "C1", "C5", "C6", "C7", "C8", "C9", "C9", "C9", "C3"], [ chi("C2") ], 0), #66, Nothing
+	([ "B1", "B1", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B1"], [ pon("B9") ], 0), #67, Nothing 
+	([ "P1", "P1", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9", "P9", "P9", "B9"], [], 0), #68, Nohting
+
 
 	# --------- Ignored by bot (because kan and pon are the same for bot)
 	([ "B6", "B6" ], [ kan("B5"), kan("P3"), ckan("WE"), ckan("C9") ], 13), #63, suu-kantsu
@@ -134,6 +138,9 @@ test_hands = [
 	([ "WE", "WE", "P9", "P9", "P8", "P8", "P1", "P1", "DR", "DR", "P3", "P3", "P4", "P4"], [], 5), #X, Chii toitsu, honitsu
 	([ "B1", "B1", "B8", "B8", "B7", "B7", "B5", "B5", "B6", "B6", "B3", "B3", "B4", "B4"], [], 8), #X, Chii toitsu, chinitsu
 	([ "DR", "DR", "DG", "DG", "DW", "DW", "WE", "WE", "WW", "WW", "WN", "WN", "WS", "WS"], [], 13), #X, Tsu-iisou
+	([ "C1", "C1", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C9", "C9", "C5"], [], 13), #X, Chuuren-pootoo
+	([ "B1", "B1", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "B9", "B9", "B1"], [], 13), #X, Chuuren-pootoo
+	([ "P1", "P1", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9", "P9", "P9", "P9"], [], 13), #X, Chuuren-pootoo
 ]
 
 
@@ -272,10 +279,10 @@ class BotEngineTestCase(TestCase):
 		e = BotEngine()
 		try:
 			e.set_blocking()
-			# Remove last 5 tests (Hand: seven pairs), bot "question_yaku" detect only "normal sets"
+			# Remove last 8 tests (Hand: seven pairs), bot "question_yaku" detect only "normal sets"
 			# + 3 next hand because bot don't see pinfu yet
 			# + 1 beacause bot see kan as pon
-			for hand_id, h in enumerate(test_hands[:-9]): 
+			for hand_id, h in enumerate(test_hands[:-12]): 
 				hand, sets, r = h
 				e.set_hand(tiles(hand))
 				e.set_sets(sets)
@@ -315,6 +322,22 @@ class BotEngineTestCase(TestCase):
 			e.question_yaku()
 			self.assertEquals(e.get_int(), 2)
 
+		finally:
+			e.shutdown()
+
+	def test_nine_lanterns(self):
+		e = BotEngine()
+		try:
+			e.set_blocking()
+			h = tiles([ "C1", "C1", "C1", "C2", "C3", "C4", "B1", "C6", "C7", "C8", "C9", "C9", "B1", "B1" ])
+			e.set_hand(h)
+			e.set_turns(12)
+			e.set_sets([])
+			wall = 3 * all_tiles
+			e.set_wall(wall)
+			e.question_discard_tiles()
+			tile_list = e.get_tiles()
+			self.assertEquals(tile_list, [Tile("B1"), Tile("B1"), Tile("B1")])
 		finally:
 			e.shutdown()
 

@@ -28,8 +28,13 @@ def is_hand_open(sets):
 
 def find_tiles_yaku(hand, sets, specials, round_wind, player_wind, wintype):
 	last_tile = hand[-1]
-	if not sets and all((hand.count(tile) == 2 for tile in hand)):
-		return score_special_chii_toitsu(hand) + specials
+
+	if not sets:
+		if all((hand.count(tile) == 2 for tile in hand)):
+			return score_special_chii_toitsu(hand) + specials
+
+		if score_special_nine_lanterns(hand):
+			return [("Chuuren-pootoo", 13)]
 
 	for pair, rest in detect_pairs(hand):
 		founded_sets = find_sets(rest, sets)
@@ -445,6 +450,22 @@ def score_toitoiho(pair_tile, sets):
 	return 0
 
 
+def nine_lanterns_helper(hand, suits):
+	for s in suits:
+		if hand.count(s) == 0:
+			return False
+
+	for h in hand:
+		if not h in suits:
+			return False
+
+	return hand.count(suits[0]) >= 3 and hand.count(suits[-1]) >= 3
+
+
+def score_special_nine_lanterns(hand):
+	return nine_lanterns_helper(hand, bamboos) or nine_lanterns_helper(hand, pins) or nine_lanterns_helper(hand, chars)
+	
+	
 def score_special_chii_toitsu(hand):
 	yaku = [ ("Chii toitsu", 2) ]
 

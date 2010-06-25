@@ -227,6 +227,62 @@ static void check_seven_pairs(SearchContext *context)
 	check_seven_pairs_helper(context, tiles, 0, 0);
 }
 
+static void check_nine_lanterns_helper(SearchContext *context, int suit) 
+{
+	tile_id tiles[TILES_COUNT];
+	zero_tiles(tiles);
+	tiles[suit] = 3;
+	tiles[suit + 8] = 3;
+	
+	int t,z;
+	for (t = suit + 1; t < suit + 8; t++) {
+		tiles[t] = 1;
+	}
+
+	for (z = suit; z < suit + 9; z++) {
+		tiles[z]++;
+		tile_id missing[TILES_COUNT];
+		int mcount = find_missing_tiles(context->gc.hand, tiles, missing);
+
+
+		if (mcount > 6 || mcount == 0) {
+			return;
+		}
+
+		int others = context->gc.wall_size;
+		int t;
+		for (t = 0; t < TILES_COUNT; t++) {
+			if (missing[t] > 0) { others -= context->gc.wall[t]; }
+		}
+		if (others >= 0) {
+			double gc = good_combinations_count(missing, 0, 0, 1, 0, context->gc.wall, others, context->gc.turns);
+			if (gc > 0) {
+				double result = gc / combinations_d(context->gc.wall_size, context->gc.turns);
+				int score = fan_to_score[13];
+				double value = result * score;
+				if (value > context->best_value) {
+					context->best_value = value;
+					copy_tiles(tiles, context->best_target);
+					#ifdef DEBUG
+					context->best_score = score;
+					context->best_prob = result;
+					context->best_sets[0] = context->sets[0]; context->best_sets[1] = context->sets[1];	
+					context->best_sets[2] = context->sets[2]; context->best_sets[3] = context->sets[3];
+					#endif
+				}
+			}
+		}
+		tiles[z]--;
+	}
+}
+
+static void check_nine_lanterns(SearchContext *context)
+{
+	check_nine_lanterns_helper(context, TILE_C1);
+	check_nine_lanterns_helper(context, TILE_B1);
+	check_nine_lanterns_helper(context, TILE_P1);
+}
+
 void find_best(SearchContext *context, TileSet *all_sets) 
 {
 	int t;
@@ -237,6 +293,7 @@ void find_best(SearchContext *context, TileSet *all_sets)
 
 	if (context->gc.open_sets_count == 0 && context->gc.closed_kans_count == 0) {
 		check_seven_pairs(context);
+		check_nine_lanterns(context);
 	}
 
 	for (t = 0; t < context->gc.open_sets_count; t++)  {

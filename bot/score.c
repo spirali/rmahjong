@@ -20,7 +20,7 @@
 #include "score.h"
 #include "io.h"
 
-static int fan_to_score[14] = {
+int fan_to_score[14] = {
  1,          // 0
  1000,       // 1
  2000,       // 2
