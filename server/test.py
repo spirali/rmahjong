@@ -121,6 +121,8 @@ test_hands = [
 	([ "C1", "C1", "C1", "C5", "C6", "C7", "C8", "C9", "C9", "C9", "C3"], [ chi("C2") ], 0), #66, Nothing
 	([ "B1", "B1", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B1"], [ pon("B9") ], 0), #67, Nothing 
 	([ "P1", "P1", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9", "P9", "P9", "B9"], [], 0), #68, Nohting
+	([ "P1", "P9", "C1", "C9", "B1", "B9", "DR", "DG", "DW", "WW", "WE", "WS", "WN", "C2"], [], 0), #69, Nothing 
+	([ "P1", "P9", "C1", "C9", "B1", "B9", "DR", "DG", "DW", "WW", "WE", "WS", "P1", "P1"], [], 0), #69, Nothing 
 
 
 	# --------- Ignored by bot (because kan and pon are the same for bot)
@@ -141,6 +143,8 @@ test_hands = [
 	([ "C1", "C1", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C9", "C9", "C5"], [], 13), #X, Chuuren-pootoo
 	([ "B1", "B1", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "B9", "B9", "B1"], [], 13), #X, Chuuren-pootoo
 	([ "P1", "P1", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9", "P9", "P9", "P9"], [], 13), #X, Chuuren-pootoo
+	([ "P1", "P9", "C1", "C9", "B1", "B9", "DR", "DG", "DW", "WW", "WE", "WS", "WN", "B9"], [], 13), #X, Kokushi-musou
+	([ "P1", "P9", "C1", "C9", "B1", "B9", "DR", "DG", "DW", "WW", "WE", "WS", "WN", "DR"], [], 13), #X, Kokushi-musou
 ]
 
 
@@ -199,6 +203,8 @@ class EvalHandTestCase(TestCase):
 						([ "B3", "B3", "B2", "B2", "C9", "C9", "WW", "WW", "DR", "DR", "P1", "P1", "WN"], [], True, ["WN"]),
 						([ "B3", "B3", "B2", "B2", "C9", "C9", "WW", "WW", "DR", "DR", "P1", "P7", "WN"], [], False, []),
 						([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P3", "P1", "WN"], [], False, []),
+						([ "B1", "B1", "B1", "B2", "B4", "B5", "B6", "B7", "B8", "B9", "B9", "B9", "B3"], [], True, ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9']),
+						([ "B1", "B9", "C1", "C9", "P1", "P9", "DW", "DR", "DG", "WN", "WE", "WW", "WW"], [], True, [ "WS" ]),
 						([ "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "WN", "WN"], [ pon("P1") ], True, ["B3","B6","B9"]),
 						([ "P1", "P2", "P3", "DR", "DR", "DR", "B7", "B8", "WN", "WN"], [ pon("P1") ], True, ["B6", "B9"]),
 						([ "P1", "P2", "P3", "DR", "DR", "DR", "B7", "B9", "WN", "WN"], [ pon("P1") ], True, ["B8"]))
@@ -282,7 +288,7 @@ class BotEngineTestCase(TestCase):
 			# Remove last 8 tests (Hand: seven pairs), bot "question_yaku" detect only "normal sets"
 			# + 3 next hand because bot don't see pinfu yet
 			# + 1 beacause bot see kan as pon
-			for hand_id, h in enumerate(test_hands[:-12]): 
+			for hand_id, h in enumerate(test_hands[:-14]): 
 				hand, sets, r = h
 				e.set_hand(tiles(hand))
 				e.set_sets(sets)

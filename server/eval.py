@@ -36,6 +36,9 @@ def find_tiles_yaku(hand, sets, specials, round_wind, player_wind, wintype):
 		if score_special_nine_lanterns(hand):
 			return [("Chuuren-pootoo", 13)]
 
+		if score_special_kokushi_musou(hand):
+			return [("Kokushi-musou", 13)]
+
 	for pair, rest in detect_pairs(hand):
 		founded_sets = find_sets(rest, sets)
 		if founded_sets:
@@ -464,8 +467,26 @@ def nine_lanterns_helper(hand, suits):
 
 def score_special_nine_lanterns(hand):
 	return nine_lanterns_helper(hand, bamboos) or nine_lanterns_helper(hand, pins) or nine_lanterns_helper(hand, chars)
-	
-	
+
+
+def score_special_kokushi_musou(hand):
+	pair = False
+
+	for tile in all_tiles:
+		if tile.is_nonterminal():
+			if hand.count(tile) != 0:
+				return False
+		else:
+			if hand.count(tile) == 2:
+				if pair:
+					return False
+				else:
+					pair = True
+			elif hand.count(tile) != 1:
+				return False
+	return pair
+
+
 def score_special_chii_toitsu(hand):
 	yaku = [ ("Chii toitsu", 2) ]
 
@@ -606,7 +627,17 @@ def find_waiting_tiles(hand, sets):
 
 	tiles = []
 	for tile in all_tiles:
-		for pair, rest in detect_pairs(hand + [tile]):
+		h = hand + [tile]
+
+		if score_special_nine_lanterns(h):
+			tiles.append(tile)
+			continue
+
+		if score_special_kokushi_musou(h):
+			tiles.append(tile)
+			continue
+
+		for pair, rest in detect_pairs(h):
 			if find_sets(rest, sets):
 				tiles.append(tile)
 		
