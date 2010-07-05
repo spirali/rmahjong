@@ -347,6 +347,23 @@ class BotEngineTestCase(TestCase):
 		finally:
 			e.shutdown()
 
+	def test_kokushi_musou(self):
+		e = BotEngine()
+		try:
+			e.set_blocking()
+			h = tiles([ "DR", "DR", "DR", "DW", "WE", "WW", "WS", "WN", "P1", "P9", "C9", "C1", "B1", "B9" ])
+			e.set_hand(h)
+			e.set_turns(12)
+			e.set_sets([])
+			wall = 3 * all_tiles
+			e.set_wall(wall)
+			e.question_discard_tiles()
+			tile_list = e.get_tiles()
+			self.assertEquals(tile_list, [Tile("DR")])
+		finally:
+			e.shutdown()
+
+
 	def test_seven_pairs(self):
 		e = BotEngine()
 		try:

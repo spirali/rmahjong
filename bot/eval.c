@@ -283,6 +283,55 @@ static void check_nine_lanterns(SearchContext *context)
 	check_nine_lanterns_helper(context, TILE_P1);
 }
 
+static void check_kokushi_musou(SearchContext *context)
+{
+	tile_id tiles[TILES_COUNT];
+	zero_tiles(tiles);
+	int wtiles[] = { TILE_DR, TILE_DG, TILE_DW, TILE_WE, TILE_WS, TILE_WW, TILE_WN, TILE_C1, TILE_C9, TILE_P1, TILE_P9, TILE_B1, TILE_B9 };
+	
+	int t,z;
+	for (t = 0; t < (sizeof(wtiles) / sizeof(int)); t++) {
+		tiles[wtiles[t]] = 1;
+	}
+
+	for (z = 0; z < (sizeof(wtiles) / sizeof(int)); z++) {
+		tiles[wtiles[z]] = 2;
+		tile_id missing[TILES_COUNT];
+		int mcount = find_missing_tiles(context->gc.hand, tiles, missing);
+
+
+		if (mcount > 6 || mcount == 0) {
+			return;
+		}
+
+		int others = context->gc.wall_size;
+		int t;
+		for (t = 0; t < TILES_COUNT; t++) {
+			if (missing[t] > 0) { others -= context->gc.wall[t]; }
+		}
+		if (others >= 0) {
+			double gc = good_combinations_count(missing, 0, 0, 1, 0, context->gc.wall, others, context->gc.turns);
+			if (gc > 0) {
+				double result = gc / combinations_d(context->gc.wall_size, context->gc.turns);
+				int score = fan_to_score[13];
+				double value = result * score;
+				if (value > context->best_value) {
+					context->best_value = value;
+					copy_tiles(tiles, context->best_target);
+					#ifdef DEBUG
+					context->best_score = score;
+					context->best_prob = result;
+					context->best_sets[0] = context->sets[0]; context->best_sets[1] = context->sets[1];	
+					context->best_sets[2] = context->sets[2]; context->best_sets[3] = context->sets[3];
+					#endif
+				}
+			}
+		}
+		tiles[wtiles[z]] = 1;
+	}
+
+}
+
 void find_best(SearchContext *context, TileSet *all_sets) 
 {
 	int t;
@@ -294,6 +343,7 @@ void find_best(SearchContext *context, TileSet *all_sets)
 	if (context->gc.open_sets_count == 0 && context->gc.closed_kans_count == 0) {
 		check_seven_pairs(context);
 		check_nine_lanterns(context);
+		check_kokushi_musou(context);
 	}
 
 	for (t = 0; t < context->gc.open_sets_count; t++)  {
