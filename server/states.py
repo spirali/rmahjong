@@ -262,5 +262,9 @@ class DrawState(WaitingForReadyPlayersState):
 
 	def all_players_are_ready(self):
 		rotate_players = self.server.round.get_dealer() not in self.winners
-		self.server.start_new_round(rotate_players)
+
+		riichi_bets = sum( [ 1000 if player.riichi else 0 for player in self.server.players ])
+		riichi_bets += self.server.round.prev_riichi_bets
+	
+		self.server.start_new_round(rotate_players, riichi_bets)
 		self.server.set_state(PlayerMoveState(self.server, self.server.round.get_dealer()))

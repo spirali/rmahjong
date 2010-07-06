@@ -109,52 +109,10 @@ class RawTexture:
 	def bind(self):
 		gl.glBindTexture(gl.GL_TEXTURE_2D, self.texture)
 
-	def _from_surface(self, surface):
-		data = pygame.image.tostring(surface, "RGBA", 1)
-		width = surface.get_width()
-		height = surface.get_height()
-		texture = gl.glGenTextures(1)
-		gl.glBindTexture(gl.GL_TEXTURE_2D, texture)
-		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR)
-		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR)
-		gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA, width, height, 0, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, data)
-		return texture, width, height
-
-	def tex_coord(self, x, y):		
-		gl.glTexCoord2f(x, y)
-
-def find_texture_size(size):
-	x = 8
-	while x < size:
-		x *= 2
-	return x
-
-class Texture:
-
-	def __init__(self, surface):
-		w = surface.get_width()
-		h = surface.get_height()
-		new_size = max(find_texture_size(w), find_texture_size(h))
-		new_surface = pygame.Surface((new_size, new_size), pygame.SRCALPHA)
-		new_surface.blit(surface, (0,new_size - h))
-		
-		self.texture = self._from_surface(new_surface)
-		self.width = w
-		self.height = h
-		
-		self.x_coef = float(w) / new_size
-		self.y_coef = float(h) / new_size
-
-	def bind(self):
-		gl.glBindTexture(gl.GL_TEXTURE_2D, self.texture)
-
 	def free(self):
 		gl.glDeleteTextures([self.texture])
 
-	def tex_coord(self, x, y):		
-		gl.glTexCoord2f(self.x_coef * x, self.y_coef * y)
-
-	def draw(self, x, y):
+	def draw(self, x, y, scale_x = 1.0, scale_y = 1.0):
 		y = 768 - y
 		self.bind()
 		gl.glBegin(gl.GL_QUADS)
@@ -162,11 +120,11 @@ class Texture:
 		self.tex_coord(0.0,1.0)
 		gl.glVertex2f(x, y)
 		self.tex_coord(1.0,1.0)
-		gl.glVertex2f(x + self.width, y)
+		gl.glVertex2f(x + self.width * scale_x, y)
 		self.tex_coord(1.0,0.0)
-		gl.glVertex2f(x + self.width, y - self.height)
+		gl.glVertex2f(x + self.width * scale_x, y - self.height * scale_y)
 		self.tex_coord(0.0,0.0)
-		gl.glVertex2f(x, y - self.height)
+		gl.glVertex2f(x, y - self.height * scale_y)
 		gl.glEnd()
 
 	def _from_surface(self, surface):
@@ -182,4 +140,34 @@ class Texture:
 
 		gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA, width, height, 0, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, data)
 		glu.gluBuild2DMipmaps(gl.GL_TEXTURE_2D, 4, width, height, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, data );
-		return texture
+		return texture, width, height
+
+	def tex_coord(self, x, y):		
+		gl.glTexCoord2f(x, y)
+
+
+def find_texture_size(size):
+	x = 8
+	while x < size:
+		x *= 2
+	return x
+
+
+class Texture(RawTexture):
+
+	def __init__(self, surface):
+		w = surface.get_width()
+		h = surface.get_height()
+		new_size = max(find_texture_size(w), find_texture_size(h))
+		new_surface = pygame.Surface((new_size, new_size), pygame.SRCALPHA)
+		new_surface.blit(surface, (0,new_size - h))
+		
+		self.texture, _w, _h = self._from_surface(new_surface)
+		self.width = w
+		self.height = h
+		
+		self.x_coef = float(w) / new_size
+		self.y_coef = float(h) / new_size
+
+	def tex_coord(self, x, y):		
+		gl.glTexCoord2f(self.x_coef * x, self.y_coef * y)

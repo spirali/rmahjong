@@ -20,7 +20,7 @@ import logging
 
 from graphics import init_fonts, init_opengl, enable2d, disable2d
 from table import Table, winds
-from gui import GuiManager, PlayerBox, TextWidget
+from gui import GuiManager, PlayerBox, TextWidget, ContainerWidget, TextureWidget
 from directions import direction_up, direction_down, direction_left, direction_right
 from states import ConnectingState, TestState, TestTableState
 from menu import MainMenuState
@@ -40,6 +40,7 @@ class Mahjong:
 		self.round_wind = None
 		self.riichi = False
 		self.round_label = None
+		self.prev_riichi_bets_label = None
 		self.fullscreen = False
 
 		self.server_process = None
@@ -49,9 +50,15 @@ class Mahjong:
 	def reset_all(self):
 		for box in self.player_boxes:
 			self.gui.remove_widget(box)
+
 		if self.round_label:
 			self.gui.remove_widget(self.round_label)
 			self.round_label = None
+
+		if self.prev_riichi_bets_label:
+			self.gui.remove_widget(self.prev_riichi_bets_label)
+			self.prev_riichi_bets_label = None
+		
 		self.player_boxes = []
 		self.table.reset_all()
 		self.riichi = False
@@ -186,6 +193,7 @@ class Mahjong:
 		self.table.set_new_hand(message["hand"].split())
 		self.add_dora_indicator(message["dora_indicator"])
 		self.set_round_wind(message["round_wind"])
+		self.set_prev_riichi_bets(int(message["prev_riichi_bets"]))
 
 	def add_dora_indicator(self, tile_name):
 		self.table.add_dora_indicator(tile_name)
@@ -197,6 +205,13 @@ class Mahjong:
 			self.gui.remove_widget(self.round_label)
 		self.round_label = TextWidget((530,310), "Round: " + wtiles_to_names[wind], (175,175,175))
 		self.gui.add_widget(self.round_label)
+
+	def set_prev_riichi_bets(self, bets):
+		if bets > 0:
+			w1 = TextureWidget((520, 328), self.table.rstick_texture, 0.3, 0.3)
+			w2 = TextWidget((500,330), str(bets / 1000) + "x", (175,175,175))
+			self.prev_riichi_bets_label = ContainerWidget( [ w1, w2] )
+			self.gui.add_widget(self.prev_riichi_bets_label)
 
 	def get_round_wind(self):
 		return self.round_wind

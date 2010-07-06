@@ -49,8 +49,8 @@ class Server:
 	def start_new_game(self):
 		self.game = Game(self.players, None)
 
-	def start_new_round(self, rotate_players):
-		self.round = self.game.new_round(rotate_players)
+	def start_new_round(self, rotate_players, prev_riichi_bets = 0):
+		self.round = self.game.new_round(rotate_players, prev_riichi_bets)
 
 	def add_player(self, player):
 		self.players.append(player)

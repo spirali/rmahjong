@@ -40,7 +40,7 @@ class Game:
 		self.players.remove(east_player)
 		self.players.append(east_player)
 	
-	def new_round(self, rotate_players):
+	def new_round(self, rotate_players, prev_riichi_bets = 0):
 		self.round_id += 1
 
 		# Rotate players
@@ -48,8 +48,7 @@ class Game:
 			self.rotate_players()
 			if self.players[0] == self.first_east_player:
 				self.next_round_wind()
-
-		return Round(self.players, self.random, self.round_wind, self.is_potential_last_round())
+		return Round(self.players, self.random, self.round_wind, self.is_potential_last_round(), prev_riichi_bets)
 
 	def next_round_wind(self):
 		self.round_wind = winds[(1 + winds.index(self.round_wind)) % 4]
@@ -60,10 +59,11 @@ class Game:
 
 class Round:
 
-	def __init__(self, players, random, round_wind, potential_last):
+	def __init__(self, players, random, round_wind, potential_last, prev_riichi_bets):
 		self.random = random
 		self.round_wind = round_wind
 		self.potential_last = potential_last
+		self.prev_riichi_bets = prev_riichi_bets
 		self.init_round()
 		self.init_players(players)
 		logging.info("Round is ready")
@@ -168,7 +168,7 @@ class Round:
 		for player in diffs:
 			player.score += diffs[player]		
 
-		looser_riichi = 0
+		looser_riichi = self.prev_riichi_bets
 		for player in winner.other_players():
 			if player.riichi:
 				looser_riichi += 1000
@@ -245,7 +245,7 @@ class Round:
 
 class DebugRound(Round):
 	
-	def __init__(self, players, random, round_wind, potential_last):
+	def __init__(self, players, random, round_wind, potential_last, prev_riichi_bets):
 		def tiles(strs):
 			return map(Tile, strs)
 
@@ -272,7 +272,7 @@ class DebugRound(Round):
 	
 		self.hands = map(tiles, hands) 
 		self.rnd = tiles(r)
-		Round.__init__(self, players, random, round_wind, potential_last)
+		Round.__init__(self, players, random, round_wind, potential_last, prev_riichi_bets)
 
 		for h in self.hands:
 			for t in h:

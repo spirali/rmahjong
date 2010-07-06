@@ -95,6 +95,38 @@ class Widget:
 		return pygame.Rect( (0,0), self.size)
 
 
+class ContainerWidget:
+
+	def __init__(self, widgets):
+		self.widgets = widgets
+
+	def on_enter(self, manager):
+		for w in self.widgets:
+			w.on_enter(manager)
+
+	def on_leave(self, manager):
+		for w in self.widgets:
+			w.on_leave(manager)
+
+	def draw(self):
+		for w in self.widgets:
+			w.draw()
+
+	def is_inside(self, position):
+		for w in self.widgets:
+			if w.is_inside(position):
+				return True
+		return False
+
+	def button_up(self, button, position):
+		for w in self.widgets:
+			w.button_up(button, position)
+
+	def button_down(self, button, position):
+		for w in self.widgets:
+			w.button_down(button, position)
+
+
 class Button(Widget):
 	
 	def __init__(self, position, size, label, callback):
@@ -377,4 +409,15 @@ class GameSummary(Widget):
 			tile_painter.draw_tile_list(surface, (20, 205), uradora_indicators, space = 3)
 
 		self.set_surface(surface)
+
+class TextureWidget(Widget):
+	
+	def __init__(self, position, texture, scale_x = 1.0, scale_y = 1.0):
+		Widget.__init__(self, position, (0,0))
+		self.extern_texture = texture
+		self.scale_x = scale_x
+		self.scale_y = scale_y
+
+	def draw(self):
+		self.extern_texture.draw(self.position[0], self.position[1], self.scale_x, self.scale_y)
 

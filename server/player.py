@@ -230,6 +230,7 @@ class NetworkPlayer(Player):
 		msg["my_wind"] = self.wind.name
 		msg["round_wind"] = self.round.round_wind.name
 		msg["dora_indicator"] = self.round.dora_indicators[0].name
+		msg["prev_riichi_bets"] = self.round.prev_riichi_bets
 		msg["hand"] = " ".join( [ tile.name for tile in self.hand ] )
 		self.connection.send_dict(msg)
 

@@ -243,12 +243,12 @@ class Table:
 		# FIXME
 		self.bg_texture = RawTexture(self.tp.bg_image)
 
-		rstick_texture = RawTexture(pygame.image.load("data/others/rstick.png"))
+		self.rstick_texture = RawTexture(pygame.image.load("data/others/rstick.png"))
 		self.riichi_sticks = [
-			RiichiStick( (-0.9,4,0), 0, rstick_texture),
-			RiichiStick( (3.4,8.1,0), 90, rstick_texture),
-			RiichiStick( (-0.8,12,0), 0, rstick_texture),
-			RiichiStick( (-5.0,8.1,0), 90, rstick_texture),
+			RiichiStick( (-0.9,4,0), 0, self.rstick_texture),
+			RiichiStick( (3.4,8.1,0), 90, self.rstick_texture),
+			RiichiStick( (-0.8,12,0), 0, self.rstick_texture),
+			RiichiStick( (-5.0,8.1,0), 90, self.rstick_texture),
 		]
 
 		self.reset_all()
