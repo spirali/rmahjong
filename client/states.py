@@ -321,18 +321,26 @@ class RoundState(State):
 		player_id = self.mahjong.player_id_by_wind(player)
 		shoutbox = self.mahjong.create_shoutbox(player, "Kan!")
 		self.mahjong.gui.add_widget_with_timeout(shoutbox, 2500)
-		self.mahjong.table.add_open_set(player_id, [tile_name] * 4, [])
-		if player_id == 0:
-			self.process_self_kan(message)
-		else:
-			if self.picked_tile:
-				self.mahjong.table.remove_tiles_from_other_hand(player_id, 3)			
-				self.picked_tile.remove()
-				self.picked_tile = None
-			else:
-				self.mahjong.table.remove_tiles_from_other_hand(player_id, 4)			
+		
+		open_pon = self.mahjong.table.find_open_set_id(player_id, [tile_name] * 3)
 
-	def process_self_kan(self, message):
+		if open_pon is not None:
+			self.mahjong.table.add_tile_to_openset(player_id, open_pon, tile_name)		
+		else:
+			self.mahjong.table.add_open_set(player_id, [tile_name] * 4, [])
+
+		if player_id == 0:
+			self.process_self_kan(message, open_pon is not None)
+		else:
+			if open_pon is None:
+				if self.picked_tile:
+					self.mahjong.table.remove_tiles_from_other_hand(player_id, 3)			
+					self.picked_tile.remove()
+					self.picked_tile = None
+				else:
+					self.mahjong.table.remove_tiles_from_other_hand(player_id, 4)			
+
+	def process_self_kan(self, message, open_pon):
 		raise Exception("Invalid state for self_kan")
 
 	def on_key_down(self, event):
@@ -418,19 +426,22 @@ class MyMoveState(RoundState):
 	def action_kan(self, tile):
 		self.protocol.send_message(message = "CLOSED_KAN", tile = tile)
 
-	def process_self_kan(self, message):
+	def process_self_kan(self, message, open_pon):
 		tile_name = message["tile"]
-		self.mahjong.table.remove_hand_tile_by_name(tile_name)
-		self.mahjong.table.remove_hand_tile_by_name(tile_name)
-		self.mahjong.table.remove_hand_tile_by_name(tile_name)
+
+		if not open_pon:
+			self.mahjong.table.remove_hand_tile_by_name(tile_name)
+			self.mahjong.table.remove_hand_tile_by_name(tile_name)
+			self.mahjong.table.remove_hand_tile_by_name(tile_name)
+
 		if self.picked_tile.name == tile_name:
 			self.picked_tile.remove()
 		else:
 			self.mahjong.table.remove_hand_tile_by_name(tile_name)
 			self.move_picked_tile_into_hand()
+
 		self.new_picked_tile(message["new_tile"])
 		self.mahjong.arrange_hand()
-
 		actions = split_str(message["actions"],";")
 		self.add_buttons(actions, self.on_action_click)
 
@@ -622,7 +633,7 @@ class TestState(State):
 			self.mahjong.table.add_open_set(x, [ "DR", "DR", "DR", "DR" ], [])
 			self.mahjong.table.add_open_set(x, [ "C1", "C2", "C3", "C4" ], [])
 			self.mahjong.table.add_open_set(x, [ "B7", "B8", "B9", "B9" ], [])
-	#		self.mahjong.table.add_open_set(x, [ "WN", "WE", "WS", "WW" ], [])
+			self.mahjong.table.add_open_set(x, [ "WN", "WE", "WS", "WW" ], [])
 
 		from table import all_tile_names
 		for tile in all_tile_names[:13]:

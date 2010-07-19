@@ -436,8 +436,17 @@ int choose_drop_tile(GameContext *gc, tile_id *target)
 	int t;
 	for(t = 0; t < TILES_COUNT; t++) {
 		// KAN!
-		if (gc->hand[t] == 4 && unn[t] == 1) {
-			return -(t + 1);
+		if (unn[t] == 1) {
+			if (gc->hand[t] == 4 && unn[t] == 1) {
+				return -(t + 1);
+			}
+			int s;
+			for (s = 0; s < gc->open_sets_count; s++) {
+				if (gc->open_sets[s].type == PON && gc->open_sets[s].tile == t) {
+					return -(t + 1);
+				}
+			}
+
 		}
 	}
 

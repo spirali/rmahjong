@@ -110,6 +110,11 @@ class Player:
 		for tile in set(self.hand):			
 			if self.hand.count(tile) == 4:
 				options.append("Kan " + tile.name)
+
+		for s in self.sets:
+			if s.is_pon() and s.tile in self.hand:
+				options.append("Kan " + s.tile.name)
+
 		return options
 
 	def is_furiten(self):
@@ -181,12 +186,23 @@ class Player:
 		self.score -= 1000
 		self.round.on_riichi(self)
 
-	def play_closed_kan(self, tile):
+	def play_closed_kan(self, tile):		
+		pon_found = False
+		for s in self.sets:
+			if s.is_pon() and s.tile == tile:
+				self.sets.remove(s)
+				self.hand.remove(tile)
+				pon_found = True
+				break
+
 		kan = Kan(tile)
 		kan.closed = True
-		for t in kan.tiles():
-			self.hand.remove(t)
 		self.sets.append(kan)
+
+		if not pon_found:
+			for t in kan.tiles():
+				self.hand.remove(t)
+
 		self.round.closed_kan_played(self, kan)
 
 	def __str__(self):

@@ -419,8 +419,19 @@ class BotEngineTestCase(TestCase):
 			tile = e.get_tile()
 			self.assertEquals(tile, Tile("P9"))
 
+			h = tiles([ "C1", "C2", "C3", "P9", "B1", "B1", "B1", "P1", "P3", "DR", "DR" ])
+			e.set_hand(h)
+			e.set_sets([pon("P9")])
+			e.question_discard()
+			action = e.get_string()
+			self.assert_(action == "Kan")
+			tile = e.get_tile()
+			self.assertEquals(tile, Tile("P9"))
+
+
 			h = tiles([ "C1", "C2", "C3", "P9", "P9", "P9", "P9", "P7", "P8",  "P1", "P3", "DR", "DR", "C5" ])
 			e.set_hand(h)
+			e.set_sets([])
 			e.question_discard()
 			action = e.get_string()
 			self.assert_(action == "Discard")

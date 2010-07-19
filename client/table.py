@@ -234,6 +234,20 @@ class RiichiStick:
 	
 		gl.glPopMatrix()
 
+
+def generate_open_set_positions(init_pos, direction):
+		fx, fy = 2, 2.66
+
+		p2 = direction.move_left(init_pos, fx * 4.3)
+
+		positions = [
+			init_pos, 
+			direction.move_down(init_pos, fy + 0.2),
+			p2,
+			direction.move_down(p2, fy + 0.2),
+		]
+		
+		return (direction, [ [p, []] for p in positions ])
 	
 class Table:
 
@@ -263,12 +277,13 @@ class Table:
 		self.dora_indicators = []
 		self.ura_dora_indicators = []
 
-		self.open_set_positions = [ 
-			((17,-13.5,0), direction_up, 0), 
-			((22,24,0), direction_left, 0),
-			((-15,34,0), direction_down, 0),
-			((-23.5,-6,0), direction_right, 0),
-		]
+		self.open_sets = [ generate_open_set_positions(init_pos, direction) for init_pos, direction in
+			[ 
+			((17,-13.5,0), direction_up), 
+			((22,24,0), direction_left),
+			((-15,34,0), direction_down),
+			((-23.5,-6,0), direction_right),
+			]]
 
 		self.init_dropzones()
 
@@ -514,22 +529,32 @@ class Table:
 		for tile in self.hand:
 			tile.callback = callback
 
+	def check_open_sets(self, player, tile_names):
+		pass
+
+	def find_open_set_id(self, player, tile_names):
+		direction, positions = self.open_sets[player]
+		for i, (position, tiles) in enumerate(positions):
+			if [ t.name for t in tiles ] == tile_names:
+				return i
+		return None
+
+	def new_open_set_id(self, player):
+		return self.find_open_set_id(player, [])
+
+	def add_tile_to_openset(self, player, openset_id, tile_name):
+		direction, positions = self.open_sets[player]
+		pos, tiles = positions[openset_id]
+		tile = self.new_tile(tile_name, pos, (direction.angle, -90))
+		positions[openset_id][0] = direction.move_left(pos, 2)
+		tiles.append(tile)
+
 	def add_open_set(self, player, tile_names, marked):
-		orig_position, direction, level = self.open_set_positions[player]
-		position = orig_position
-		fx, fy = 2, 2.66
-		for i, tile_name in reversed(list(enumerate(tile_names))):
-			dr, mv, turn = (direction.next, fy, 0) if i in marked else (direction, fx, 0)
-			tile = self.new_tile(tile_name, position, (direction.angle, -90))
-			position = direction.move_left(position, mv)
-		level += 1
-		if level == 2:
-			level = 0
-			position = direction.move_left(orig_position, fx * 4.3)
-			position = direction.move_up(position, fy + 0.2)
-		else:
-			position = direction.move_down(orig_position, fy + 0.2)
-		self.open_set_positions[player] = (position, direction, level)
+		openset_id = self.new_open_set_id(player)
+		assert openset_id >= 0 and openset_id <= 3
+
+		for tile_name in reversed(tile_names):
+			self.add_tile_to_openset(player, openset_id, tile_name)
 
 	def find_tile_in_hand(self, tile_name):
 		for tile in self.hand:
