@@ -147,7 +147,7 @@ class Player:
 	def round_end_draw(self, winners, loosers, payment_diffs, end_of_game):
 		pass
 
-	def closed_kan_played_by_me(self, kan, new_tile, dora_indicator):
+	def own_kan_played_by_me(self, kan, new_tile, dora_indicator):
 		self.new_hand_tile(new_tile)
 		self.kan_played = True
 
@@ -186,7 +186,8 @@ class Player:
 		self.score -= 1000
 		self.round.on_riichi(self)
 
-	def play_closed_kan(self, tile):		
+	def play_own_kan(self, tile):		
+		""" Own kan means 'not stealed' kan """
 		pon_found = False
 		for s in self.sets:
 			if s.is_pon() and s.tile == tile:
@@ -196,14 +197,14 @@ class Player:
 				break
 
 		kan = Kan(tile)
-		kan.closed = True
+		kan.closed = not pon_found # If we add to pon, it is open kan
 		self.sets.append(kan)
 
 		if not pon_found:
 			for t in kan.tiles():
 				self.hand.remove(t)
 
-		self.round.closed_kan_played(self, kan)
+		self.round.own_kan_played(self, kan)
 
 	def __str__(self):
 		return self.name
@@ -307,9 +308,9 @@ class NetworkPlayer(Player):
 			self.play_riichi()
 			return
 
-		if name == "CLOSED_KAN":
+		if name == "KAN":
 			tile = Tile(message["tile"])
-			self.play_closed_kan(tile)
+			self.play_own_kan(tile)
 			return
 
 
@@ -317,10 +318,10 @@ class NetworkPlayer(Player):
 		print s
 		logging.error(s)
 
-	def closed_kan_played_by_me(self, kan, new_tile, dora_indicator):
-		Player.closed_kan_played_by_me(self, kan, new_tile, dora_indicator)
+	def own_kan_played_by_me(self, kan, new_tile, dora_indicator):
+		Player.own_kan_played_by_me(self, kan, new_tile, dora_indicator)
 		msg = {}
-		msg["message"] = "CLOSED_KAN"
+		msg["message"] = "KAN"
 		msg["tile"] = kan.tile.name
 		msg["player"] = self.wind.name
 		msg["new_tile"] = new_tile.name
@@ -328,9 +329,9 @@ class NetworkPlayer(Player):
 		msg["actions"] = ";".join(self.hand_actions())
 		self.connection.send_dict(msg)
 
-	def closed_kan_played_by_other(self, player, kan, dora_indicator):
+	def own_kan_played_by_other(self, player, kan, dora_indicator):
 		msg = {}
-		msg["message"] = "CLOSED_KAN"
+		msg["message"] = "KAN"
 		msg["player"] = player.wind.name
 		msg["tile"] = kan.tile.name
 		msg["dora_indicator"] = dora_indicator.name
@@ -459,9 +460,10 @@ class BotPlayer(Player):
 			self.action = None
 			tile = self.engine.get_tile(True)
 			target = self.engine.get_tiles(True)
+			logging.debug("%s: Target/Tile: %s %s" % (self, target, tile))
 			
 			if action == "Kan":
-				self.play_closed_kan(tile)
+				self.play_own_kan(tile)
 			else:
 				if self.riichi_allowed and self.other_condition_for_riichi():
 					h = copy(self.hand)
@@ -469,7 +471,7 @@ class BotPlayer(Player):
 					for t in h:
 						if t in target:
 							target.remove(t)
-					if len(target) == 1 and self.round.hidden_tiles_for_player(self).count(target[0]) > 1 and hand_in_tenpai(h, []): 
+					if len(target) == 1 and self.round.hidden_tiles_for_player(self).count(target[0]) > 1 and hand_in_tenpai(h, self.sets): 
 						# If target is 1 tile away and this tile is more then 1 in "game"
 						self.play_riichi()
 				self.drop_tile(tile)
@@ -534,8 +536,8 @@ class BotPlayer(Player):
 	def player_played_riichi(self, player):
 		pass
 
-	def closed_kan_played_by_me(self, kan, new_tile, dora_indicator):
-		Player.closed_kan_played_by_me(self, kan, new_tile, dora_indicator)
+	def own_kan_played_by_me(self, kan, new_tile, dora_indicator):
+		Player.own_kan_played_by_me(self, kan, new_tile, dora_indicator)
 
 		if "Tsumo" in self.hand_actions():
 			self.server.declare_win(self, None, "Tsumo")
@@ -545,5 +547,5 @@ class BotPlayer(Player):
 		self.engine.question_discard_and_target()
 		self.action = self.action_discard
 
-	def closed_kan_played_by_other(self, player, kan, dora_indicator):
+	def own_kan_played_by_other(self, player, kan, dora_indicator):
 		pass

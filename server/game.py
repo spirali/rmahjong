@@ -132,12 +132,12 @@ class Round:
 	def move_interrputed(self):
 		self.last_innterruption = self.move_id
 
-	def closed_kan_played(self, player, kan):
+	def own_kan_played(self, player, kan):
 		tile, dora_indicator = self.kan_played()
 		for p in player.other_players():
-			p.closed_kan_played_by_other(player, kan, dora_indicator)
+			p.own_kan_played_by_other(player, kan, dora_indicator)
 		# This have to be after closed_kan_player_by_other, because "Tsumo" can occur in closed_kan_player_by_me
-		player.closed_kan_played_by_me(kan, tile, dora_indicator) 
+		player.own_kan_played_by_me(kan, tile, dora_indicator) 
 
 	def kan_played(self):
 		dora_indicator = self.pick_random_tile()

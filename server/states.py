@@ -109,13 +109,14 @@ class PlayerMoveState(GenericGameState):
 		self.player = player
 
 	def enter_state(self):
-		logging.debug("PlayerMoveState: %s %s %s" % (self.player.name, self.player.hand, self.player.sets))
+		tile = self.server.round.pick_random_tile()
+		logging.debug("PlayerMoveState: %s %s %s %s" % (self.player.name, self.player.hand, self.player.sets, tile))
 		self.server.round.player_on_move(self.player)
 		self.server.round.set_active_player(self.player)
 
 		for p in self.player.other_players():
 			p.other_move(self.player)
-		self.player.move(self.server.round.pick_random_tile())
+		self.player.move(tile)
 
 	def drop_tile(self, player, tile):
 		assert player == self.player

@@ -265,8 +265,8 @@ class RoundState(State):
 			self.process_stolen_tile(message)
 			return
 
-		if name == "CLOSED_KAN":
-			self.process_closed_kan(message)
+		if name == "KAN":
+			self.process_own_kan(message)
 			return
 
 		State.process_message(self, message)		
@@ -313,7 +313,7 @@ class RoundState(State):
 			self.mahjong.table.remove_tiles_from_other_hand(player_id, len(tiles) - 1)
 			self.mahjong.set_state(OtherMoveState(self.mahjong, player, action == "Kan"))
 
-	def process_closed_kan(self, message):
+	def process_own_kan(self, message):
 		self.mahjong.table.remove_dead_wall_tile_for_kan()
 		self.mahjong.add_dora_indicator(message["dora_indicator"])
 		tile_name = message["tile"]
@@ -424,7 +424,7 @@ class MyMoveState(RoundState):
 		self.protocol.send_message(message = "RIICHI")
 
 	def action_kan(self, tile):
-		self.protocol.send_message(message = "CLOSED_KAN", tile = tile)
+		self.protocol.send_message(message = "KAN", tile = tile)
 
 	def process_self_kan(self, message, open_pon):
 		tile_name = message["tile"]

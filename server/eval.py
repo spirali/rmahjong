@@ -208,6 +208,7 @@ def find_sets(hand, sets):
 	founded = copy(sets)
 
 	def check_triples(hand, level):			
+			assert level >= 1 and level <= 5
 			if level == 5:				
 				return founded
 			tile = hand[0]
