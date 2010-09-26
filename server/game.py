@@ -150,7 +150,7 @@ class Round:
 		self.move_id += 1
 
 	def is_last_round(self, winners):
-		return self.potential_last and not self.players[0] in winners
+		return (self.potential_last and not self.players[0] in winners) or any((player.score <= 0 for player in self.players))
 
 	def end_of_round(self, winner, looser, wintype):
 		if winner.riichi:
