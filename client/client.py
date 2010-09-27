@@ -278,7 +278,7 @@ def main_init():
 
 main_init()
 mahjong = Mahjong()
-mahjong.show_fps = True
+#mahjong.show_fps = True
 try:
 	mahjong.open_main_menu()
 	#mahjong.set_state(ConnectingState(mahjong, "localhost"))

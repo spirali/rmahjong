@@ -245,6 +245,17 @@ def display_list_of_tile(tile_size, back_texture, border_texture):
 
 	# Right-bottom & left-bottom
 	draw_face_xz_skew(texture, dx, x, dy, -dy, -z, -dz, (1.0, 0.0, -1.0))
+	draw_face_xz_skew(texture, -dx, -x, dy, -dy, -z, -dz, (-1.0, 0.0, -1.0))
+
+	# Left-top-front
+	draw_face_triangle(texture, -dx, -x, -dy, -y, z, dz, (-1.0, -1.0, 1.0))
+	# Right-top-front
+	draw_face_triangle(texture, dx, x, -dy, -y, z, dz, (1.0, -1.0, 1.0))
+
+	# Left-bottom-front
+	draw_face_triangle(texture, -dx, -x, -dy, -y, -z, -dz, (-1.0, -1.0, -1.0))
+	# Right-bottom-front
+	draw_face_triangle(texture, dx, x, -dy, -y, -z, -dz, (1.0, -1.0, -1.0))
 
 	displaylist.end()
 	return displaylist
