@@ -100,7 +100,24 @@ def disable2d():
 	gl.glEnable(gl.GL_DEPTH_TEST)
 	gl.glDisable(gl.GL_BLEND)
 	gl.glEnable(gl.GL_LIGHTING);
+
+class DisplayList:
 	
+	def __init__(self):
+		self.index = gl.glGenLists(1)
+
+	def call(self):
+		gl.glCallList(self.index)
+
+	def free(self):
+		gl.glDeleteLists([self.index])
+
+	def begin(self):
+		gl.glNewList(self.index, gl.GL_COMPILE)
+
+	def end(self):
+		gl.glEndList(self.index)
+
 class RawTexture:
 
 	def __init__(self, surface):

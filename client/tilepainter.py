@@ -15,7 +15,7 @@
 # <http://www.gnu.org/licenses/>.
 
 
-from graphics import Texture, RawTexture
+from graphics import Texture, RawTexture, DisplayList
 import pygame
 import OpenGL.GL as gl
 import OpenGL.GLU as glu
@@ -23,7 +23,7 @@ import OpenGL.GLU as glu
 
 class TilePainter:
 
-	def __init__(self, screen_size):
+	def __init__(self, tile_size):
 		width = 450 * 4
 		self.image = pygame.image.load("data/tiles/default.png")
 		self.bg_image = pygame.image.load("data/bg/default.png")
@@ -81,6 +81,8 @@ class TilePainter:
 			img = self.image.subsurface(pygame.Rect((tx, ty), self.face_size))
 			self.tile_images[name] = img
 			self.tile_textures[name] = Texture(img)
+
+		self.tile_displaylist = display_list_of_tile(tile_size, self.back, self.border)
 
 	def draw_tile(self, screen, position, name):
 		if name != "XX":
@@ -183,3 +185,66 @@ def draw_face_triangle(texture, x1, x2, y1, y2, z1, z2, normal):
 	texture.tex_coord(0.90, 0.90)
 	gl.glVertex3f(x2, y1, z2)
 	gl.glEnd()
+
+def display_list_of_tile(tile_size, back_texture, border_texture):
+	displaylist = DisplayList()
+	displaylist.begin()
+	x, y, z = tile_size
+
+	dx = x - 0.08
+	dy = y - 0.08
+	dz = z - 0.08
+
+	texture = back_texture
+	texture.bind()
+
+	# Back
+	draw_face_y(texture, y, dx, dz, (0.0, 1.0, 0.0))
+
+	# Back-left & back-right
+	draw_face_xy_skew(texture, -x, -dx, dy, y, dz, -dz, (-1.0, 1.0, 0.0))
+	draw_face_xy_skew(texture, x, dx, dy, y, dz, -dz, (1.0, 1.0, 0.0))
+
+	# top-back & bottom-back
+	draw_face_yz_skew(texture, -dx, dx, dy, y, z, dz, (0.0, 1.0, 1.0))
+	draw_face_yz_skew(texture, -dx, dx, dy, y, -z, -dz, (0.0, 1.0, -1.0))
+
+	# Left-top-back
+	draw_face_triangle(texture, -dx, -x, dy, y, z, dz, (-1.0, 1.0, 1.0))
+	# Right-top-back
+	draw_face_triangle(texture, dx, x, dy, y, z, dz, (1.0, 1.0, 1.0))
+
+	# Left-bottom-back
+	draw_face_triangle(texture, -dx, -x, dy, y, -z, -dz, (-1.0, 1.0, -1.0))
+	# Right-bottom-back
+	draw_face_triangle(texture, dx, x, dy, y, -z, -dz, (1.0, 1.0, -1.0))
+
+	texture = border_texture
+	texture.bind()
+
+	# Left & Right
+	draw_face_x(texture, x, dy, dz, (1.0, 0.0, 0.0))		
+	draw_face_x(texture, -x, dy, dz, (-1.0, 0.0, 0.0))		
+
+	# Top & Bottom 
+	draw_face_z(texture, z, dx + 0.04, dy + 0.05, (0.0, 0.0, 1.0))
+	draw_face_z(texture, -z, dx + 0.04, dy + 0.05, (0.0, 0.0, -1.0))		
+	# Don't know exactly why but with this +0.04 it looks slightly better
+
+	# Left-front & right-front
+	draw_face_xy_skew(texture, -x, -dx, -dy, -y, dz, -dz, (-1.0, -1.0, 0.0))
+	draw_face_xy_skew(texture, x, dx, -dy, -y, dz, -dz, (1.0, -1.0, 0.0))
+
+	# top-front & bottom-front
+	draw_face_yz_skew(texture, -dx, dx, -dy, -y, z, dz, (0.0, -1.0, 1.0))
+	draw_face_yz_skew(texture, -dx, dx, -dy, -y, -z, -dz, (0.0, -1.0, -1.0))
+
+	# Right-top & Left-top
+	draw_face_xz_skew(texture, dx, x, dy, -dy, z, dz, (1.0, 0.0, 1.0))
+	draw_face_xz_skew(texture, -dx, -x, dy, -dy, z, dz, (-1.0, 0.0, 1.0))
+
+	# Right-bottom & left-bottom
+	draw_face_xz_skew(texture, dx, x, dy, -dy, -z, -dz, (1.0, 0.0, -1.0))
+
+	displaylist.end()
+	return displaylist

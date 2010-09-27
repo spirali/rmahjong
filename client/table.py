@@ -90,68 +90,7 @@ class Tile:
 			texture.bind()
 			# Front
 			draw_face_y(texture, -y, dx,  dz, (0.0, -1.0, 0.0))
-
-		texture = self.table.tp.back
-		texture.bind()
-
-		# Back
-		draw_face_y(texture, y, dx, dz, (0.0, 1.0, 0.0))
-
-		# Back-left & back-right
-		draw_face_xy_skew(texture, -x, -dx, dy, y, dz, -dz, (-1.0, 1.0, 0.0))
-		draw_face_xy_skew(texture, x, dx, dy, y, dz, -dz, (1.0, 1.0, 0.0))
-
-		# top-back & bottom-back
-		draw_face_yz_skew(texture, -dx, dx, dy, y, z, dz, (0.0, 1.0, 1.0))
-		draw_face_yz_skew(texture, -dx, dx, dy, y, -z, -dz, (0.0, 1.0, -1.0))
-
-		# Left-top-back
-		draw_face_triangle(texture, -dx, -x, dy, y, z, dz, (-1.0, 1.0, 1.0))
-		# Right-top-back
-		draw_face_triangle(texture, dx, x, dy, y, z, dz, (1.0, 1.0, 1.0))
-
-		# Left-bottom-back
-		draw_face_triangle(texture, -dx, -x, dy, y, -z, -dz, (-1.0, 1.0, -1.0))
-		# Right-bottom-back
-		draw_face_triangle(texture, dx, x, dy, y, -z, -dz, (1.0, 1.0, -1.0))
-
-		texture = self.table.tp.border
-		texture.bind()
-
-		# Left & Right
-		draw_face_x(texture, x, dy, dz, (1.0, 0.0, 0.0))		
-		draw_face_x(texture, -x, dy, dz, (-1.0, 0.0, 0.0))		
-
-		# Top & Bottom 
-		draw_face_z(texture, z, dx + 0.04, dy + 0.05, (0.0, 0.0, 1.0))
-		draw_face_z(texture, -z, dx + 0.04, dy + 0.05, (0.0, 0.0, -1.0))		
-		# Don't know exactly why but with this +0.04 it looks slightly better
-
-		# Left-front & right-front
-		draw_face_xy_skew(texture, -x, -dx, -dy, -y, dz, -dz, (-1.0, -1.0, 0.0))
-		draw_face_xy_skew(texture, x, dx, -dy, -y, dz, -dz, (1.0, -1.0, 0.0))
-
-		# top-front & bottom-front
-		draw_face_yz_skew(texture, -dx, dx, -dy, -y, z, dz, (0.0, -1.0, 1.0))
-		draw_face_yz_skew(texture, -dx, dx, -dy, -y, -z, -dz, (0.0, -1.0, -1.0))
-
-		# Right-top & Left-top
-		draw_face_xz_skew(texture, dx, x, dy, -dy, z, dz, (1.0, 0.0, 1.0))
-		draw_face_xz_skew(texture, -dx, -x, dy, -dy, z, dz, (-1.0, 0.0, 1.0))
-
-		# Right-bottom & left-bottom
-		draw_face_xz_skew(texture, dx, x, dy, -dy, -z, -dz, (1.0, 0.0, -1.0))
-		draw_face_xz_skew(texture, -dx, -x, dy, -dy, -z, -dz, (-1.0, 0.0, -1.0))
-
-		# Left-top-front
-		draw_face_triangle(texture, -dx, -x, -dy, -y, z, dz, (-1.0, -1.0, 1.0))
-		# Right-top-front
-		draw_face_triangle(texture, dx, x, -dy, -y, z, dz, (1.0, -1.0, 1.0))
-
-		# Left-bottom-front
-		draw_face_triangle(texture, -dx, -x, -dy, -y, -z, -dz, (-1.0, -1.0, -1.0))
-		# Right-bottom-front
-		draw_face_triangle(texture, dx, x, -dy, -y, -z, -dz, (1.0, -1.0, -1.0))
+		self.table.tp.tile_displaylist.call()
 
 	def __repr__(self):
 		return "<Tile %s>" % self.name
@@ -252,7 +191,7 @@ def generate_open_set_positions(init_pos, direction):
 class Table:
 
 	def __init__(self):
-		self.tp = TilePainter((640,480))
+		self.tp = TilePainter(tile_size)
 		
 		# FIXME
 		self.bg_texture = RawTexture(self.tp.bg_image)

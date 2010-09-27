@@ -116,7 +116,7 @@ class Mahjong:
 			self.draw_all()
 			self.state.tick()
 			self.gui.tick()
-			clock.tick(10)
+			clock.tick(20)
 			if self.show_fps:
 				frames += 1
 				t = pygame.time.get_ticks()
@@ -278,7 +278,7 @@ def main_init():
 
 main_init()
 mahjong = Mahjong()
-#mahjong.show_fps = True
+mahjong.show_fps = True
 try:
 	mahjong.open_main_menu()
 	#mahjong.set_state(ConnectingState(mahjong, "localhost"))
