@@ -42,6 +42,7 @@ class Mahjong:
 		self.round_label = None
 		self.prev_riichi_bets_label = None
 		self.fullscreen = False
+		self.show_fps = False
 
 		self.server_process = None
 
@@ -108,12 +109,22 @@ class Mahjong:
 
 	def run(self):
 		clock = pygame.time.Clock()
+		time = pygame.time.get_ticks()
+		frames = 0
 		while not self.quit_flag:
 			self.process_events()
 			self.draw_all()
 			self.state.tick()
 			self.gui.tick()
 			clock.tick(10)
+			if self.show_fps:
+				frames += 1
+				t = pygame.time.get_ticks()
+				if (t - time) >= 1000:
+					print "FPS:",float(frames) / (t - time) * 1000
+					time = t
+					frames = 0
+			
 
 	def init_player_boxes(self, names, player_winds, score):
 		self.player_boxes = [
@@ -267,6 +278,7 @@ def main_init():
 
 main_init()
 mahjong = Mahjong()
+#mahjong.show_fps = True
 try:
 	mahjong.open_main_menu()
 	#mahjong.set_state(ConnectingState(mahjong, "localhost"))
