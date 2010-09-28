@@ -232,13 +232,15 @@ class EvalHandTestCase(TestCase):
 			self.assertEquals(riichi_test(tiles(h), sets), riichi, [h,sets])
 
 	def test_singlewait(self):
+		# Last tile in the list comes last
 		hands = (([  "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P1", "WN", "WN"], [], True),
 				([  "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "WN", "WN", "WN"], [], False),
-				([  "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P1", "P2", "P3"], [], False),
+				([  "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P1", "P2", "P3"], [], True),
 				([  "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P3", "P2", "P1"], [], True),
 				([  "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "C7", "C8", "C9"], [], True),
 				([  "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "C6", "C7", "C8"], [], False),
-				([  "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P3", "P1", "P2"], [], True))
+				([  "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "P1", "P1", "P3", "P1", "P2"], [], True),
+				([  "B1", "B2", "B3", "C8", "C8", "C8", "DW", "DW", "DW", "P4", "P4", "P1", "P2", "P3"], [], True))
 		for h, sets, singlewait in hands:
 			self.assertEquals(check_single_waiting(tiles(h), sets), singlewait)
 

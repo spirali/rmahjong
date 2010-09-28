@@ -658,6 +658,8 @@ def check_single_waiting(hand, sets):
 					tiles = set.tiles()
 					if tiles[1] == last_tile or (last_tile.is_terminal() and (tiles[0] == last_tile or tiles[2] == last_tile)):
 						return True
+					if (tiles[0].is_terminal() and tiles[2] == last_tile) or (tiles[2].is_terminal() and tiles[0] == last_tile):
+						return True
 	return False				
 
 
