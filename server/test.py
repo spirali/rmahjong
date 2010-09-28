@@ -123,6 +123,7 @@ test_hands = [
 	([ "P1", "P1", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9", "P9", "P9", "B9"], [], 0), #68, Nohting
 	([ "P1", "P9", "C1", "C9", "B1", "B9", "DR", "DG", "DW", "WW", "WE", "WS", "WN", "C2"], [], 0), #69, Nothing 
 	([ "P1", "P9", "C1", "C9", "B1", "B9", "DR", "DG", "DW", "WW", "WE", "WS", "P1", "P1"], [], 0), #69, Nothing 
+	([ "C4", "C5", "C6", "C7", "B7", "B8", "B9", "P2", "P3", "P4", "C4"], [kan("WS")], 0), #70, Nothing 
 
 
 	# --------- Ignored by bot (because kan and pon are the same for bot)
@@ -165,6 +166,10 @@ class EvalHandTestCase(TestCase):
 		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WS"), "Ron"), 1)
 		hand = [ "WE", "DW", "DW", "DW", "C4", "C2", "C3", "DR", "B9", "DR", "B8", "B7", "WE", "WE" ]
 		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WS"), "Ron"), 2)
+		hand,sets = ([ "C4", "C5", "C6", "C7", "B7", "B8", "B9", "P2", "P3", "P4", "C4"], [kan("WS")])
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WS"), "Ron"), 1)
+		hand,sets = ([ "C4", "C5", "C6", "C7", "B7", "B8", "B9", "P2", "P3", "P4", "C4"], [ckan("WS")])
+		self.assertEquals(count_of_tiles_yaku(tiles(hand), sets, [], Tile("WE"), Tile("WS"), "Ron"), 1)
 
 		hand = [ "WN", "B9", "B6", "WN", "B4", "B8", "B5", "B7"]
 		sets = [chi("B1"), chi("P5")]

@@ -282,7 +282,7 @@ def eval_sets(pair, sets, round_wind, player_wind, last_tile, wintype):
 
 	yaku_pai_base = 0 
 	for set in sets:
-		if set.is_pon():
+		if set.is_pon_or_kan():
 			if set.tile == round_wind:
 				yaku_pai_base += 1
 			if set.tile == player_wind:
