@@ -178,7 +178,7 @@ class Mahjong:
 		return self.username
 
 	def get_version_string(self):
-		return "0.2"
+		return "0.3"
 
 	def process_network_message(self, message):
 		print "Unknown message (%s): %s" % (self.state.__class__.__name__, repr(message))
