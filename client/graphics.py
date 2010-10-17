@@ -116,7 +116,7 @@ class DisplayList:
 		gl.glNewList(self.index, gl.GL_COMPILE)
 
 	def end(self):
-		gl.glEndList(self.index)
+		gl.glEndList()
 
 class RawTexture:
 
