@@ -484,7 +484,10 @@ class Table:
 	def add_tile_to_openset(self, player, openset_id, tile_name):
 		direction, positions = self.open_sets[player]
 		pos, tiles = positions[openset_id]
-		tile = self.new_tile(tile_name, pos, (direction.angle, -90))
+		if tile_name == "XX":
+			tile = self.new_tile(tile_name, pos, (direction.angle, -270))
+		else:
+			tile = self.new_tile(tile_name, pos, (direction.angle, -90))
 		positions[openset_id][0] = direction.move_left(pos, 2)
 		tiles.append(tile)
 

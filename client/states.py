@@ -327,7 +327,7 @@ class RoundState(State):
 		if open_pon is not None:
 			self.mahjong.table.add_tile_to_openset(player_id, open_pon, tile_name)		
 		else:
-			self.mahjong.table.add_open_set(player_id, [tile_name] * 4, [])
+			self.mahjong.table.add_open_set(player_id, [tile_name, "XX", "XX", tile_name], [])
 
 		if player_id == 0:
 			self.process_self_kan(message, open_pon is not None)
