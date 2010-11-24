@@ -6,9 +6,10 @@ from table import all_tile_names
 
 class GuiManager:
 
-	def __init__(self):
+	def __init__(self, config):
 		self.widgets = []
 		self.timeouts = []
+		self.config = config
 
 	def add_widget(self, widget):
 		self.widgets.append(widget)
@@ -28,12 +29,14 @@ class GuiManager:
 			widget.draw()
 
 	def button_up(self, button, position):
+		p = self.from_window_to_gui(position)
 		for widget in self.widgets:
-			widget.button_up(button, position)
+			widget.button_up(button, p)
 	
 	def button_down(self, button, position):
+		p = self.from_window_to_gui(position)
 		for widget in self.widgets:
-			widget.button_down(button, position)
+			widget.button_down(button, p)
 
 	def tick(self):
 		ticks = pygame.time.get_ticks()
@@ -41,6 +44,11 @@ class GuiManager:
 			if timeout <= ticks:
 				self.widgets.remove(widget)
 				self.timeouts.remove((timeout, widget))
+
+	def from_window_to_gui(self, pos):
+		px, py = pos
+		wx, wy = self.config.get_window_size()
+		return (px * 1024.0 / wx, py * 768.0 / wy)
 
 
 class Widget:

@@ -27,9 +27,10 @@ from menu import MainMenuState
 
 class Mahjong:
 
-	def __init__(self):
+	def __init__(self, config):
+		self.config = config
 		self.table = Table()
-		self.gui = GuiManager()
+		self.gui = GuiManager(config)
 		self.state = None
 		self.light_state = None
 		self.quit_flag = False
@@ -41,7 +42,6 @@ class Mahjong:
 		self.riichi = False
 		self.round_label = None
 		self.prev_riichi_bets_label = None
-		self.fullscreen = False
 		self.show_fps = False
 
 		self.server_process = None
@@ -94,9 +94,10 @@ class Mahjong:
 					self.table.on_left_button_down(ev.pos)
 			if ev.type == pygame.MOUSEBUTTONUP:
 				self.gui.button_up(ev.button, ev.pos)
-
 			if ev.type == pygame.KEYDOWN:
 				self.state.on_key_down(ev)
+			if ev.type == pygame.VIDEORESIZE:
+				self.config.resize_window((ev.w, ev.h)) 
 		return True
 
 	def draw_all(self):
@@ -236,8 +237,8 @@ class Mahjong:
 		mahjong.set_state(MainMenuState(self))
 
 	def toggle_fullscreen(self):
-		self.fullscreen = not self.fullscreen
-		video_init(self.fullscreen)
+		self.config.toggle_fullscreen()
+		self.config.video_init()
 
 	def on_quit(self):
 		if self.server_process:
@@ -245,39 +246,73 @@ class Mahjong:
 
 multisamples = True
 
-def video_init(fullscreen):
-	if multisamples:
-		pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLEBUFFERS,1)
-		pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLESAMPLES,4)
-	else:
-		pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLEBUFFERS,0)
-		pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLESAMPLES,0)
+class Config:
 
-	flags = pygame.DOUBLEBUF | pygame.OPENGL
-	if fullscreen:
-		flags |= pygame.FULLSCREEN
-	pygame.display.set_mode((1024,768), flags)
-	pygame.display.set_caption("RMahjong")
+	def __init__(self):
+		self.window_size = (1024, 768)
+		self.stored_window_size = self.window_size
+		self.multisamples = True
+		self.fullscreen = False
 
-def main_init():
+	def get_window_size(self):
+		return self.window_size
+
+	def preinit(self):
+		info = pygame.display.Info()
+		self.screen_resolution = (info.current_w, info.current_h)
+
+	def video_init(self):
+		if self.multisamples:
+			pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLEBUFFERS,1)
+			pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLESAMPLES,4)
+		else:
+			pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLEBUFFERS,0)
+			pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLESAMPLES,0)
+
+		flags = pygame.DOUBLEBUF | pygame.OPENGL
+
+		if self.fullscreen:
+			flags |= pygame.FULLSCREEN
+		else:
+			flags |= pygame.RESIZABLE
+		pygame.display.set_mode(self.window_size, flags)
+		pygame.display.set_caption("RMahjong")
+		init_opengl(self.window_size[0], self.window_size[1])	
+
+	def resize_window(self, new_size):
+		self.window_size = new_size
+		self.video_init()
+
+	def disable_multisamples(self):
+		self.multisamples = False
+
+	def toggle_fullscreen(self):
+		self.fullscreen = not self.fullscreen
+		if self.fullscreen:
+			self.stored_window_size = self.window_size
+			self.window_size = self.screen_resolution
+		else:
+			self.window_size = self.stored_window_size
+
+			
+def main_init(config):
 	logging.basicConfig(filename = "client.log", format = "%(asctime)s - %(levelname)s - %(message)s", level = logging.DEBUG)
 	pygame.display.init()
 	pygame.font.init()
+	config.preinit()
 	try:
-		video_init(False)
+		config.video_init()
 	except pygame.error, e:
 		print "!! Display init failed: " + str(e)
 		print "!! Openning fallback display without GL_MULTISAMPLEBUFFERS"
-		global multisamples
-		multisamples = False
-		video_init(False)
-	pygame.display.set_caption("RMahjong")
+		config.disable_multisamples()
+		config.video_init()
 	init_fonts()
 	pygame.key.set_repeat(100, 30)
-	init_opengl(1024, 768)	
 
-main_init()
-mahjong = Mahjong()
+config = Config()
+main_init(config)
+mahjong = Mahjong(config)
 #mahjong.show_fps = True
 try:
 	mahjong.open_main_menu()

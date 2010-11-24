@@ -80,11 +80,12 @@ def blit_to_center(dest_surface, surface):
 	dest_surface.blit(surface, (px, py))
 
 def enable2d():
-	v = gl.glGetIntegerv(gl.GL_VIEWPORT)
+	#v = gl.glGetIntegerv(gl.GL_VIEWPORT)
 	gl.glMatrixMode(gl.GL_PROJECTION)
 	gl.glPushMatrix()
 	gl.glLoadIdentity()
-	gl.glOrtho(0, v[2], 0, v[3], -1, 1)
+	#gl.glOrtho(0, v[2], 0, v[3], -1, 1)
+	gl.glOrtho(0, 1024, 0, 768, -1, 1)
 	gl.glMatrixMode(gl.GL_MODELVIEW)
 	gl.glPushMatrix()
 	gl.glLoadIdentity()
