@@ -269,6 +269,7 @@ class NetworkPlayer(Player):
 			self.can_drop_tile = False
 			tile = Tile(message["tile"])
 			self.drop_tile(tile)
+			logging.debug("%s: Discarded Tile: %s" % (self, tile))
 			return
 
 		if name == "READY":
