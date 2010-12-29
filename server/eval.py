@@ -178,8 +178,12 @@ def compute_score(hand, sets, wintype, doras_and_ura_doras, specials, round_wind
 	yaku += compute_doras(hand, sets, doras, "Dora")
 	yaku += compute_doras(hand, sets, ura_doras, "Ura dora")
 
-	if ("Pinfu",1) in yaku:
+	yaku_names = [ y[0] for y in yaku ]
+
+	if "Pinfu" in yaku_names:
 		minipoints = 30 if wintype == "Ron" else 20	
+	elif "Chii toitsu" in yaku_names:
+		minipoints = 25
 	else:
 		minipoints = compute_minipoints(hand, sets, wintype, round_wind, player_wind, last_tile)
 	fans = min(sum(map(lambda r: r[1], yaku)), 13)
