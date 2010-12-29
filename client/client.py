@@ -205,6 +205,7 @@ class Mahjong:
 		self.table.set_new_hand(message["hand"].split())
 		self.add_dora_indicator(message["dora_indicator"])
 		self.set_round_wind(message["round_wind"])
+		self.set_round_name(message["round_name"])
 		self.set_prev_riichi_bets(int(message["prev_riichi_bets"]))
 
 	def add_dora_indicator(self, tile_name):
@@ -212,10 +213,11 @@ class Mahjong:
 
 	def set_round_wind(self, wind):
 		self.round_wind = wind
-		wtiles_to_names = { "WE" : "east", "WS" : "south", "WN" : "north", "WW" : "west" }
+
+	def set_round_name(self, name):
 		if self.round_label:
 			self.gui.remove_widget(self.round_label)
-		self.round_label = TextWidget((530,310), "Round: " + wtiles_to_names[wind], (175,175,175))
+		self.round_label = TextWidget((530,310), "Round: " + name, (175,175,175))
 		self.gui.add_widget(self.round_label)
 
 	def set_prev_riichi_bets(self, bets):

@@ -626,6 +626,7 @@ class TestState(State):
 		#self.mahjong.table.set_new_hand(["DW", "DW", "C2","C3","C4", "WW", "WW", "WW"])
 		self.mahjong.my_wind = "WE"
 		self.mahjong.set_round_wind("WS")
+		self.mahjong.set_round_name("South 4")
 		self.mahjong.set_prev_riichi_bets(11000)
 		#self.mahjong.table.set_new_hand(["DW", "DW", ])
 

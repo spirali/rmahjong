@@ -246,6 +246,7 @@ class NetworkPlayer(Player):
 		msg["my_score"] = self.score
 		msg["my_wind"] = self.wind.name
 		msg["round_wind"] = self.round.round_wind.name
+		msg["round_name"] = self.round.get_round_name()
 		msg["dora_indicator"] = self.round.dora_indicators[0].name
 		msg["prev_riichi_bets"] = self.round.prev_riichi_bets
 		msg["hand"] = " ".join( [ tile.name for tile in self.hand ] )

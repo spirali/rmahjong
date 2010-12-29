@@ -48,28 +48,38 @@ class Game:
 			self.rotate_players()
 			if self.players[0] == self.first_east_player:
 				self.next_round_wind()
-		return Round(self.players, self.random, self.round_wind, self.is_potential_last_round(), prev_riichi_bets)
+
+		round_number = (4 - self.players.index(self.first_east_player)) % 4 + 1
+		return Round(self.players, self.random, self.round_wind, round_number, prev_riichi_bets)
 
 	def next_round_wind(self):
 		self.round_wind = winds[(1 + winds.index(self.round_wind)) % 4]
 
-	def is_potential_last_round(self):
-		return self.round_wind == winds[1] and self.players[0].right_player == self.first_east_player
-
 
 class Round:
 
-	def __init__(self, players, random, round_wind, potential_last, prev_riichi_bets):
+	"""
+		"Round number" means the number of players in the east position in current round wind
+	"""
+
+	def __init__(self, players, random, round_wind, round_number, prev_riichi_bets):
 		self.random = random
 		self.round_wind = round_wind
-		self.potential_last = potential_last
+		self.round_number = round_number
 		self.prev_riichi_bets = prev_riichi_bets
 		self.init_round()
 		self.init_players(players)
 		logging.info("Round is ready")
 
+	def can_be_last(self):
+		return self.round_wind == winds[1] and self.round_number == 4
+
 	def get_dealer(self):
 		return self.players[0]
+
+	def get_round_name(self):
+		names = { winds[0] : "East", winds[1] : "South", winds[2] : "West", winds[3] : "North" }
+		return names[self.round_wind] + " " + str(self.round_number)
 
 	def init_round(self):
 		self.wall = 4 * all_tiles
@@ -150,7 +160,7 @@ class Round:
 		self.move_id += 1
 
 	def is_last_round(self, winners):
-		return (self.potential_last and not self.players[0] in winners) or any((player.score <= 0 for player in self.players))
+		return (self.can_be_last() and not self.players[0] in winners) or any((player.score <= 0 for player in self.players))
 
 	def end_of_round(self, winner, looser, wintype):
 		if winner.riichi:
@@ -245,7 +255,7 @@ class Round:
 
 class DebugRound(Round):
 	
-	def __init__(self, players, random, round_wind, potential_last, prev_riichi_bets):
+	def __init__(self, players, random, round_wind, round_number, prev_riichi_bets):
 		def tiles(strs):
 			return map(Tile, strs)
 
@@ -272,7 +282,7 @@ class DebugRound(Round):
 	
 		self.hands = map(tiles, hands) 
 		self.rnd = tiles(r)
-		Round.__init__(self, players, random, round_wind, potential_last, prev_riichi_bets)
+		Round.__init__(self, players, random, round_wind, round_number, prev_riichi_bets)
 
 		for h in self.hands:
 			for t in h:
