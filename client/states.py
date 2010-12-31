@@ -286,10 +286,11 @@ class RoundState(State):
 		player = message["player"]
 		from_player = message["from_player"]
 		player_id = self.mahjong.player_id_by_wind(player)
+		from_player_id = self.mahjong.player_id_by_wind(from_player)
 		# TODO: Timed shout
 		shoutbox = self.mahjong.create_shoutbox(player, action + "!")
 		self.mahjong.gui.add_widget_with_timeout(shoutbox, 2500)
-		self.mahjong.table.add_open_set(player_id, tiles, [])
+		self.mahjong.table.add_open_set(player_id, tiles, from_player_id)
 		self.mahjong.table.steal_from_dropzone(self.mahjong.player_id_by_wind(from_player))
 
 		if action == "Kan":
@@ -325,9 +326,9 @@ class RoundState(State):
 		open_pon = self.mahjong.table.find_open_set_id(player_id, [tile_name] * 3)
 
 		if open_pon is not None:
-			self.mahjong.table.add_tile_to_openset(player_id, open_pon, tile_name)		
+			self.mahjong.table.add_extra_kan_tile(player_id, open_pon, tile_name)		
 		else:
-			self.mahjong.table.add_open_set(player_id, [tile_name, "XX", "XX", tile_name], [])
+			self.mahjong.table.add_open_set(player_id, [tile_name, "XX", "XX", tile_name], -1)
 
 		if player_id == 0:
 			self.process_self_kan(message, open_pon is not None)
@@ -338,7 +339,7 @@ class RoundState(State):
 					self.picked_tile.remove()
 					self.picked_tile = None
 				else:
-					self.mahjong.table.remove_tiles_from_other_hand(player_id, 4)			
+					self.mahjong.table.remove_tiles_from_other_hand(player_id, 4)
 
 	def process_self_kan(self, message, open_pon):
 		raise Exception("Invalid state for self_kan")
@@ -621,8 +622,8 @@ class TestState(State):
 
 	def __init__(self, mahjong):
 		State.__init__(self, mahjong)
-		#self.mahjong.table.set_new_hand(["DW", "DW", "C2","C3","C4", "WW", "WW", "WW", "B8", "B6", "B7"])
-		self.mahjong.table.set_new_hand(["DW", "DW", "C1", "C2", "C3", "C4"])
+		self.mahjong.table.set_new_hand(["DW", "DW", "C2","C3","C4", "WW", "WW", "WW", "B8", "B6", "B7"])
+		#self.mahjong.table.set_new_hand(["DW", "DW", "C1", "C2", "C3", "C4"])
 		#self.mahjong.table.set_new_hand(["DW", "DW", "C2","C3","C4", "WW", "WW", "WW"])
 		self.mahjong.my_wind = "WE"
 		self.mahjong.set_round_wind("WS")
@@ -630,11 +631,20 @@ class TestState(State):
 		self.mahjong.set_prev_riichi_bets(11000)
 		#self.mahjong.table.set_new_hand(["DW", "DW", ])
 
+
+		for x in xrange(7):
+			self.mahjong.table.new_other_hand_tile(1, x)
+			self.mahjong.table.new_other_hand_tile(2, x)
+			self.mahjong.table.new_other_hand_tile(3, x)
+
+
 		for x in xrange(4):
-			self.mahjong.table.add_open_set(x, [ "DR", "DR", "DR", "DR" ], [])
-			self.mahjong.table.add_open_set(x, [ "C1", "C2", "C3", "C4" ], [])
-			self.mahjong.table.add_open_set(x, [ "B7", "B8", "B9", "B9" ], [])
-			self.mahjong.table.add_open_set(x, [ "WN", "WE", "WS", "WW" ], [])
+			self.mahjong.table.add_open_set(x, [ "DR", "DR", "DR", "C4" ], 3)
+			self.mahjong.table.add_open_set(x, [ "C1", "C2", "C3", "C4" ], 3)
+			self.mahjong.table.add_open_set(x, [ "B7", "B8", "B9", "C4" ], 3)
+			self.mahjong.table.add_open_set(x, [ "WN", "WE", "WS", "C4" ], 3)
+	#		self.mahjong.table.add_extra_kan_tile(x, 0, "DR")
+	#		self.mahjong.table.add_extra_kan_tile(x, 1, "DR")
 
 		from table import all_tile_names
 		for tile in all_tile_names[:13]:
