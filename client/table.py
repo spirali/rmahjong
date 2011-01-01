@@ -97,35 +97,67 @@ class Tile:
 
 
 class DropZone:
+
+	"""
+		When riichi is called we have turn tile sideway. But when this tile is stolen, we have to turn next one
+
+	"""
 	
 	def __init__(self, table, initial_position, direction, row_size):
 		self.position = initial_position
+		self.row_start = initial_position
 		self.direction = direction
 		self.table = table
 		self.tile_in_row = 0
 		self.row_size = row_size
 		self.last_tile = None
 		self.last_pos = None
+		self.last_called_riichi = False
+		self.called_riichi = False
 
-	def next_position(self):
+	def set_called_riichi(self):
+		self.called_riichi = True
+
+	def next_position(self, called_riichi):
+		fx = self.table.get_face_size_x()
+		fy = self.table.get_face_size_y()
 		p = self.position
 		self.last_pos = p
 		self.tile_in_row += 1
+		if called_riichi:
+			move = fy
+			result = self.direction.move_right(p, (fy - fx) / 2)
+		else:
+			move = fx
+			result = p
+
 		if self.tile_in_row == self.row_size:
 			self.tile_in_row = 0
-			self.position = self.direction.move_down(self.position, self.table.get_face_size_y() + 0.2)
-			self.position = self.direction.move_left(self.position, self.table.get_face_size_x() * (self.row_size - 1))
+			self.row_start = self.direction.move_down(self.row_start, fy + 0.2)
+			self.position = self.row_start
 		else:
-			self.position = self.direction.move_right(self.position, self.table.get_face_size_x())
-		return p
+			self.position = self.direction.move_right(self.position, move)
+		return result
 			
 	def new_tile(self, name):
-		pos = self.next_position()
-		tile = self.table.new_tile(name, (pos[0], pos[1], 0) , (self.direction.angle, -90))
+		if self.called_riichi:
+			called_riichi = True
+			self.called_riichi = False
+		else:
+			called_riichi = False
+		self.last_called_riichi = called_riichi
+		pos = self.next_position(called_riichi)
+		if called_riichi:
+			angle = self.direction.next.angle
+		else:
+			angle = self.direction.angle
+		tile = self.table.new_tile(name, (pos[0], pos[1], 0) , (angle, -90))
 		self.last_tile = tile
 		return tile
 
 	def pop_tile(self):
+		if self.last_called_riichi:
+			self.called_riichi = True
 		self.tile_in_row = (self.tile_in_row - 1) % self.row_size
 		self.position = self.last_pos
 		self.last_tile.remove()
@@ -367,11 +399,11 @@ class Table:
 		self.add_tile(t)
 		return t
 
-	def new_tile_to_dropzone(self, player_index, tile_name):
-		return self.drop_zones[player_index].new_tile(tile_name)
+	def new_tile_to_dropzone(self, player_id, tile_name):
+		return self.drop_zones[player_id].new_tile(tile_name)
 
-	def steal_from_dropzone(self, player_index):
-		self.drop_zones[player_index].pop_tile()
+	def steal_from_dropzone(self, player_id):
+		self.drop_zones[player_id].pop_tile()
 
 	def add_to_hand(self, tile):
 		self.hand.append(tile)
@@ -552,3 +584,4 @@ class Table:
 
 	def set_riichi(self, player_id):
 		self.riichi_sticks[player_id].show()
+		self.drop_zones[player_id].set_called_riichi()

@@ -631,6 +631,9 @@ class TestState(State):
 		self.mahjong.set_prev_riichi_bets(11000)
 		#self.mahjong.table.set_new_hand(["DW", "DW", ])
 
+		self.mahjong.init_player_boxes(["A","B", "C", "D"], ["east", "south", "west", "north"], (1000, 2000, 25000, 30000))
+		for w in winds:
+			self.mahjong.set_riichi(w)
 
 		for x in xrange(7):
 			self.mahjong.table.new_other_hand_tile(1, x)
@@ -665,10 +668,6 @@ class TestState(State):
 		for tile in [ "C2","DG", "WE", "P6", "B4" ]:
 			self.mahjong.table.add_ura_dora_indicator(tile)
 
-		self.mahjong.init_player_boxes(["A","B", "C", "D"], ["east", "south", "west", "north"], (1000, 2000, 25000, 30000))
-
-		for w in winds:
-			self.mahjong.set_riichi(w)
 
 	def tick(self):
 		pass
