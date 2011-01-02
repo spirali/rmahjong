@@ -294,6 +294,7 @@ class RoundState(State):
 		self.mahjong.table.steal_from_dropzone(self.mahjong.player_id_by_wind(from_player))
 
 		if action == "Kan":
+			self.mahjong.table.remove_dead_wall_tile_for_kan()
 			self.mahjong.add_dora_indicator(message["dora_indicator"])
 		
 		if player_id == 0:
