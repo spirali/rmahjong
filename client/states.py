@@ -651,7 +651,7 @@ class TestState(State):
 	#		self.mahjong.table.add_extra_kan_tile(x, 1, "DR")
 
 		from table import all_tile_names
-		for tile in all_tile_names[:13]:
+		for tile in all_tile_names[:12]:
 			self.mahjong.table.new_tile_to_dropzone(0, tile)
 			self.mahjong.table.new_tile_to_dropzone(1, tile)
 			self.mahjong.table.new_tile_to_dropzone(2, tile)
@@ -660,6 +660,7 @@ class TestState(State):
 		self.mahjong.table.steal_from_dropzone(0)
 		self.mahjong.table.new_tile_to_dropzone(0, "DR")
 		self.mahjong.table.steal_from_dropzone(0)
+		self.mahjong.table.new_tile_to_dropzone(0, "DW")
 		self.mahjong.table.new_tile_to_dropzone(0, "DW")
 
 

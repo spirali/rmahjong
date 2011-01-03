@@ -158,6 +158,8 @@ class DropZone:
 	def pop_tile(self):
 		if self.last_called_riichi:
 			self.called_riichi = True
+		if self.tile_in_row == 0:
+			self.row_start = self.direction.move_up(self.row_start, self.table.get_face_size_y() + 0.2)
 		self.tile_in_row = (self.tile_in_row - 1) % self.row_size
 		self.position = self.last_pos
 		self.last_tile.remove()
