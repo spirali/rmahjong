@@ -287,6 +287,13 @@ class RoundState(State):
 		from_player = message["from_player"]
 		player_id = self.mahjong.player_id_by_wind(player)
 		from_player_id = self.mahjong.player_id_by_wind(from_player)
+
+		if action == "Chi":
+			# In chi, stolen tile is always at the left in the set
+			tiles.remove(stolen_tile)
+			tiles.append(stolen_tile)
+
+
 		# TODO: Timed shout
 		shoutbox = self.mahjong.create_shoutbox(player, action + "!")
 		self.mahjong.gui.add_widget_with_timeout(shoutbox, 2500)
