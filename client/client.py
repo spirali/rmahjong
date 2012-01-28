@@ -1,4 +1,4 @@
-# Copyright (C) 2009 Stanislav Bohm 
+# Copyright (C) 2009 Stanislav Bohm
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -11,7 +11,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program; see the file COPYING. If not, see 
+# along with this program; see the file COPYING. If not, see
 # <http://www.gnu.org/licenses/>.
 
 
@@ -48,6 +48,14 @@ class Mahjong:
 		self.server_process = None
 
 		self.username = _("Mahjong player")
+		self.wind_names = [
+			_("East"),
+			_("South"),
+			_("West"),
+			_("North")
+		]
+
+
 
 	def reset_all(self):
 		for box in self.player_boxes:
@@ -60,7 +68,7 @@ class Mahjong:
 		if self.prev_riichi_bets_label:
 			self.gui.remove_widget(self.prev_riichi_bets_label)
 			self.prev_riichi_bets_label = None
-		
+
 		self.player_boxes = []
 		self.table.reset_all()
 		self.riichi = False
@@ -98,7 +106,7 @@ class Mahjong:
 			if ev.type == pygame.KEYDOWN:
 				self.state.on_key_down(ev)
 			if ev.type == pygame.VIDEORESIZE:
-				self.config.resize_window((ev.w, ev.h)) 
+				self.config.resize_window((ev.w, ev.h))
 		return True
 
 	def draw_all(self):
@@ -126,12 +134,12 @@ class Mahjong:
 					print "FPS:",float(frames) / (t - time) * 1000
 					time = t
 					frames = 0
-			
+
 
 	def init_player_boxes(self, names, player_winds, score):
 		self.player_boxes = [
 			PlayerBox((50, 700), names[0], player_winds[0], int(score[0]), direction_up, (0,-80)),
-			PlayerBox((954, 50), names[1], player_winds[1], int(score[1]), direction_left, (-210, 0)), 
+			PlayerBox((954, 50), names[1], player_winds[1], int(score[1]), direction_left, (-210, 0)),
 			PlayerBox((700, 0), names[2], player_winds[2], int(score[2]), direction_up, (0,80)),
 			PlayerBox((0, 50), names[3], player_winds[3], int(score[3]), direction_right, (80,0)) ]
 		for widget in self.player_boxes:
@@ -150,7 +158,7 @@ class Mahjong:
 	def add_dropped_tile(self, wind, tile_name):
 		self.table.new_tile_to_dropzone(self.player_id_by_wind(wind), tile_name)
 
-	def set_riichi(self, wind):		
+	def set_riichi(self, wind):
 		player_id = self.player_id_by_wind(wind)
 		self.player_boxes[player_id].score_delta(-1000)
 		self.table.set_riichi(player_id)
@@ -188,25 +196,29 @@ class Mahjong:
 	def arrange_hand(self):
 		self.table.arrange_hand()
 
+	def translate_round_name(self, round_name):
+		server_wnames = [ "East", "South", "West", "North" ]
+		name, number = round_name.split()
+		return self.wind_names[server_wnames.index(name)] + " " + number
+
 	def init_round(self, message):
 		self.reset_all()
 
 		# TODO: Random number from server
-		import random 
+		import random
 		self.table.break_wall(random.randint(1,6) + random.randint(1,6))
 
 		self.my_wind = message["my_wind"]
-		
+
 		names = [ self.get_username(), message["right"], message["across"], message["left"] ]
 		scores = [ message["my_score"], message["right_score"], message["across_score"], message["left_score"] ]
 		wid = winds.index(self.my_wind)
-		wnames = [ _("East"), _("South"), _("West"), _("North") ]
-		player_winds = [ wnames[ (wid + t) % 4 ] for t in xrange(4) ]
+		player_winds = [ self.wind_names[ (wid + t) % 4 ] for t in xrange(4) ]
 		self.init_player_boxes(names, player_winds, scores)
 		self.table.set_new_hand(message["hand"].split())
 		self.add_dora_indicator(message["dora_indicator"])
 		self.set_round_wind(message["round_wind"])
-		self.set_round_name(message["round_name"])
+		self.set_round_name(self.translate_round_name(message["round_name"]))
 		self.set_prev_riichi_bets(int(message["prev_riichi_bets"]))
 
 	def add_dora_indicator(self, tile_name):
@@ -280,7 +292,7 @@ class Config:
 			flags |= pygame.RESIZABLE
 		pygame.display.set_mode(self.window_size, flags)
 		pygame.display.set_caption("RMahjong")
-		init_opengl(self.window_size[0], self.window_size[1])	
+		init_opengl(self.window_size[0], self.window_size[1])
 
 	def resize_window(self, new_size):
 		self.window_size = new_size
@@ -297,7 +309,7 @@ class Config:
 		else:
 			self.window_size = self.stored_window_size
 
-			
+
 def main_init(config):
 	gettext.install('rmahjong', './data/locale', unicode=1)
 	logging.basicConfig(filename = "client.log", format = "%(asctime)s - %(levelname)s - %(message)s", level = logging.DEBUG)
