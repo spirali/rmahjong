@@ -17,6 +17,7 @@
 
 import pygame
 import logging
+import gettext
 
 from graphics import init_fonts, init_opengl, enable2d, disable2d
 from table import Table, winds
@@ -46,7 +47,7 @@ class Mahjong:
 
 		self.server_process = None
 
-		self.username = "Mahjong player"
+		self.username = _("Mahjong player")
 
 	def reset_all(self):
 		for box in self.player_boxes:
@@ -199,7 +200,7 @@ class Mahjong:
 		names = [ self.get_username(), message["right"], message["across"], message["left"] ]
 		scores = [ message["my_score"], message["right_score"], message["across_score"], message["left_score"] ]
 		wid = winds.index(self.my_wind)
-		wnames = [ "East", "South", "West", "North" ]
+		wnames = [ _("East"), _("South"), _("West"), _("North") ]
 		player_winds = [ wnames[ (wid + t) % 4 ] for t in xrange(4) ]
 		self.init_player_boxes(names, player_winds, scores)
 		self.table.set_new_hand(message["hand"].split())
@@ -217,7 +218,7 @@ class Mahjong:
 	def set_round_name(self, name):
 		if self.round_label:
 			self.gui.remove_widget(self.round_label)
-		self.round_label = TextWidget((530,310), "Round: " + name, (175,175,175))
+		self.round_label = TextWidget((530,310), _("Round") + ": " + name, (175,175,175))
 		self.gui.add_widget(self.round_label)
 
 	def set_prev_riichi_bets(self, bets):
@@ -298,6 +299,7 @@ class Config:
 
 			
 def main_init(config):
+	gettext.install('rmahjong', './data/locale', unicode=1)
 	logging.basicConfig(filename = "client.log", format = "%(asctime)s - %(levelname)s - %(message)s", level = logging.DEBUG)
 	pygame.display.init()
 	pygame.font.init()

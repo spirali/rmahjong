@@ -1,0 +1,212 @@
+# French translations for PACKAGE package
+# Traductions françaises du paquet PACKAGE.
+# Copyright (C) 2012 ORGANIZATION
+# Doulème Décosterd <douleme@free.fr>, 2012.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2012-01-15 13:37+CET\n"
+"PO-Revision-Date: 2012-01-15 13:38+0100\n"
+"Last-Translator: Doulème Décosterd <douleme@free.fr>\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: client/client.py:50
+msgid "Mahjong player"
+msgstr "Joueur mahjong"
+
+#: client/client.py:203
+msgid "East"
+msgstr "Est"
+
+#: client/client.py:203
+msgid "North"
+msgstr "Nord"
+
+#: client/client.py:203
+msgid "South"
+msgstr "Sud"
+
+#: client/client.py:203
+msgid "West"
+msgstr "Ouest"
+
+#: client/client.py:221
+msgid "Round"
+msgstr "Tour"
+
+#: client/gui.py:311
+msgid "Winner"
+msgstr "Gagnant"
+
+#: client/gui.py:318
+msgid "Total"
+msgstr "Total"
+
+#: client/gui.py:319
+msgid "Payment"
+msgstr "Payement"
+
+#: client/gui.py:321
+msgid "Riichi bets from others"
+msgstr ""
+
+#: client/gui.py:361
+#, fuzzy
+msgid "Game results"
+msgstr "Résultats du jeu"
+
+#: client/gui.py:405
+msgid "Round wind"
+msgstr "Vent du tour"
+
+#: client/gui.py:408
+msgid "Dora indicator(s)"
+msgstr "Indicateur(s) dora"
+
+#: client/gui.py:415
+msgid "Uradora indicator(s)"
+msgstr "Indicateur(s) uradora"
+
+#: client/menu.py:65
+msgid "Player name"
+msgstr "Nom du joueur"
+
+#: client/menu.py:79
+msgid "Connect to the address"
+msgstr "Se connecter à l'adresse"
+
+#: client/menu.py:91
+msgid "Singleplayer (1 human + 3 bots)"
+msgstr "Mono-joueur (1 humain + 3 IAs)"
+
+#: client/menu.py:92
+msgid "Multiplayer (2 human + 2 bots)"
+msgstr "Multijoueurs (2 humains + 2 IAs)"
+
+#: client/menu.py:93
+msgid "Multiplayer (3 human + 1 bot)"
+msgstr "Multijoueurs (3 humains + 1 IA)"
+
+#: client/menu.py:94
+msgid "Multiplayer (4 humans)"
+msgstr "Multijoueurs (4 humains)"
+
+#: client/menu.py:95
+#: client/menu.py:147
+msgid "Back to main menu"
+msgstr "Retour au menu principal"
+
+#: client/menu.py:97
+msgid "Game type"
+msgstr "Type de jeu"
+
+#: client/menu.py:120
+msgid "New game"
+msgstr "Nouvelle partie"
+
+#: client/menu.py:121
+msgid "Join to network game"
+msgstr "Rejoindre un jeu réseau"
+
+#: client/menu.py:122
+#: client/menu.py:148
+msgid "Options"
+msgstr "Options"
+
+#: client/menu.py:123
+msgid "Quit"
+msgstr "Quitter"
+
+#: client/menu.py:146
+#: client/states.py:615
+msgid "Toggle fullscreen"
+msgstr "Passer en plein écran / fenêtré"
+
+#: client/states.py:120
+msgid "Connecting ... "
+msgstr "Connection ..."
+
+#: client/states.py:125
+msgid "Cancel"
+msgstr "Annuler"
+
+#: client/states.py:128
+msgid "Intitializing ... "
+msgstr "Initialisation ..."
+
+#: client/states.py:150
+msgid "Waiting for other players ... "
+msgstr "En attente d'autre joueurs"
+
+#: client/states.py:162
+msgid "Starting server ... "
+msgstr "Démarrage du serveur ..."
+
+#: client/states.py:204
+msgid "Ok"
+msgstr "Valider"
+
+#: client/states.py:515
+#: client/states.py:529
+msgid "Show score"
+msgstr "Montrer les scores"
+
+#: client/states.py:524
+msgid "in tenpai"
+msgstr "en tenpai"
+
+#: client/states.py:526
+msgid "Nobody is tenpai"
+msgstr "Personne n'est tenpai"
+
+#: client/states.py:528
+msgid "Draw"
+msgstr ""
+
+#: client/states.py:545
+msgid "Show payments"
+msgstr "Montrer les payements"
+
+#: client/states.py:565
+msgid "Show final score"
+msgstr "Montrer le score final"
+
+#: client/states.py:567
+msgid "I am ready for next round"
+msgstr "Je suis prêt pour le tour suivant"
+
+#: client/states.py:595
+msgid "Return to menu"
+msgstr "Retourner au menu"
+
+#: client/states.py:614
+msgid "Return to game"
+msgstr "Retourner à la partie"
+
+#: client/states.py:616
+msgid "Quit game"
+msgstr "Quitter la partie"
+
+#: client/states.py:642
+msgid "east"
+msgstr "est"
+
+#: client/states.py:642
+msgid "north"
+msgstr "nord"
+
+#: client/states.py:642
+msgid "south"
+msgstr "sud"
+
+#: client/states.py:642
+msgid "west"
+msgstr "ouest"
+

@@ -117,15 +117,15 @@ class ConnectingState(RoundPreparingState):
 		self.server_adress = server_adress
 
 	def enter_state(self):
-		self.label = Label( (350, 350), (350,45), "Connecting ... ")
+		self.label = Label( (350, 350), (350,45), _("Connecting ... "))
 		self.mahjong.gui.add_widget(self.label)
 		self.button = None
 		self.mahjong.draw_all()
 		connection = Connection()
-		self.button = Button( (475,420), (100, 30), "Cancel", lambda b: self.mahjong.open_main_menu())
+		self.button = Button( (475,420), (100, 30), _("Cancel"), lambda b: self.mahjong.open_main_menu())
 		self.mahjong.gui.add_widget(self.button)
 		if connection.connect(self.server_adress, 4500):
-			self.set_label("Intitializing ... ")
+			self.set_label(_("Intitializing ... "))
 			self.protocol = DictProtocol(connection)
 			self.mahjong.protocol = self.protocol
 			self.protocol.send_message(message="LOGIN", 
@@ -147,7 +147,7 @@ class ConnectingState(RoundPreparingState):
 	def process_message(self, message):
 		name = message["message"]
 		if name == "WELCOME":
-			self.set_label("Waiting for other players ... ")
+			self.set_label(_("Waiting for other players ... "))
 			return
 		RoundPreparingState.process_message(self, message)
 
@@ -159,7 +159,7 @@ class StartServerState(OfflineState):
 		self.number_of_players = number_of_players
 
 	def enter_state(self):
-		label = Label( (350, 350), (350,45), "Starting server ... ")
+		label = Label( (350, 350), (350,45), _("Starting server ... "))
 		# button = Button( (475,420), (100, 30), "Cancel", lambda b: self.mahjong.open_main_menu())
 		self.setup_widgets([label])
 		self.mahjong.draw_all()
@@ -201,7 +201,7 @@ class ErrorState(State):
 		logging.error("ErrorState: " + self.error_msg)
 		self.label = Label( (350, 350), (350,45), self.error_msg, bg_color = (250, 20, 20, 90))
 		self.mahjong.gui.add_widget(self.label)
-		self.button = Button( (475,420), (100, 30), "Ok", lambda b: self.mahjong.open_main_menu())
+		self.button = Button( (475,420), (100, 30), _("Ok"), lambda b: self.mahjong.open_main_menu())
 		self.mahjong.gui.add_widget(self.button)
 
 	def leave_state(self):
@@ -512,7 +512,7 @@ class ScoreState(RoundPreparingState):
 
 		name = self.message["message"]
 		if name == "ROUND_END":	
-			button = Button( (475,340), (120, 30), "Show score", self.show_score_clicked)
+			button = Button( (475,340), (120, 30), _("Show score"), self.show_score_clicked)
 			shoutbox = self.mahjong.create_shoutbox(self.message["player"], self.message["wintype"] + "!")
 			self.setup_widgets([ button, shoutbox ])
 			#for tile_name in self.message["ura_dora_indicators"].split():
@@ -521,12 +521,12 @@ class ScoreState(RoundPreparingState):
 			# Draw
 			if self.message["tenpai"]:
 				players = [ self.mahjong.get_player_name(player) for player in self.message["tenpai"].split() ]
-				text = "in tenpai: " + ",".join(players)
+				text = _("in tenpai") + ": ,".join(players)
 			else:
-				text = "Nobody is tenpai"
+				text = _("Nobody is tenpai")
 
-			label = Label( (250, 350), (550,45), "Draw (" + text + ")")
-			button = Button( (475,410), (120, 30), "Show score", self.show_payments)
+			label = Label( (250, 350), (550,45), _("Draw") + "(" + text + ")")
+			button = Button( (475,410), (120, 30), _("Show score"), self.show_payments)
 			self.setup_widgets([ button, label ])
 
 	def show_score_clicked(self, button):
@@ -542,7 +542,7 @@ class ScoreState(RoundPreparingState):
 		ura_dora_indicators = self.message["ura_dora_indicators"].split()
 
 		table = ScoreTable(score_items , total, payment, player_name, looser_riichi)
-		button = Button( (400,560), (300, 25), "Show payments", self.show_payments)
+		button = Button( (400,560), (300, 25), _("Show payments"), self.show_payments)
 		hand = HandWidget((10,10), winner_hand, winner_sets , self.mahjong.table.tp)
 
 		dora_indicators_names = [ tile.name for tile in self.mahjong.table.dora_indicators ]
@@ -562,9 +562,9 @@ class ScoreState(RoundPreparingState):
 
 	def show_payments(self, button):
 		if self.message["end_of_game"] == "True":
-			button = Button( (400,560), (300, 25), "Show final score", self.final_score)
+			button = Button( (400,560), (300, 25), _("Show final score"), self.final_score)
 		else:
-			button = Button( (400,560), (300, 25), "I am ready for next round", self.send_ready)
+			button = Button( (400,560), (300, 25), _("I am ready for next round"), self.send_ready)
 		results = self.get_results()
 		table = PaymentTable(results)
 		self.setup_widgets([table, button])
@@ -592,7 +592,7 @@ class FinalState(State):
 		State.enter_state(self)
 
 		table = FinalTable(self.results)
-		button = Button( (400,560), (300, 25), "Return to menu", self.return_to_menu_clicked)
+		button = Button( (400,560), (300, 25), _("Return to menu"), self.return_to_menu_clicked)
 		self.setup_widgets([table, button])
 
 	def return_to_menu_clicked(self, button):
@@ -611,9 +611,9 @@ class IngameMenu(LightState):
 	def enter_state(self):
 		LightState.enter_state(self)
 		frame = Frame((300, 300), (400, 180))
-		button1 = Button((325, 320), (350, 35), "Return to game", self.on_return)
-		button2 = Button((325, 380), (350, 35), "Toggle fullscreen", self.on_fullscreen)
-		button3 = Button((325, 420), (350, 35), "Quit game", self.on_quit)
+		button1 = Button((325, 320), (350, 35), _("Return to game"), self.on_return)
+		button2 = Button((325, 380), (350, 35), _("Toggle fullscreen"), self.on_fullscreen)
+		button3 = Button((325, 420), (350, 35), _("Quit game"), self.on_quit)
 		self.setup_widgets([frame, button1, button2, button3])
 
 	def on_quit(self, button):

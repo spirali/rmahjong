@@ -1,4 +1,4 @@
-# Copyright (C) 2009 Stanislav Bohm 
+# Copyright (C) 2009 Stanislav Bohm
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -11,13 +11,14 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program; see the file COPYING. If not, see 
+# along with this program; see the file COPYING. If not, see
 # <http://www.gnu.org/licenses/>.
 
 
 import pygame
 from pygame import display, event
 import pygame
+import locale
 import OpenGL.GL as gl
 import OpenGL.GLU as glu
 
@@ -28,9 +29,14 @@ font_large = None
 
 def init_fonts():
 	global font, font_small, font_large
-	font = pygame.font.Font("data/fonts/finalnew.ttf", 18)
-	font_small = pygame.font.Font("data/fonts/finalnew.ttf", 14)
-	font_large = pygame.font.Font("data/fonts/finalnew.ttf", 32)
+	if locale.getdefaultlocale()[0].startswith("fr"):
+		# We need a font with french special letters
+		font_name = "data/fonts/DejaVuSerif.ttf"
+	else:
+		font_name = "data/fonts/finalnew.ttf"
+	font = pygame.font.Font(font_name, 18)
+	font_small = pygame.font.Font(font_name, 14)
+	font_large = pygame.font.Font(font_name, 32)
 
 def setup_perspective():
 	glu.gluPerspective(30, 1.0*1024/768, 0.1, 200.0)
@@ -103,7 +109,7 @@ def disable2d():
 	gl.glEnable(gl.GL_LIGHTING);
 
 class DisplayList:
-	
+
 	def __init__(self):
 		self.index = gl.glGenLists(1)
 
@@ -160,7 +166,7 @@ class RawTexture:
 		glu.gluBuild2DMipmaps(gl.GL_TEXTURE_2D, 4, width, height, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, data );
 		return texture, width, height
 
-	def tex_coord(self, x, y):		
+	def tex_coord(self, x, y):
 		gl.glTexCoord2f(x, y)
 
 
@@ -179,13 +185,13 @@ class Texture(RawTexture):
 		new_size = max(find_texture_size(w), find_texture_size(h))
 		new_surface = pygame.Surface((new_size, new_size), pygame.SRCALPHA)
 		new_surface.blit(surface, (0,new_size - h))
-		
+
 		self.texture, _w, _h = self._from_surface(new_surface)
 		self.width = w
 		self.height = h
-		
+
 		self.x_coef = float(w) / new_size
 		self.y_coef = float(h) / new_size
 
-	def tex_coord(self, x, y):		
+	def tex_coord(self, x, y):
 		gl.glTexCoord2f(self.x_coef * x, self.y_coef * y)

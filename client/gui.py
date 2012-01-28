@@ -308,17 +308,17 @@ class ScoreTable(Table):
 	
 	def __init__(self, score_items, total, payment, player_name, looser_riichi):
 		Table.__init__(self, (350,150), (380,400))
-		self.text("Winner: " + player_name, 15)
+		self.text(_("Winner") +": " + player_name, 15)
 		self.line(15)
 
 		for sitem in score_items:
 			self.text(sitem,25) 
 
 		self.line(10)
-		self.text("Total: " + total, 25) 
-		self.text("Payment: " + payment, 25) 
+		self.text(_("Total") + ": " + total, 25) 
+		self.text(_("Payment") + ": " + payment, 25) 
 		if int(looser_riichi) != 0:
-			self.text("Riichi bets from others: +" + looser_riichi, 25) 
+			self.text(_("Riichi bets from others") + ": +" + looser_riichi, 25) 
 
 		self.table_done()
 	
@@ -358,7 +358,7 @@ class FinalTable(Table):
 		Table.__init__(self, (350,150), (380,400))
 		self.set_row(30)
 
-		self.text_center("Game results", 30)
+		self.text_center(_("Game results"), 30)
 		self.line(10)
 		for name, score in results:
 			self.text_center(name, 30)
@@ -402,17 +402,17 @@ class GameSummary(Widget):
 		surface.fill((0,0,0,110))
 
 		color = (255,255,255)
-		textsurface = graphics.font.render("Round wind", True, color)
+		textsurface = graphics.font.render(_("Round wind"), True, color)
 		surface.blit(textsurface, (20, 20))
 
-		textsurface = graphics.font.render("Dora indicator(s)", True, color)
+		textsurface = graphics.font.render(_("Dora indicator(s)"), True, color)
 		surface.blit(textsurface, (20, 105))
 
 		tile_painter.draw_tile(surface, (20, 40), round_wind)
 		tile_painter.draw_tile_list(surface, (20, 125), dora_indicators, space = 3)
 
 		if uradora_indicators:
-			textsurface = graphics.font.render("Uradora indicator(s)", True, color)
+			textsurface = graphics.font.render(_("Uradora indicator(s)"), True, color)
 			surface.blit(textsurface, (20, 185))
 			tile_painter.draw_tile_list(surface, (20, 205), uradora_indicators, space = 3)
 

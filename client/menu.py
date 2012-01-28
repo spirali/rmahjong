@@ -62,7 +62,7 @@ class EntryState(OfflineState):
 class PlayerNameState(EntryState):
 
 	def __init__(self, mahjong, accept_callback):
-		EntryState.__init__(self, mahjong, "Player name:", mahjong.get_username(), 18)
+		EntryState.__init__(self, mahjong, _("Player name") + ":", mahjong.get_username(), 18)
 		self.accept_callback = accept_callback
 
 	def on_accept(self, string):
@@ -76,7 +76,7 @@ class PlayerNameState(EntryState):
 class AddressEntryState(EntryState):
 
 	def __init__(self, mahjong):
-		EntryState.__init__(self, mahjong, "Connect to the address:", "localhost")
+		EntryState.__init__(self, mahjong, _("Connect to the address")+":", "localhost")
 
 	def on_accept(self, string):
 		self.mahjong.set_state(ConnectingState(self.mahjong, string))
@@ -88,13 +88,13 @@ class AddressEntryState(EntryState):
 class PlayersCountState(MenuState):
 
 	def __init__(self, mahjong):
-		items = [ ("Singleplayer (1 human + 3 bots)", self.on_run1),
-					("Multiplayer (2 human + 2 bots)", self.on_run2),
-					("Multiplayer (3 human + 1 bot)", self.on_run3),
-					("Multiplayer (4 humans)", self.on_run4),
-					("Back to main menu", self.on_main_menu),
+		items = [ (_("Singleplayer (1 human + 3 bots)"), self.on_run1),
+					(_("Multiplayer (2 human + 2 bots)"), self.on_run2),
+					(_("Multiplayer (3 human + 1 bot)"), self.on_run3),
+					(_("Multiplayer (4 humans)"), self.on_run4),
+					(_("Back to main menu"), self.on_main_menu),
 				]
-		MenuState.__init__(self, mahjong, "Game type", items)
+		MenuState.__init__(self, mahjong, _("Game type"), items)
 
 	def on_main_menu(self, button):
 		self.mahjong.open_main_menu()
@@ -116,12 +116,11 @@ class PlayersCountState(MenuState):
 
 
 class MainMenuState(MenuState):
-
 	def __init__(self, mahjong):
-		items = [ ("New game", self.on_new_game),
-					("Join to network game", self.on_join_game),
-					("Options", self.on_options),
-					("Quit", self.on_quit) ]
+		items = [ (_("New game"), self.on_new_game),
+					(_("Join to network game"), self.on_join_game),
+					(_("Options"), self.on_options),
+					(_("Quit"), self.on_quit) ]
 		MenuState.__init__(self, mahjong, "RMahjong", items)
 
 	def enter_state(self):
@@ -144,9 +143,9 @@ class MainMenuState(MenuState):
 class OptionsState(MenuState):
 
 	def __init__(self, mahjong):
-		items = [ ("Toggle fullscreen", self.on_fullscreen),
-					("Back to main menu", self.on_back) ]
-		MenuState.__init__(self, mahjong, "Options", items)
+		items = [ (_("Toggle fullscreen"), self.on_fullscreen),
+					(_("Back to main menu"), self.on_back) ]
+		MenuState.__init__(self, mahjong, _("Options"), items)
 
 	def on_back(self, button):
 		self.mahjong.open_main_menu()
