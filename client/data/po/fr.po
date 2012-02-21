@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: 2012-01-15 13:37+CET\n"
-"PO-Revision-Date: 2012-01-15 13:38+0100\n"
+"PO-Revision-Date: 2012-02-11 14:29+0100\n"
 "Last-Translator: Doulème Décosterd <douleme@free.fr>\n"
 "Language-Team: French\n"
 "Language: fr\n"
@@ -55,10 +55,9 @@ msgstr "Payement"
 
 #: client/gui.py:321
 msgid "Riichi bets from others"
-msgstr ""
+msgstr "Mise riichi des autres"
 
 #: client/gui.py:361
-#, fuzzy
 msgid "Game results"
 msgstr "Résultats du jeu"
 
@@ -156,7 +155,7 @@ msgstr "Valider"
 #: client/states.py:515
 #: client/states.py:529
 msgid "Show score"
-msgstr "Montrer les scores"
+msgstr "Montrer le score"
 
 #: client/states.py:524
 msgid "in tenpai"
@@ -168,7 +167,7 @@ msgstr "Personne n'est tenpai"
 
 #: client/states.py:528
 msgid "Draw"
-msgstr ""
+msgstr "Partie nulle"
 
 #: client/states.py:545
 msgid "Show payments"

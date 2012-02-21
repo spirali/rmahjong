@@ -512,7 +512,7 @@ class ScoreState(RoundPreparingState):
 
 		name = self.message["message"]
 		if name == "ROUND_END":	
-			button = Button( (475,340), (120, 30), _("Show score"), self.show_score_clicked)
+			button = Button( (450,340), (170, 30), _("Show score"), self.show_score_clicked)
 			shoutbox = self.mahjong.create_shoutbox(self.message["player"], self.message["wintype"] + "!")
 			self.setup_widgets([ button, shoutbox ])
 			#for tile_name in self.message["ura_dora_indicators"].split():
@@ -526,7 +526,7 @@ class ScoreState(RoundPreparingState):
 				text = _("Nobody is tenpai")
 
 			label = Label( (250, 350), (550,45), _("Draw") + "(" + text + ")")
-			button = Button( (475,410), (120, 30), _("Show score"), self.show_payments)
+			button = Button( (450,410), (170, 30), _("Show score"), self.show_payments)
 			self.setup_widgets([ button, label ])
 
 	def show_score_clicked(self, button):
