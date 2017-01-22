@@ -160,7 +160,7 @@ class RawTexture:
 		gl.glTexEnvf( gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE );
 		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR)
 		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR_MIPMAP_LINEAR)
-		gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAX_ANISOTROPY_EXT, 1000.0)
+		gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.constant.IntConstant("GL_TEXTURE_MAX_ANISOTROPY_EXT", 34046), 1000.0)
 
 		gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA, width, height, 0, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, data)
 		glu.gluBuild2DMipmaps(gl.GL_TEXTURE_2D, 4, width, height, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, data );
