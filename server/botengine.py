@@ -1,4 +1,4 @@
-# Copyright (C) 2009 Stanislav Bohm 
+# Copyright (C) 2009 Stanislav Bohm
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -11,13 +11,13 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program; see the file COPYING. If not, see 
+# along with this program; see the file COPYING. If not, see
 # <http://www.gnu.org/licenses/>.
 
 
 from subprocess import PIPE, Popen
 from threading import Thread, Lock
-from Queue import Queue
+import queue
 from tile import Tile, Pon, Chi
 
 BOT_PATH = "../bot/bot"
@@ -37,13 +37,13 @@ class BotEngineThread(Thread):
 
 	def run(self):
 		while not self.thread_quit:
-			line = self.process_out.readline()
+			line = self.process_out.readline().decode()
 			self.queue.put(line, True)
 
 class BotEngine():
 
 	def __init__(self):
-		self.queue = Queue(3)
+		self.queue = queue.Queue(3)
 		self.process = Popen([ BOT_PATH ], bufsize = 0, stdin = PIPE, stdout = PIPE)
 		self.nonblocking = True
 		self.process_out = self.process.stdout
@@ -98,16 +98,16 @@ class BotEngine():
 
 	def set_blocking(self):
 		self.nonblocking = False
-	
+
 	def set_hand(self, tiles):
-		self._write("HAND\n")	
+		self._write("HAND\n")
 		self._set_tiles(tiles)
 
 	def set_turns(self, turns):
 		self._write("TURNS\n%d\n" % turns)
 
 	def set_wall(self, tiles):
-		self._write("WALL\n")	
+		self._write("WALL\n")
 		self._set_tiles(tiles)
 
 	def set_doras(self, doras):
@@ -150,7 +150,7 @@ class BotEngine():
 		self._write_sets(sets)
 
 	def _write(self, string):
-		self.process_in.write(string)
+		self.process_in.write(string.encode())
 
 	def _set_tiles(self, tiles):
 		message = " ".join((tile.name for tile in tiles))

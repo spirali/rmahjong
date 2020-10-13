@@ -131,7 +131,7 @@ class Mahjong:
 				frames += 1
 				t = pygame.time.get_ticks()
 				if (t - time) >= 1000:
-					print "FPS:",float(frames) / (t - time) * 1000
+					print ("FPS:",float(frames) / (t - time) * 1000)
 					time = t
 					frames = 0
 
@@ -167,7 +167,7 @@ class Mahjong:
 
 	def player_id_by_wind(self, wind):
 		my_id = winds.index(self.my_wind)
-		for i in xrange(4):
+		for i in range(4):
 			if winds[(my_id + i) % 4] == wind:
 				return i
 		raise Exception("Unknown player: " + wind)
@@ -191,7 +191,7 @@ class Mahjong:
 		return "0.4"
 
 	def process_network_message(self, message):
-		print "Unknown message (%s): %s" % (self.state.__class__.__name__, repr(message))
+		print ("Unknown message (%s): %s" % (self.state.__class__.__name__, repr(message)))
 
 	def arrange_hand(self):
 		self.table.arrange_hand()
@@ -213,7 +213,7 @@ class Mahjong:
 		names = [ self.get_username(), message["right"], message["across"], message["left"] ]
 		scores = [ message["my_score"], message["right_score"], message["across_score"], message["left_score"] ]
 		wid = winds.index(self.my_wind)
-		player_winds = [ self.wind_names[ (wid + t) % 4 ] for t in xrange(4) ]
+		player_winds = [ self.wind_names[ (wid + t) % 4 ] for t in range(4) ]
 		self.init_player_boxes(names, player_winds, scores)
 		self.table.set_new_hand(message["hand"].split())
 		self.add_dora_indicator(message["dora_indicator"])
@@ -311,16 +311,16 @@ class Config:
 
 
 def main_init(config):
-	gettext.install('rmahjong', './data/locale', unicode=1)
+	gettext.install('rmahjong', './data/locale')
 	logging.basicConfig(filename = "client.log", format = "%(asctime)s - %(levelname)s - %(message)s", level = logging.DEBUG)
 	pygame.display.init()
 	pygame.font.init()
 	config.preinit()
 	try:
 		config.video_init()
-	except pygame.error, e:
-		print "!! Display init failed: " + str(e)
-		print "!! Openning fallback display without GL_MULTISAMPLEBUFFERS"
+	except pygame.error as e:
+		print ("!! Display init failed: " + str(e))
+		print ("!! Openning fallback display without GL_MULTISAMPLEBUFFERS")
 		config.disable_multisamples()
 		config.video_init()
 	init_fonts()

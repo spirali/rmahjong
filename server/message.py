@@ -1,4 +1,4 @@
-# Copyright (C) 2009 Stanislav Bohm 
+# Copyright (C) 2009 Stanislav Bohm
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -11,9 +11,9 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program; see the file COPYING. If not, see 
+# along with this program; see the file COPYING. If not, see
 # <http://www.gnu.org/licenses/>.
 
 
 def check_message(msg, message_name):
-	return msg.has_key("message") and msg["message"] == message_name
+	return msg.get("message") == message_name

@@ -1,4 +1,4 @@
-# Copyright (C) 2009 Stanislav Bohm 
+# Copyright (C) 2009 Stanislav Bohm
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -11,7 +11,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program; see the file COPYING. If not, see 
+# along with this program; see the file COPYING. If not, see
 # <http://www.gnu.org/licenses/>.
 
 
@@ -27,7 +27,7 @@ class Connection:
 		if sock == None:
 			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.socket = sock
-	
+
 	def bind_and_listen(self, port, reuse_addr = False):
 		if reuse_addr:
 			self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -39,7 +39,7 @@ class Connection:
 
 	def wait_for_read(self, timeout = None):
 		return len(select.select([self.socket], [], [], timeout)[0]) > 0
-	
+
 	def accept(self):
 		if self.is_read_ready():
 			return Connection(self.socket.accept()[0])
@@ -55,20 +55,20 @@ class Connection:
 			if self.is_read_ready():
 				buf = []
 				while True:
-					char = self.socket.recv(1)
+					char = self.socket.recv(1).decode()
 					if char == '\n':
-						return string.join(buf,'')
-					if char == '':
+						return "".join(buf)
+					if not char:
 						raise ConnectionClosed()
 					buf.append(char)
-		except socket.error,e:
+		except socket.error as e:
 			raise ConnectionClosed()
 
 	def send(self, string):
 		try:
-			self.socket.send(string)
-		except socket.error,e:
-			raise ConnectionClosed()	
+			self.socket.send(string.encode())
+		except socket.error as e:
+			raise ConnectionClosed()
 
 	def get_peer_name(self):
 		return self.socket.getpeername()[0]

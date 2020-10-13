@@ -28,7 +28,7 @@ class Server:
 	def __init__(self, port, count_of_network_players):
 		logging.info("Starting server on port " + str(port))
 		self.players = []
-		for i in xrange(4 - count_of_network_players):
+		for i in range(4 - count_of_network_players):
 			self.players.append(BotPlayer(self))
 			logging.info("Added bot " + self.players[-1].name)
 
@@ -89,7 +89,7 @@ class Server:
 		self.state.player_try_steal_tile(player, action, opened_set)
 
 if len(sys.argv) == 1:
-	print "Usage:", sys.argv[0], "<number_of_players>"
+	print ("Usage:", sys.argv[0], "<number_of_players>")
 else:
 	logging.basicConfig(filename = "server.log", format = "%(asctime)s - %(levelname)s - %(message)s", level = logging.DEBUG)
 	server = Server(4500, int(sys.argv[1]))

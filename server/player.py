@@ -1,4 +1,4 @@
-# Copyright (C) 2009 Stanislav Bohm 
+# Copyright (C) 2009 Stanislav Bohm
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -11,7 +11,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program; see the file COPYING. If not, see 
+# along with this program; see the file COPYING. If not, see
 # <http://www.gnu.org/licenses/>.
 
 import logging
@@ -80,8 +80,8 @@ class Player:
 		specials = []
 		if self.riichi:
 			if self.ippatsu_move_id >= self.round.move_id:
-				specials.append(('Ippatsu', 1)) 
-			specials.append(('Riichi', 1)) 
+				specials.append(('Ippatsu', 1))
+			specials.append(('Riichi', 1))
 
 		if self.kan_played:
 			specials.append(("Rinjankaihoo", 1))
@@ -95,7 +95,7 @@ class Player:
 			if not set.closed:
 				return True
 		return False
-	
+
 	def other_condition_for_riichi(self):
 		return not self.riichi and self.round.get_remaining_tiles_in_wall() >= 4 and self.score >= 1000 and not self.is_hand_open()
 
@@ -107,7 +107,7 @@ class Player:
 		if self.other_condition_for_riichi() and riichi_test(self.hand, self.sets):
 			options.append("Riichi")
 
-		for tile in set(self.hand):			
+		for tile in set(self.hand):
 			if self.hand.count(tile) == 4:
 				options.append("Kan " + tile.name)
 
@@ -135,7 +135,7 @@ class Player:
 			if find_potential_chi(self.hand, tile):
 				options.append("Chi")
 
-		if count_of_tiles_yaku(self.hand + [ tile ], self.sets, self.get_specials_yaku(), self.round.round_wind, 
+		if count_of_tiles_yaku(self.hand + [ tile ], self.sets, self.get_specials_yaku(), self.round.round_wind,
 				self.wind, "Ron") > 0 and not self.is_furiten():
 			options.append("Ron")
 
@@ -162,11 +162,11 @@ class Player:
 			tiles = my_set.tiles()
 			tiles.remove(tile)
 			for t in tiles:
-				self.hand.remove(t)			
-	
+				self.hand.remove(t)
+
 			self.sets.append(my_set)
 			self.can_drop_tile = True
-			
+
 			if action == "Kan":
 				self.new_hand_tile(new_tile)
 				self.kan_played = True
@@ -186,7 +186,7 @@ class Player:
 		self.score -= 1000
 		self.round.on_riichi(self)
 
-	def play_own_kan(self, tile):		
+	def play_own_kan(self, tile):
 		""" Own kan means 'not stealed' kan """
 		pon_found = False
 		for s in self.sets:
@@ -227,7 +227,7 @@ class NetworkPlayer(Player):
 			while message:
 				self.process_message(message)
 				message = self.connection.read_message()
-		except ConnectionClosed, e:
+		except ConnectionClosed as e:
 			self.server.player_leaved(self)
 
 	def tick(self):
@@ -317,7 +317,7 @@ class NetworkPlayer(Player):
 
 
 		s = "Unknown message " + str(message) + " from player: " + self.name
-		print s
+		print (s)
 		logging.error(s)
 
 	def own_kan_played_by_me(self, kan, new_tile, dora_indicator):
@@ -343,7 +343,7 @@ class NetworkPlayer(Player):
 		if self != player:
 			actions = self.steal_actions(player, tile)
 		else:
-			actions = []		
+			actions = []
 
 		chi_choose = ""
 
@@ -356,16 +356,16 @@ class NetworkPlayer(Player):
 			actions.append("Pass")
 
 		msg_actions = ";".join(actions)
-		msg = { "message" : "DROPPED", 
-				"wind" : player.wind.name, 
-				"tile" : tile.name, 
+		msg = { "message" : "DROPPED",
+				"wind" : player.wind.name,
+				"tile" : tile.name,
 				"chi_choose" : chi_choose,
 				"actions" : msg_actions }
 		self.connection.send_dict(msg)
-		
+
 		if not actions:
 			# This should be called after sending DROPPED, because it can cause new game state
-			self.server.player_is_ready(self) 
+			self.server.player_is_ready(self)
 
 	def player_played_riichi(self, player):
 		self.connection.send_message(message = "RIICHI", player = player.wind.name)
@@ -386,9 +386,9 @@ class NetworkPlayer(Player):
 		msg["winner_sets"] = ";".join( [ set.tiles_as_string() for set in player.sets ] )
 
 		for player in self.server.players:
-			msg[player.wind.name + "_score"] = player.score 
+			msg[player.wind.name + "_score"] = player.score
 			msg[player.wind.name + "_payment"] = payment_diffs[player]
-	
+
 		self.connection.send_dict(msg)
 
 	def round_end_draw(self, winners, loosers, payment_diffs, end_of_game):
@@ -399,11 +399,11 @@ class NetworkPlayer(Player):
 		msg["end_of_game"] = end_of_game
 
 		for player in self.server.players:
-			msg[player.wind.name + "_score"] = player.score 
+			msg[player.wind.name + "_score"] = player.score
 			msg[player.wind.name + "_payment"] = payment_diffs[player]
 
 		self.connection.send_dict(msg)
-	
+
 	def stolen_tile(self, player, from_player, action, opened_set, stolen_tile, new_tile, dora_indicator):
 		Player.stolen_tile(self, player, from_player, action, opened_set, stolen_tile, new_tile, dora_indicator)
 		msg = { "message" : "STOLEN_TILE",
@@ -411,7 +411,7 @@ class NetworkPlayer(Player):
 				"player" : player.wind.name,
 				"from_player" : from_player.wind.name,
 				"tiles" : " ".join([tile.name for tile in opened_set.tiles()]),
-				"stolen_tile" : stolen_tile.name								
+				"stolen_tile" : stolen_tile.name
 		}
 
 		if action == "Kan":
@@ -432,7 +432,7 @@ bot_names = (name for name in [ "Panda", "Saki", "Yogi" ])
 class BotPlayer(Player):
 
 	def __init__(self, server):
-		Player.__init__(self, server, bot_names.next())
+		Player.__init__(self, server, next(bot_names))
 		self.engine = BotEngine()
 		self.action = None
 
@@ -463,7 +463,7 @@ class BotPlayer(Player):
 			tile = self.engine.get_tile(True)
 			target = self.engine.get_tiles(True)
 			logging.debug("%s: Target/Tile: %s %s" % (self, target, tile))
-			
+
 			if action == "Kan":
 				self.play_own_kan(tile)
 			else:
@@ -473,7 +473,7 @@ class BotPlayer(Player):
 					for t in h:
 						if t in target:
 							target.remove(t)
-					if len(target) == 1 and self.round.hidden_tiles_for_player(self).count(target[0]) > 1 and hand_in_tenpai(h, self.sets): 
+					if len(target) == 1 and self.round.hidden_tiles_for_player(self).count(target[0]) > 1 and hand_in_tenpai(h, self.sets):
 						# If target is 1 tile away and this tile is more then 1 in "game"
 						self.play_riichi()
 				self.drop_tile(tile)

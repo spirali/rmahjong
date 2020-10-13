@@ -118,7 +118,7 @@ class Round:
 		self.active_player = player
 
 	def get_hand(self):
-		return [ self.pick_random_tile() for i in xrange(13) ]
+		return [ self.pick_random_tile() for i in range(13) ]
 
 	def get_remaining_tiles_in_wall(self):
 		""" Returns number of tiles in live wall """

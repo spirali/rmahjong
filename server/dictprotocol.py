@@ -1,4 +1,4 @@
-# Copyright (C) 2009 Stanislav Bohm 
+# Copyright (C) 2009 Stanislav Bohm
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -11,7 +11,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program; see the file COPYING. If not, see 
+# along with this program; see the file COPYING. If not, see
 # <http://www.gnu.org/licenses/>.
 
 
@@ -25,7 +25,7 @@ class DictProtocol:
 		self.connection.close()
 
 	def send_message(self, **kw):
-		self.send_dict(kw)		
+		self.send_dict(kw)
 
 	def send_dict(self, data):
 		msg_list = [ "%s|%s\n" % key_value for key_value in data.items() ]

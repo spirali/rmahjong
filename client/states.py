@@ -1,4 +1,4 @@
-# Copyright (C) 2009 Stanislav Bohm 
+# Copyright (C) 2009 Stanislav Bohm
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -11,7 +11,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program; see the file COPYING. If not, see 
+# along with this program; see the file COPYING. If not, see
 # <http://www.gnu.org/licenses/>.
 
 
@@ -24,6 +24,7 @@ import subprocess
 import logging
 import os.path
 import pygame
+import sys
 
 
 def split_str(string, sep):
@@ -35,7 +36,7 @@ class StateBase:
 		self.mahjong = mahjong
 		self.protocol = mahjong.protocol
 		self.widgets = []
-		
+
 	def enter_state(self):
 		pass
 
@@ -66,14 +67,14 @@ class StateBase:
 	def show_error(self, message):
 		self.mahjong.set_state(ErrorState(self.mahjong, message))
 
-	
+
 
 class State(StateBase):
-	
+
 	def __init__(self, mahjong):
 		StateBase.__init__(self, mahjong)
 		self.protocol = mahjong.protocol
-		
+
 	def tick(self):
 		if self.protocol:
 			message = self.protocol.read_message()
@@ -89,7 +90,7 @@ class OfflineState(StateBase):
 
 
 class RoundPreparingState(State):
-	
+
 	def process_message(self, message):
 		name = message["message"]
 		if name == "ROUND":
@@ -106,7 +107,7 @@ class RoundPreparingState(State):
 			state = OtherMoveState(self.mahjong, message["wind"], True)
 			self.mahjong.set_state(state)
 			return
-		State.process_message(self, message)		
+		State.process_message(self, message)
 
 
 class ConnectingState(RoundPreparingState):
@@ -128,8 +129,8 @@ class ConnectingState(RoundPreparingState):
 			self.set_label(_("Intitializing ... "))
 			self.protocol = DictProtocol(connection)
 			self.mahjong.protocol = self.protocol
-			self.protocol.send_message(message="LOGIN", 
-				user_name = self.mahjong.get_username(), 
+			self.protocol.send_message(message="LOGIN",
+				user_name = self.mahjong.get_username(),
 				version = self.mahjong.get_version_string())
 		else:
 			self.show_error("Connection failed")
@@ -163,21 +164,21 @@ class StartServerState(OfflineState):
 		# button = Button( (475,420), (100, 30), "Cancel", lambda b: self.mahjong.open_main_menu())
 		self.setup_widgets([label])
 		self.mahjong.draw_all()
-		
+
 		process = None
 		try:
 			process = subprocess.Popen([ self.get_server_filename(), str(self.number_of_players) ], bufsize = 0, stdout = subprocess.PIPE)
 			process_out = process.stdout
 			# TODO: Nonblocking server start
-			response = process_out.readline()
-			if response != "Init done\n":
+			response = process_out.readline().decode().rstrip()
+			if response != "Init done":
 				self.show_error("Initialization of server failed")
 				logging.error("Server response: " + response)
 				process.terminate()
 			else:
 				self.mahjong.set_server_process(process)
 				self.mahjong.set_state(ConnectingState(self.mahjong, "localhost"))
-		except OSError, e:
+		except OSError as e:
 			self.show_error("Server: " + str(e))
 			if process:
 				process.terminate()
@@ -220,7 +221,7 @@ class RoundState(State):
 
 	def process_message(self, message):
 		name = message["message"]
-		
+
 		if name == "DROPPED":
 			self.mahjong.add_dropped_tile(message["wind"], message["tile"])
 			actions = split_str(message["actions"],";")
@@ -231,7 +232,7 @@ class RoundState(State):
 				self.chi_choose.sort()
 				for choose in self.chi_choose:
 					tile_num = int(choose[1]) # Get digit
-					actions.append("Chi " + str(tile_num) + str(tile_num + 1) + str(tile_num+2)) 
+					actions.append("Chi " + str(tile_num) + str(tile_num + 1) + str(tile_num+2))
 
 			if actions:
 				self.add_buttons(actions, self.on_steal_action_click)
@@ -269,7 +270,7 @@ class RoundState(State):
 			self.process_own_kan(message)
 			return
 
-		State.process_message(self, message)		
+		State.process_message(self, message)
 
 	def add_buttons(self, button_labels, callback):
 		px, py = 290,730
@@ -303,7 +304,7 @@ class RoundState(State):
 		if action == "Kan":
 			self.mahjong.table.remove_dead_wall_tile_for_kan()
 			self.mahjong.add_dora_indicator(message["dora_indicator"])
-		
+
 		if player_id == 0:
 			tiles.remove(stolen_tile) # Tiles are now removed from hand, so we dont want remove stolen tile
 			for tile in tiles:
@@ -330,11 +331,11 @@ class RoundState(State):
 		player_id = self.mahjong.player_id_by_wind(player)
 		shoutbox = self.mahjong.create_shoutbox(player, "Kan!")
 		self.mahjong.gui.add_widget_with_timeout(shoutbox, 2500)
-		
+
 		open_pon = self.mahjong.table.find_open_set_id(player_id, [tile_name] * 3)
 
 		if open_pon is not None:
-			self.mahjong.table.add_extra_kan_tile(player_id, open_pon, tile_name)		
+			self.mahjong.table.add_extra_kan_tile(player_id, open_pon, tile_name)
 		else:
 			self.mahjong.table.add_open_set(player_id, [tile_name, "XX", "XX", tile_name], -1)
 
@@ -343,7 +344,7 @@ class RoundState(State):
 		else:
 			if open_pon is None:
 				if self.picked_tile:
-					self.mahjong.table.remove_tiles_from_other_hand(player_id, 3)			
+					self.mahjong.table.remove_tiles_from_other_hand(player_id, 3)
 					self.picked_tile.remove()
 					self.picked_tile = None
 				else:
@@ -376,8 +377,8 @@ class MyMoveState(RoundState):
 		table = self.mahjong.table
 
 		if not self.mahjong.riichi:
-			table.set_hand_callback(self.drop_hand_tile)		
-		
+			table.set_hand_callback(self.drop_hand_tile)
+
 		if self.picked_tile_name:
 			self.new_picked_tile(self.picked_tile_name)
 
@@ -397,14 +398,14 @@ class MyMoveState(RoundState):
 		self.mahjong.table.add_to_hand(self.picked_tile)
 
 	def drop_picked_tile(self, tile):
-		self.mahjong.table.set_hand_callback(None)		
+		self.mahjong.table.set_hand_callback(None)
 		self.protocol.send_message(message = "DROP", tile = tile.name)
 		tile.remove()
 		self.remove_widgets()
 
 	def drop_hand_tile(self, tile):
 		table = self.mahjong.table
-		table.set_hand_callback(None)		
+		table.set_hand_callback(None)
 		self.protocol.send_message(message = "DROP", tile = tile.name)
 		tile.remove()
 		if self.picked_tile:
@@ -415,7 +416,7 @@ class MyMoveState(RoundState):
 	def leave_state(self):
 		RoundState.leave_state(self)
 		self.mahjong.select_none()
-		self.mahjong.table.set_hand_callback(None)		
+		self.mahjong.table.set_hand_callback(None)
 
 	def on_action_click(self, button):
 		self.remove_widgets()
@@ -502,7 +503,7 @@ class OtherMoveState(RoundState):
 			self.protocol.send_message(message = "STEAL", action = action)
 
 class ScoreState(RoundPreparingState):
-	
+
 	def __init__(self, mahjong, round_end_message):
 		RoundPreparingState.__init__(self, mahjong)
 		self.message = round_end_message
@@ -511,7 +512,7 @@ class ScoreState(RoundPreparingState):
 		State.enter_state(self)
 
 		name = self.message["message"]
-		if name == "ROUND_END":	
+		if name == "ROUND_END":
 			button = Button( (450,340), (170, 30), _("Show score"), self.show_score_clicked)
 			shoutbox = self.mahjong.create_shoutbox(self.message["player"], self.message["wintype"] + "!")
 			self.setup_widgets([ button, shoutbox ])
@@ -547,7 +548,7 @@ class ScoreState(RoundPreparingState):
 
 		dora_indicators_names = [ tile.name for tile in self.mahjong.table.dora_indicators ]
 		summary = GameSummary(self.mahjong.table.tp, dora_indicators_names, ura_dora_indicators, self.mahjong.get_round_wind())
-		
+
 		self.setup_widgets([table, button, hand, summary])
 
 	def get_results(self):
@@ -583,7 +584,7 @@ class ScoreState(RoundPreparingState):
 
 
 class FinalState(State):
-	
+
 	def __init__(self, mahjong, results):
 		State.__init__(self, mahjong)
 		self.results = results
@@ -601,8 +602,8 @@ class FinalState(State):
 
 class LightState(StateBase):
 	pass
-	
-	
+
+
 class IngameMenu(LightState):
 
 	def __init__(self, mahjong):
@@ -624,7 +625,7 @@ class IngameMenu(LightState):
 
 	def on_return(self, button):
 		self.mahjong.set_light_state(None)
-		
+
 
 class TestState(State):
 
@@ -643,13 +644,13 @@ class TestState(State):
 		for w in winds:
 			self.mahjong.set_riichi(w)
 
-		for x in xrange(7):
+		for x in range(7):
 			self.mahjong.table.new_other_hand_tile(1, x)
 			self.mahjong.table.new_other_hand_tile(2, x)
 			self.mahjong.table.new_other_hand_tile(3, x)
 
 
-		for x in xrange(4):
+		for x in range(4):
 			self.mahjong.table.add_open_set(x, [ "DR", "DR", "DR", "C4" ], 3)
 			self.mahjong.table.add_open_set(x, [ "C1", "C2", "C3", "C4" ], 3)
 			self.mahjong.table.add_open_set(x, [ "B7", "B8", "B9", "C4" ], 3)
@@ -685,7 +686,7 @@ class TestTableState(State):
 
 	def __init__(self, mahjong):
 		State.__init__(self, mahjong)
-		
+
 		table = ScoreTable(["ABC 100", "XYZ 200"], "8000", "2000/300", "Player_name", "2000")
 		gamesummary = GameSummary(self.mahjong.table.tp, ["DW", "C1", "C4", "B9", "WW", ], ["DW", "C1", "WW", "WE", "B1"],  "WE")
 		#table = PaymentTable([("ABC", 1000, 2000), ("CDE", 200000, -15000), ("EFG", 0, 123456), ("XYZ", 15000, 0)])

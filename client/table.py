@@ -323,19 +323,19 @@ class Table:
 	def init_wall(self):
 		wall = []
 
-		for x in xrange(17):
+		for x in range(17):
 			wall.append(self.new_dummy_tile(((16-x)*2 - 17, -10, 1.22), (180,90)))
 			wall.append(self.new_dummy_tile(((16-x)*2 - 17, -10, 0), (180,90)))
 
-		for x in xrange(17):
+		for x in range(17):
 			wall.append(self.new_dummy_tile((-19, x*2 -7, 1.22), (-90,90)))
 			wall.append(self.new_dummy_tile((-19, x*2 -7, 0), (-90,90)))
 
-		for x in xrange(17):
+		for x in range(17):
 			wall.append(self.new_dummy_tile((x*2 - 17, 28, 1.22), (180,90)))
 			wall.append(self.new_dummy_tile((x*2 - 17, 28, 0), (180,90)))
 
-		for x in xrange(17):
+		for x in range(17):
 			wall.append(self.new_dummy_tile((17.5, (16-x)*2 -7 , 1.22), (90,90)))
 			wall.append(self.new_dummy_tile((17.5, (16-x)*2 -7 , 0), (90,90)))
 		self.wall = wall
@@ -351,7 +351,7 @@ class Table:
 
 		o1, o2, o3 = [], [], []
 
-		for x in xrange(13):
+		for x in range(13):
 			o1.append(self.new_other_hand_tile(1, x))
 			o2.append(self.new_other_hand_tile(2, x))
 			o3.append(self.new_other_hand_tile(3, x))
