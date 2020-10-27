@@ -138,10 +138,10 @@ class Mahjong:
 
 	def init_player_boxes(self, names, player_winds, score):
 		self.player_boxes = [
-			PlayerBox((50, 700), names[0], player_winds[0], int(score[0]), direction_up, (0,-80)),
-			PlayerBox((954, 50), names[1], player_winds[1], int(score[1]), direction_left, (-210, 0)),
-			PlayerBox((700, 0), names[2], player_winds[2], int(score[2]), direction_up, (0,80)),
-			PlayerBox((0, 50), names[3], player_winds[3], int(score[3]), direction_right, (80,0)) ]
+			PlayerBox((50, 700), names[0], player_winds[0], int(float(score[0])), direction_up, (0,-80)),
+			PlayerBox((954, 50), names[1], player_winds[1], int(float(score[1])), direction_left, (-210, 0)),
+			PlayerBox((700, 0), names[2], player_winds[2], int(float(score[2])), direction_up, (0,80)),
+			PlayerBox((0, 50), names[3], player_winds[3], int(float(score[3])), direction_right, (80,0)) ]
 		for widget in self.player_boxes:
 			self.gui.add_widget(widget)
 
