@@ -19,6 +19,7 @@ from tile import Pon, Chi
 from tile import red_dragon, white_dragon, green_dragon, dragons
 from tile import bamboos, chars, pins, all_tiles, honors
 from copy import copy
+import functools
 
 def is_hand_open(sets):
 	for set in sets:
@@ -96,14 +97,14 @@ def compute_payment(fans, minipoints, wintype, player_wind):
 	
 	if wintype == "Ron":
 		if player_wind.name == "WE":
-			return (name, round_to_base(score / 2 * 3, 100))
+			return (name, round_to_base(score // 2 * 3, 100))
 		else:
 			return (name, score)
 	else:
 		if player_wind.name == "WE":
-			return (name, (round_to_base(score / 2, 100), 0))
+			return (name, (round_to_base(score // 2, 100), 0))
 		else:
-			return (name, (round_to_base(score / 4, 100), round_to_base(score / 2, 100)))
+			return (name, (round_to_base(score // 4, 100), round_to_base(score // 2, 100)))
 
 def quick_pons_and_kans(hand):
 	d = {}
@@ -274,7 +275,7 @@ def eval_sets(pair, sets, round_wind, player_wind, last_tile, wintype):
 	# Other hands
 	for name, fn in score_functions:
 		score = fn(pair, sets)
-		if score > 0:
+		if score:
 			result.append((name, score))
 
 	# Pinfu
@@ -304,7 +305,7 @@ def eval_sets(pair, sets, round_wind, player_wind, last_tile, wintype):
 
 
 def sum_over_sets(sets, fn):
-	return reduce(lambda a, s: fn(s) + a, sets, 0)
+	return functools.reduce(lambda a, s: fn(s) + a, sets, 0)
 
 def for_all_tiles_in_sets(sets, fn):
 	return for_all_sets(sets, lambda s: s.all_tiles(fn))

@@ -555,8 +555,8 @@ class ScoreState(RoundPreparingState):
 		results = []
 		for wind in winds:
 			name = (self.mahjong.get_player_name(wind))
-			score = (int(self.message[wind + "_score"]))
-			payment = (int(self.message[wind + "_payment"]))
+			score = (int(float(self.message[wind + "_score"])))
+			payment = (int(float(self.message[wind + "_payment"])))
 			results.append((name, score, payment))
 		results.sort(key = lambda r: r[1], reverse = True)
 		return results

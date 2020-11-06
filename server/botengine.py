@@ -53,7 +53,10 @@ class BotEngine():
 
 	def shutdown(self):
 		self.thread.thread_quit = True
+		self.process.stdin.close()
+		self.process.stdout.close()
 		self.process.terminate()
+		self.process.wait()
 		#self._write("QUIT\n")
 		#self.join()
 
@@ -71,7 +74,7 @@ class BotEngine():
 
 	def get_tiles(self, blocking = False):
 		if self._is_next_line() or blocking:
-			return map(Tile, (self._read_line().strip().split()))
+			return [*map(Tile, (self._read_line().strip().split()))]
 		else:
 			return None
 

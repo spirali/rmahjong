@@ -89,7 +89,7 @@ class TilePainter:
 			img = self.tile_images[name]
 			w = img.get_width()
 			h = img.get_height()
-			screen.blit(pygame.transform.smoothscale(img, (w/4, h/4)), position)
+			screen.blit(pygame.transform.smoothscale(img, (w//4, h//4)), position)
 
 	def draw_tile_list(self, screen, position, tile_names, space = 0):
 		for i, tile_name in enumerate(tile_names):
